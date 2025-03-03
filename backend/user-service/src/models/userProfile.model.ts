@@ -1,10 +1,13 @@
-// src/models/user.model.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('user_profiles')
 export class UserProfile {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
+
+    // Campo para asociar el perfil con el ID del usuario en auth-service
+    @Column({ unique: true })
+    userId!: string;
 
     @Column({ unique: true })
     username!: string;

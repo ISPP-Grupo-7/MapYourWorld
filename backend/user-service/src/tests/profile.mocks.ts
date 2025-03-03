@@ -19,6 +19,7 @@ import {
 
 import { UserProfile } from '../models/userProfile.model';
 import { UserProfileRepository } from '../repositories/userProfile.repository';
+import { AppDataSource } from '@backend/database/appDataSource';
 
 const RabbitMQ = require('@shared/libs/rabbitmq');
 RabbitMQ.publishEvent = async (eventName: string, data: any): Promise<void> => {
@@ -27,12 +28,22 @@ RabbitMQ.publishEvent = async (eventName: string, data: any): Promise<void> => {
   return Promise.resolve();
 };
 
+AppDataSource.initialize()
+  .then(() => {
+    console.log('DataSource inicializado correctamente');
+    runAllTests();
+  })
+  .catch((error) => {
+    console.error('Error inicializando DataSource:', error);
+  });
+
 const mockProfiles: Map<string, UserProfile> = new Map();
 
 // Perfil de prueba
 const testUserId = '12345';
 const testProfile: UserProfile = {
   id: testUserId,
+  userId: testUserId,
   username: 'testuser',
   email: 'test@example.com',
   firstName: 'Test',
@@ -44,12 +55,12 @@ const testProfile: UserProfile = {
     city: 'Test City',
     country: 'Test Country',
     latitude: 40.416775,
-    longitude: -3.70379
+    longitude: -3.70379,
   },
   social: {
     instagram: 'testuser',
     twitter: 'testuser',
-    facebook: 'testuser'
+    facebook: 'testuser',
   },
   preferences: {
     language: 'es',
@@ -58,8 +69,8 @@ const testProfile: UserProfile = {
     privacySettings: {
       showLocation: true,
       showActivity: true,
-      profileVisibility: 'public'
-    }
+      profileVisibility: 'public',
+    },
   },
   statistics: {
     totalPoints: 100,
@@ -69,19 +80,25 @@ const testProfile: UserProfile = {
     photosUploaded: 5,
     achievements: 3,
     followers: 20,
-    following: 15
+    following: 15,
   },
   accountStatus: 'active',
   lastActive: new Date(),
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 mockProfiles.set(testUserId, { ...testProfile });
 
+// Sobrescritura de los métodos del UserProfileRepository
 UserProfileRepository.prototype.findById = async function (id: string): Promise<UserProfile | null> {
   console.log(`Mock UserProfileRepository.findById llamado con: ${id}`);
   return mockProfiles.get(id) || null;
+};
+
+UserProfileRepository.prototype.findByUserId = async function (userId: string): Promise<UserProfile | null> {
+  console.log(`Mock UserProfileRepository.findByUserId llamado con: ${userId}`);
+  return mockProfiles.get(userId) || null;
 };
 
 UserProfileRepository.prototype.findByUsername = async function (username: string): Promise<UserProfile | null> {
@@ -95,7 +112,8 @@ UserProfileRepository.prototype.update = async function (id: string, data: Parti
   console.log(JSON.stringify(data, null, 2));
   const existing = mockProfiles.get(id);
   if (!existing) return null;
-  const updated = { ...existing, ...data, updatedAt: new Date() };
+  // Se conserva userId del registro original
+  const updated = { ...existing, ...data, userId: existing.userId, updatedAt: new Date() };
   mockProfiles.set(id, updated);
   return updated;
 };
@@ -151,7 +169,7 @@ UserProfileRepository.prototype.search = async function (query: string, limit: n
   return [results.slice(offset, offset + limit), results.length];
 };
 
-
+// Funciones de test
 
 async function testGetUserProfile() {
   console.log('\n--- Prueba de getUserProfile ---');
@@ -159,7 +177,6 @@ async function testGetUserProfile() {
     const profile = await getUserProfile(testUserId);
     console.log('Resultado de getUserProfile:');
     console.log(JSON.stringify(profile, null, 2));
-
     const nullProfile = await getUserProfile('nonexistent');
     console.log('Resultado con ID inválido:', nullProfile);
   } catch (error) {
@@ -170,16 +187,13 @@ async function testGetUserProfile() {
 async function testGetPublicUserProfile() {
   console.log('\n--- Prueba de getPublicUserProfile ---');
   try {
-
     const selfView = await getPublicUserProfile(testUserId, testUserId);
     console.log('Perfil visto por uno mismo:');
     console.log(JSON.stringify(selfView, null, 2));
-
-
     const publicView = await getPublicUserProfile(testUserId, 'otheruser');
     console.log('\nPerfil público visto por otro usuario:');
     console.log(JSON.stringify(publicView, null, 2));
-
+    // Cambiar la privacidad a "private"
     const current = mockProfiles.get(testUserId)!;
     current.preferences.privacySettings.profileVisibility = 'private';
     mockProfiles.set(testUserId, current);
@@ -202,7 +216,6 @@ async function testUpdateUserProfile() {
         city: 'New City'
       }
     };
-
     const updatedProfile = await updateUserProfile(testUserId, updateData);
     console.log('Perfil actualizado:');
     console.log(JSON.stringify(updatedProfile, null, 2));
@@ -223,7 +236,6 @@ async function testUpdateUserPreferences() {
         profileVisibility: 'public' as 'public' | 'followers' | 'private'
       }
     };
-
     const updatedPreferences = await updateUserPreferences(testUserId, newPreferences);
     console.log('Preferencias actualizadas:');
     console.log(JSON.stringify(updatedPreferences, null, 2));
@@ -235,10 +247,11 @@ async function testUpdateUserPreferences() {
 async function testSearchUsers() {
   console.log('\n--- Prueba de searchUsers ---');
   try {
-
+    // Agregar otro perfil para probar la búsqueda
     mockProfiles.set('user2', {
       ...testProfile,
       id: 'user2',
+      userId: 'user2',
       username: 'johndoe',
       firstName: 'John',
       lastName: 'Doe'
@@ -258,7 +271,6 @@ async function testAccountDeactivation() {
     console.log('Cuenta desactivada:', deactivated);
     const profile = await getUserProfile(testUserId);
     console.log('Estado de la cuenta después de desactivar:', profile?.accountStatus);
-
     console.log('\n--- Prueba de reactivateUserAccount ---');
     const reactivated = await reactivateUserAccount(testUserId);
     console.log('Cuenta reactivada:', reactivated);
@@ -272,12 +284,10 @@ async function testAccountDeactivation() {
 async function testUpdateUserAvatar() {
   console.log('\n--- Prueba de updateUserAvatar ---');
   try {
-
     const base64Data = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABA...';
     const resultBase64 = await updateUserAvatar(testUserId, base64Data);
     console.log('Resultado de actualizar avatar (base64):');
     console.log(JSON.stringify(resultBase64, null, 2));
-
     const urlData = 'https://example.com/new-avatar.jpg';
     const resultURL = await updateUserAvatar(testUserId, urlData);
     console.log('Resultado de actualizar avatar (URL):');
@@ -302,4 +312,4 @@ async function runAllTests() {
   }
 }
 
-runAllTests();
+export { runAllTests };

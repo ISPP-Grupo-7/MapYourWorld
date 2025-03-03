@@ -14,7 +14,7 @@ import { UserProfile } from '../models/userProfile.model';
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {
     const userRepository = new UserProfileRepository();
-    const userProfile = await userRepository.findById(userId);
+    const userProfile = await userRepository.findByUserId(userId);
     if (!userProfile) return null;
 
     return {
@@ -77,7 +77,7 @@ export const updateUserProfile = async (
 ): Promise<UserProfile | null> => {
   try {
     const userRepository = new UserProfileRepository();
-    const existingProfile = await userRepository.findById(userId);
+    const existingProfile = await userRepository.findByUserId(userId);
     if (!existingProfile) return null;
 
     const updateData: Partial<UserProfile> = {};
@@ -127,7 +127,7 @@ export const updateUserAvatar = async (
 ): Promise<{ success: boolean; avatarUrl: string }> => {
   try {
     const userRepository = new UserProfileRepository();
-    const existingProfile = await userRepository.findById(userId);
+    const existingProfile = await userRepository.findByUserId(userId);
     if (!existingProfile) throw new Error('Usuario no encontrado');
 
     let avatarUrl: string;
@@ -166,7 +166,7 @@ export const updateUserPreferences = async (
 ): Promise<UserProfile['preferences'] | undefined> => {
   try {
     const userRepository = new UserProfileRepository();
-    const existingProfile = await userRepository.findById(userId);
+    const existingProfile = await userRepository.findByUserId(userId);
     if (!existingProfile) throw new Error('Usuario no encontrado');
 
     const validatedPreferences: Partial<UserProfile['preferences']> = {};
@@ -275,7 +275,7 @@ export const deactivateUserAccount = async (
   reason?: string
 ): Promise<boolean> => {
   const userRepository = new UserProfileRepository();
-  const existingProfile = await userRepository.findById(userId);
+  const existingProfile = await userRepository.findByUserId(userId);
   if (!existingProfile) throw new Error('Usuario no encontrado');
   if (existingProfile.accountStatus === 'deactivated') throw new Error('La cuenta ya está desactivada');
 
@@ -298,7 +298,7 @@ export const deactivateUserAccount = async (
 export const reactivateUserAccount = async (userId: string): Promise<boolean> => {
   try {
     const userRepository = new UserProfileRepository();
-    const existingProfile = await userRepository.findById(userId);
+    const existingProfile = await userRepository.findByUserId(userId);
     if (!existingProfile) throw new Error('Usuario no encontrado');
     if (existingProfile.accountStatus !== 'deactivated') throw new Error('La cuenta ya está activa');
 
