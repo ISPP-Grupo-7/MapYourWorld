@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@types/jsonwebtoken": "9.0.9",
+    "@types/nodemailer": "6.4.17",
+    "api-gateway": "file:",
     "bcryptjs": "3.0.2",
     "class-validator": "0.14.1",
     "compression": "1.7.4",

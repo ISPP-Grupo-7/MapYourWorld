@@ -19,6 +19,7 @@
     "helmet": "7.1.0",
     "jsonwebtoken": "9.0.2",
     "nodemailer": "6.10.0",
+    "notification-service": "file:",
     "pg": "8.13.3",
     "redis": "4.6.13",
     "socket.io": "4.7.4",
