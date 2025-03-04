@@ -4,11 +4,14 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { View, ActivityIndicator, Text, TouchableOpacity, Platform, PermissionsAndroid, Alert } from 'react-native';
 import MapView, { Marker, Polygon, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { styled } from 'nativewind';
+import Geolocation from 'react-native-geolocation-service';
+import { API_URL } from '../../constants/config';
+import { getAccessToken } from '../../services/auth.service';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -48,6 +51,9 @@ export const DistrictMap: React.FC<DistrictMapProps> = ({
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const watchIdRef = useRef<number | null>(null);
 
   /**
    * Carga los distritos iniciales
@@ -136,6 +142,39 @@ export const DistrictMap: React.FC<DistrictMapProps> = ({
   };
 
   /**
+   * Pide permiso de ubicación al usuario
+   */
+  const requestLocationPermission = async () => {
+    try {
+      if (Platform.OS === 'ios') {
+        const granted = await Geolocation.requestAuthorization('whenInUse');
+        return granted === 'granted';
+      }
+      
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Permiso de ubicación',
+            message: 'MapYourWorld necesita acceder a tu ubicación para mostrarte en el mapa',
+            buttonNeutral: 'Preguntar después',
+            buttonNegative: 'Cancelar',
+            buttonPositive: 'OK'
+          }
+        );
+        
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      }
+      
+      return false;
+    } catch (err) {
+      console.error('Error requesting location permission:', err);
+      setLocationError('Error al solicitar permisos de ubicación');
+      return false;
+    }
+  };
+
+  /**
    * Centra el mapa en la ubicación del usuario
    */
   const centerOnUserLocation = async () => {
@@ -143,7 +182,177 @@ export const DistrictMap: React.FC<DistrictMapProps> = ({
     // 1. Obtener ubicación actual
     // 2. Animar mapa a la ubicación
     // 3. Manejar errores de permisos
+    try {
+      const hasPermission = await requestLocationPermission();
+      
+      if (!hasPermission) {
+        setLocationError('No se concedieron permisos de ubicación');
+        Alert.alert('Permiso denegado', 'No podemos acceder a tu ubicación. Por favor, revisa los ajustes de tu dispositivo.');
+        return;
+      }
+      
+      setLoading(true);
+      
+      Geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Actualizar región y ubicación actual
+          const newRegion = {
+            latitude,
+            longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          };
+          
+          setRegion(newRegion);
+          setCurrentLocation({ latitude, longitude });
+          mapRef.current?.animateToRegion(newRegion, 1000);
+          
+          // Enviar ubicación al backend
+          sendLocationToBackend(latitude, longitude);
+          
+          setLoading(false);
+          setLocationError(null);
+        },
+        (error) => {
+          setLoading(false);
+          console.error('Error al obtener ubicación:', error);
+          setLocationError(`Error al obtener ubicación: ${error.message}`);
+          Alert.alert('Error', 'No podemos obtener tu ubicación actual. Verifica tu conexión y los permisos del GPS.');
+        },
+        { 
+          enableHighAccuracy: true, 
+          timeout: 15000, 
+          maximumAge: 10000 
+        }
+      );
+    } catch (err) {
+      setLoading(false);
+      console.error('Error en centerOnUserLocation:', err);
+      setLocationError('Error inesperado al acceder a la ubicación');
+    }
   };
+
+  /**
+   * Inicia el seguimiento de la ubicación del usuario
+   */
+  const startLocationTracking = async () => {
+    try {
+      const hasPermission = await requestLocationPermission();
+      
+      if (!hasPermission) {
+        setLocationError('No se concedieron permisos de ubicación');
+        return;
+      }
+      
+      // Detener seguimiento previo si existe
+      stopLocationTracking();
+      
+      const watchId = Geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCurrentLocation({ latitude, longitude });
+          
+          // Enviar ubicación al backend
+          sendLocationToBackend(latitude, longitude);
+        },
+        (error) => {
+          console.error('Error watching position:', error);
+          setLocationError(`Error al seguir ubicación: ${error.message}`);
+        },
+        { 
+          enableHighAccuracy: true, 
+          distanceFilter: 10, // Min distance (meters) between updates
+          interval: 5000,     // Min time (ms) between updates - Android only
+          fastestInterval: 2000, // Fastest update interval - Android only
+        }
+      );
+      
+      watchIdRef.current = watchId;
+    } catch (err) {
+      console.error('Error al iniciar seguimiento de ubicación:', err);
+      setLocationError('Error al iniciar seguimiento de ubicación');
+    }
+  };
+
+  /**
+   * Detiene el seguimiento de la ubicación del usuario
+   */
+  const stopLocationTracking = () => {
+    if (watchIdRef.current !== null) {
+      Geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  };
+
+  /**
+   * Envia la ubicación al backend
+   */
+  const sendLocationToBackend = async (latitude: number, longitude: number) => {
+    try {
+      const token = await getAccessToken(); // Obtener el token de autenticación
+      
+      const response = await fetch(`${API_URL}/test-location`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+          //,          'Authorization': `Bearer ${tokensToUse.accessToken}` //TODO Implementar autenticación
+        },
+        body: JSON.stringify({
+          latitude,
+          longitude,
+          timestamp: new Date().toISOString()
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Location sent successfully:', data);
+      
+      // Integrar con servicio de distritos
+      //checkDistrictForLocation(latitude, longitude);
+      
+    } catch (err) {
+      console.error('Error sending location to backend:', err);
+      // Don't stop tracking if the server request fails
+    }
+  };
+
+  /**
+   * Verifica si el usuario está en un distrito específico
+   */
+  // const checkDistrictForLocation = async (latitude: number, longitude: number) => {
+  //   try {
+  //     const response = await fetch(
+  //       `${API_URL}/districts/locate?lat=${latitude}&lng=${longitude}`
+  //     );
+      
+  //     if (!response.ok) {
+  //       throw new Error(`Server responded with ${response.status}`);
+  //     }
+      
+  //     const data = await response.json();
+  //     if (data.district) {
+  //       console.log(`User is in district: ${data.district.name}`);
+  //       // You can update UI or trigger other actions when user enters a district
+  //     }
+  //   } catch (err) {
+  //     console.error('Error checking district:', err);
+  //   }
+  // };
+
+  // Start tracking when component mounts and cleanup when it unmounts
+  useEffect(() => {
+    startLocationTracking();
+    
+    return () => {
+      stopLocationTracking();
+    };
+  }, []);
 
   return (
     <StyledView className="flex-1 relative">
@@ -211,4 +420,4 @@ export const DistrictMap: React.FC<DistrictMapProps> = ({
       )}
     </StyledView>
   );
-}; 
+};

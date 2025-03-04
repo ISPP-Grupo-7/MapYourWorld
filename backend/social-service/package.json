@@ -27,6 +27,7 @@
     "pg-hstore": "2.3.4",
     "sequelize": "6.37.1",
     "sharp": "0.33.3",
+    "social-service": "file:",
     "typeorm": "0.3.20"
   },
   "devDependencies": {
