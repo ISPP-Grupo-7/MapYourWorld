@@ -57,7 +57,7 @@ export class EventSecurityService {
       }
       
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al validar mensaje de evento:', error);
       return false;
     }
@@ -90,9 +90,9 @@ export class EventSecurityService {
         contenidoCifrado,
         iv: iv.toString('hex')
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al cifrar datos de evento:', error);
-      throw new Error('Error al cifrar datos');
+      throw new Error(`Error al cifrar datos: ${error.message}`);
     }
   }
   
@@ -118,9 +118,9 @@ export class EventSecurityService {
       
       // Parsear a objeto
       return JSON.parse(contenidoDescifrado);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al descifrar datos de evento:', error);
-      throw new Error('Error al descifrar datos');
+      throw new Error(`Error al descifrar datos: ${error.message}`);
     }
   }
   
@@ -141,9 +141,9 @@ export class EventSecurityService {
       const hmac = crypto.createHmac('sha256', HMAC_KEY);
       hmac.update(contenido);
       return hmac.digest('hex');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al generar firma HMAC:', error);
-      throw new Error('Error al generar firma');
+      throw new Error(`Error al generar firma: ${error.message}`);
     }
   }
   
@@ -161,7 +161,7 @@ export class EventSecurityService {
         Buffer.from(firmaCalculada, 'hex'),
         Buffer.from(firma, 'hex')
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al verificar firma HMAC:', error);
       return false;
     }

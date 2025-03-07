@@ -3,7 +3,8 @@
  * Este archivo centraliza la configuración para la generación y verificación de tokens
  */
 
-import jwt, { Secret, JwtPayload, SignOptions } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
+import { Secret, JwtPayload, SignOptions } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
 // Obtener secreto desde variables de entorno o usar valor por defecto
@@ -55,7 +56,7 @@ export const generateToken = (userData: UserData): string => {
   };
 
   const options: SignOptions = {
-    expiresIn: JWT_EXPIRATION
+    expiresIn: JWT_EXPIRATION as any
   };
 
   return jwt.sign(payload, JWT_SECRET, options);
@@ -69,7 +70,7 @@ export const generateToken = (userData: UserData): string => {
 export const verifyToken = (token: string): DecodedToken | null => {
   try {
     return jwt.verify(token, JWT_SECRET) as DecodedToken;
-  } catch (error) {
+  } catch (error: any) {
     return null;
   }
 };

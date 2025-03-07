@@ -239,7 +239,7 @@ export class ProcesadorDeadLetter {
                   .then(() => resolve())
                   .catch(err => reject(err));
               }
-            } catch (error) {
+            } catch (error: any) {
               this.log(`Error al procesar mensaje de ${nombreCola}: ${error.message}`, 'error');
               // Rechazar el mensaje y continuar
               canal.nack(msg, false, false);
@@ -271,7 +271,7 @@ export class ProcesadorDeadLetter {
         throw new Error(`La cola ${nombreCola} no existe. Debe crearla primero con los scripts de configuración`);
       }
       
-    } catch (error) {
+    } catch (error: any) {
       this.log(`Error al procesar cola DLQ ${nombreCola}: ${error.message}`, 'error');
       throw error;
     } finally {

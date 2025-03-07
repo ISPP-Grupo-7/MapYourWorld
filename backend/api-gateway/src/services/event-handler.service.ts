@@ -66,7 +66,7 @@ export class EventHandlerService {
         const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
         await conector.verificarColasDLQ();
         logger.info('Colas DLQ verificadas correctamente');
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Error al verificar colas DLQ:', error);
       }
 
@@ -76,7 +76,7 @@ export class EventHandlerService {
 
       this.iniciado = true;
       logger.info('Servicio de gestión de eventos iniciado correctamente');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al iniciar el servicio de eventos:', error);
       throw error;
     }
@@ -87,18 +87,15 @@ export class EventHandlerService {
    */
   private async suscribirseAEventosMapas(): Promise<void> {
     try {
-      const idSuscripcion = await suscribirseACategoria(
-        this.NOMBRE_SERVICIO,
+      const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+      await conector.suscribirse(
         this.MAPEO_COLAS.mapas,
-        'mapa',
-        this.procesarEventoMapa.bind(this)
+        ['mapas.*'],
+        (mensaje, claveEnrutamiento) => this.procesarEventoMapa(mensaje, claveEnrutamiento)
       );
-
-      this.suscripciones.push(idSuscripcion);
-      logger.info(`Suscripción a eventos de mapas establecida: ${idSuscripcion}`);
-    } catch (error) {
+      logger.info('Suscripción a eventos de mapas establecida');
+    } catch (error: any) {
       logger.error('Error al suscribirse a eventos de mapas:', error);
-      throw error;
     }
   }
 
@@ -107,18 +104,15 @@ export class EventHandlerService {
    */
   private async suscribirseAEventosNotificaciones(): Promise<void> {
     try {
-      const idSuscripcion = await suscribirseACategoria(
-        this.NOMBRE_SERVICIO,
+      const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+      await conector.suscribirse(
         this.MAPEO_COLAS.notificaciones,
-        'notificacion',
-        this.procesarEventoNotificacion.bind(this)
+        ['notificaciones.*'],
+        (mensaje, claveEnrutamiento) => this.procesarEventoNotificacion(mensaje, claveEnrutamiento)
       );
-
-      this.suscripciones.push(idSuscripcion);
-      logger.info(`Suscripción a eventos de notificaciones establecida: ${idSuscripcion}`);
-    } catch (error) {
+      logger.info('Suscripción a eventos de notificaciones establecida');
+    } catch (error: any) {
       logger.error('Error al suscribirse a eventos de notificaciones:', error);
-      throw error;
     }
   }
 
@@ -127,18 +121,15 @@ export class EventHandlerService {
    */
   private async suscribirseAEventosSociales(): Promise<void> {
     try {
-      const idSuscripcion = await suscribirseACategoria(
-        this.NOMBRE_SERVICIO,
+      const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+      await conector.suscribirse(
         this.MAPEO_COLAS.sociales,
-        'social',
-        this.procesarEventoSocial.bind(this)
+        ['social.*'],
+        (mensaje, claveEnrutamiento) => this.procesarEventoSocial(mensaje, claveEnrutamiento)
       );
-
-      this.suscripciones.push(idSuscripcion);
-      logger.info(`Suscripción a eventos sociales establecida: ${idSuscripcion}`);
-    } catch (error) {
+      logger.info('Suscripción a eventos sociales establecida');
+    } catch (error: any) {
       logger.error('Error al suscribirse a eventos sociales:', error);
-      throw error;
     }
   }
 
@@ -147,18 +138,15 @@ export class EventHandlerService {
    */
   private async suscribirseAEventosUsuarios(): Promise<void> {
     try {
-      const idSuscripcion = await suscribirseACategoria(
-        this.NOMBRE_SERVICIO,
+      const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+      await conector.suscribirse(
         this.MAPEO_COLAS.usuarios,
-        'usuario',
-        this.procesarEventoUsuario.bind(this)
+        ['usuarios.*'],
+        (mensaje, claveEnrutamiento) => this.procesarEventoUsuario(mensaje, claveEnrutamiento)
       );
-
-      this.suscripciones.push(idSuscripcion);
-      logger.info(`Suscripción a eventos de usuarios establecida: ${idSuscripcion}`);
-    } catch (error) {
+      logger.info('Suscripción a eventos de usuarios establecida');
+    } catch (error: any) {
       logger.error('Error al suscribirse a eventos de usuarios:', error);
-      throw error;
     }
   }
 
@@ -175,18 +163,15 @@ export class EventHandlerService {
         TipoEvento.USUARIO_CAMBIO_PASSWORD
       ];
 
-      const idSuscripcion = await suscribirseACategoria(
-        this.NOMBRE_SERVICIO,
+      const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+      await conector.suscribirse(
         this.MAPEO_COLAS.autenticacion,
-        'usuario',
-        this.procesarEventoAutenticacion.bind(this)
+        ['autenticacion.*'],
+        (mensaje, claveEnrutamiento) => this.procesarEventoAutenticacion(mensaje, claveEnrutamiento)
       );
-
-      this.suscripciones.push(idSuscripcion);
-      logger.info(`Suscripción a eventos de autenticación establecida: ${idSuscripcion}`);
-    } catch (error) {
+      logger.info('Suscripción a eventos de autenticación establecida');
+    } catch (error: any) {
       logger.error('Error al suscribirse a eventos de autenticación:', error);
-      throw error;
     }
   }
 
@@ -198,15 +183,16 @@ export class EventHandlerService {
       // Agregamos una propiedad para esta cola específica
       const COLA_TODOS_EVENTOS = 'mapyourworld_api-gateway_eventos_todos';
       
-      const idSuscripcion = await suscribirseTodosEventos(
-        this.NOMBRE_SERVICIO,
-        COLA_TODOS_EVENTOS,
-        this.procesarEvento.bind(this)
+      const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+      const idSuscripcion = await conector.suscribirse(
+        this.NOMBRE_COLA_EVENTOS,
+        ['#'], // Comodín para todos los eventos
+        (mensaje, claveEnrutamiento) => this.procesarEvento(mensaje, claveEnrutamiento)
       );
 
-      logger.info(`Suscripción a todos los eventos establecida: ${idSuscripcion}`);
+      logger.info('Suscripción a todos los eventos establecida');
       return idSuscripcion;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error al suscribirse a todos los eventos:', error);
       throw error;
     }
@@ -427,11 +413,14 @@ export class EventHandlerService {
 
     try {
       logger.info('Deteniendo servicio de gestión de eventos...');
+      
+      // Desconectar RabbitMQ
       await detenerRabbitMQ(this.NOMBRE_SERVICIO);
+      
       this.suscripciones = [];
       this.iniciado = false;
-      logger.info('Servicio de gestión de eventos detenido correctamente');
-    } catch (error) {
+      logger.info('Servicio de eventos detenido correctamente');
+    } catch (error: any) {
       logger.error('Error al detener el servicio de eventos:', error);
       throw error;
     }

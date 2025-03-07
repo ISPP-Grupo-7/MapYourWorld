@@ -23,7 +23,7 @@ export const encryptAES = (text: string): string => {
     const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
     
     // Crear cifrador y cifrar el texto
-    // @ts-expect-error - Ignoramos errores de tipos ya que la función es correcta
+    // @ts-ignore - Ignoramos errores de tipos ya que la función es correcta
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -56,7 +56,7 @@ export const decryptAES = (encryptedText: string): string => {
     const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
     
     // Crear descifrador y descifrar
-    // @ts-expect-error - Ignoramos errores de tipos ya que la función es correcta
+    // @ts-ignore - Ignoramos errores de tipos ya que la función es correcta
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');

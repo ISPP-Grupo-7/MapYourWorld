@@ -976,7 +976,7 @@ class ConectorRabbitMQ extends EventEmitter {
         // Verificar la cola DLQ
         await this.canal.checkQueue(nombreColaFallidos);
         console.log(`[RabbitMQ:${this.nombreServicio}] ✅ Cola DLQ verificada y lista: ${nombreColaFallidos}`);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`[RabbitMQ:${this.nombreServicio}] ❌ Error al verificar cola DLQ para ${cola}: ${error.message}`);
       }
     }
