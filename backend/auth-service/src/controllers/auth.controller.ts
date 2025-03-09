@@ -3,10 +3,11 @@
  */
 
 import { Request, Response } from 'express';
-import { User, IUser } from '@backend/auth-service/src/models/user.model';
+import { User, Role } from '@backend/auth-service/src/models/user.model';
 import { validationResult } from 'express-validator';
 import { publishEvent } from '@shared/libs/rabbitmq';
 import { generateToken, verifyToken, DecodedToken } from '@shared/config/jwt.config';
+import * as authService from '@backend/auth-service/src/services/auth.service';
 
 /**
  * Registra un nuevo usuario
@@ -20,46 +21,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password, firstName, lastName } = req.body;
-
-    // Verificar si el usuario ya existe
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'El usuario ya existe con este email' 
-      });
-      return;
-    }
-
-    // Crear nuevo usuario
-    const user = new User({
+    const { email, password } = req.body;
+    const user = await authService.registerUser({
       email,
       password,
-      firstName,
-      lastName,
-      plan: 'free',
-      active: true,
-      lastLogin: new Date()
+      role: Role.USER
     });
-
-    // Guardar usuario
-    await user.save();
 
     // Generar token JWT
     const token = generateToken({
-      userId: user._id.toString(),
-      email: user.email,
-      plan: user.plan
-    });
-
-    // Publicar evento de usuario registrado
-    await publishEvent('user.registered', {
-      userId: user._id.toString(),
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      timestamp: new Date()
+      userId: user.id.toString(),
+      email: user.email
     });
 
     // Responder con éxito
@@ -68,11 +40,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       message: 'Usuario registrado correctamente',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        plan: user.plan
+        role: user.role
       }
     });
   } catch (error) {
@@ -90,7 +60,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Validar entrada
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ success: false, errors: errors.array() });
@@ -98,54 +67,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const { email, password } = req.body;
-
-    // Buscar usuario por email con password (select: false por defecto)
-    const user = await User.findOne({ email }).select('+password');
-    
-    if (!user) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Credenciales incorrectas' 
-      });
-      return;
-    }
-
-    // Verificar si el usuario está activo
-    if (!user.active) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'La cuenta está desactivada. Por favor contacta con soporte.' 
-      });
-      return;
-    }
-
-    // Comparar contraseña
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Credenciales incorrectas' 
-      });
-      return;
-    }
-
-    // Actualizar último login
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Generar token JWT
-    const token = generateToken({
-      userId: user._id.toString(),
-      email: user.email,
-      plan: user.plan
-    });
-
-    // Publicar evento de inicio de sesión
-    await publishEvent('user.loggedin', {
-      userId: user._id.toString(),
-      email: user.email,
-      timestamp: new Date()
-    });
+    const { user, token } = await authService.loginUser(email, password);
 
     // Responder con éxito
     res.status(200).json({
@@ -153,11 +75,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       message: 'Inicio de sesión exitoso',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        plan: user.plan
+        role: user.role
       }
     });
   } catch (error) {
@@ -196,20 +116,11 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Buscar usuario por ID
-    const user = await User.findById((decoded as DecodedToken).userId);
+    const user = await User.findById(decoded.userId);
     if (!user) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Usuario no encontrado' 
-      });
-      return;
-    }
-
-    // Verificar si el usuario está activo
-    if (!user.active) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'La cuenta está desactivada' 
+      res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
       });
       return;
     }
@@ -219,11 +130,9 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: 'Token válido',
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        plan: user.plan
+        role: user.role
       }
     });
   } catch (error) {
@@ -235,3 +144,111 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
     });
   }
 }; 
+
+/**
+ * Cambia la contraseña de un usuario autenticado
+ */
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Validar entrada
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ success: false, errors: errors.array() });
+      return;
+    }
+
+    const authReq = req as AuthenticatedRequest;
+    const userId = authReq.user?.id;
+    
+    if (!userId) {
+      res.status(401).json({ 
+        success: false, 
+        message: 'Usuario no autenticado' 
+      });
+      return;
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    
+    await authService.changePassword(userId, currentPassword, newPassword);
+
+    try {
+      await sendPasswordChangeNotification(authReq.user.email, authReq.user.username || '');
+    } catch (emailError) {
+      console.error('Error al enviar notificación de cambio de contraseña:', emailError);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Contraseña cambiada correctamente'
+    });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al cambiar contraseña',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+
+/**
+ * Inicia el proceso de recuperación de contraseña
+ */
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Validar entrada
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ success: false, errors: errors.array() });
+      return;
+    }
+
+    const { email } = req.body;
+    
+    // Llamar al servicio para solicitar el reseteo de contraseña
+    await authService.requestPasswordReset(email);
+
+    // Respondemos con éxito siempre para no revelar si el email existe
+    res.status(200).json({
+      success: true,
+      message: 'Si el email está registrado, recibirás instrucciones para restablecer tu contraseña'
+    });
+  } catch (error) {
+    console.error('Error al solicitar reseteo de contraseña:', error);
+    // Por seguridad, no revelamos el error específico al cliente
+    res.status(200).json({
+      success: true,
+      message: 'Si el email está registrado, recibirás instrucciones para restablecer tu contraseña'
+    });
+  }
+};
+
+/**
+ * Restablece la contraseña usando un token
+ */
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Validar entrada
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ success: false, errors: errors.array() });
+      return;
+    }
+
+    const { token, password } = req.body;
+    await authService.resetPassword(token, password);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Contraseña restablecida correctamente'
+    });
+  } catch (error) {
+    console.error('Error al restablecer contraseña:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al restablecer contraseña',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};

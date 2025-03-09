@@ -50,8 +50,7 @@ declare module 'express' {
 export const generateToken = (userData: UserData): string => {
   const payload = {
     userId: userData.userId,
-    email: userData.email,
-    plan: userData.plan || 'free'
+    email: userData.email
   };
 
   const options: SignOptions = {
