@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 import * as socialController from '../controllers/social.controller';
+import {addComment} from '../controllers/social.controller';
 
 const router: Router = Router();
 
@@ -17,8 +18,9 @@ router.post(
     body('targetType').isIn(['photo', 'poi']).withMessage('Tipo de objetivo inválido'),
     body('targetId').notEmpty().withMessage('ID de objetivo requerido')
   ],
-  socialController.addComment
+  addComment
 );
+
 
 // Ruta para añadir un like
 router.post(

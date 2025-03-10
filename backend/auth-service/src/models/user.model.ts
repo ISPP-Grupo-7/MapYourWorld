@@ -12,6 +12,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import {UserProfile} from "../../../user-service/src/models/userProfile.model";
+import {Friend} from "../../../social-service/src/models/friend.model"
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Estadistics } from '@backend/user-service/src/models/userProfile.model';
 //TODO Aún está pendiente de hacer y corregir la importación
@@ -55,6 +56,17 @@ export class User {
 
   profile?: UserProfile;
 
+  /**
+   * Relación 1:N con solicitudes de amistad enviadas.
+   */
+  @OneToMany(() => Friend, (friend) => friend.requester)
+  sentFriendRequests!: Friend[];
+
+  /**
+   * Relación 1:N con solicitudes de amistad recibidas.
+   */
+  @OneToMany(() => Friend, (friend) => friend.recipient)
+  receivedFriendRequests!: Friend[];
   /**
    * Relación 1:N con Map
    * "Map belongs to User" => en la entidad Map habrá un @ManyToOne(...).

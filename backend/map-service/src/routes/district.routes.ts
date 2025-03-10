@@ -13,9 +13,9 @@ router.put('/update/:districtId', updateDistrict );
 
 router.put('/unlock/:districtId/:userId', unlockDistrict);
 
-router.get('/districts/user/unlock/:userId', getUserUnlockedDistricts);
+router.get('/user/unlock/:userId', getUserUnlockedDistricts);
 
-router.get('/districts/location/:latitude/:longitude', findDistrictContainingLocation);
+router.get('/location/:latitude/:longitude', findDistrictContainingLocation);
 
 
 export default router;
