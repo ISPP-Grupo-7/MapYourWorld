@@ -13,6 +13,7 @@ interface POI {
   id?: string;
   name: string;
   description: string;
+  category?: string; // Categoría del POI: MONUMENTOS, ESTACIONES, MERCADOS, PLAZAS, OTROS
   location: {
     type: string;
     coordinates: number[]; // [longitude, latitude]
@@ -163,16 +164,70 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
     // Añadir marcadores para los puntos de interés
     if (pointsOfInterest && pointsOfInterest.length > 0) {
       console.log(`Renderizando ${pointsOfInterest.length} puntos de interés`);
+      
+      // Definir iconos personalizados para cada categoría
+      const iconSize = [32, 32]; // Tamaño de los iconos en píxeles
+      const iconAnchor = [16, 32]; // Punto de anclaje del icono (centro inferior)
+      const popupAnchor = [0, -30]; // Punto de anclaje del popup (superior)
+      
+      const categoryIcons: Record<string, any> = {
+        MONUMENTOS: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3105/3105768.png',
+          iconSize: iconSize,
+          iconAnchor: iconAnchor,
+          popupAnchor: popupAnchor
+        }),
+        ESTACIONES: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+          iconSize: iconSize,
+          iconAnchor: iconAnchor,
+          popupAnchor: popupAnchor
+        }),
+        MERCADOS: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3082/3082011.png',
+          iconSize: iconSize,
+          iconAnchor: iconAnchor,
+          popupAnchor: popupAnchor
+        }),
+        PLAZAS: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3254/3254074.png',
+          iconSize: iconSize,
+          iconAnchor: iconAnchor,
+          popupAnchor: popupAnchor
+        }),
+        OTROS: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+          iconSize: iconSize,
+          iconAnchor: iconAnchor,
+          popupAnchor: popupAnchor
+        })
+      };
+      
+      // Icono por defecto para POIs sin categoría
+      const defaultIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      });
+      
       pointsOfInterest.forEach((poi: POI) => {
-        const marker = L.marker([
-          poi.location.coordinates[1], // latitude
-          poi.location.coordinates[0], // longitude
-        ]);
+        // Seleccionar el icono según la categoría del POI o usar el icono por defecto
+        const icon = poi.category ? categoryIcons[poi.category] || defaultIcon : defaultIcon;
+        
+        const marker = L.marker(
+          [
+            poi.location.coordinates[1], // latitude
+            poi.location.coordinates[0], // longitude
+          ],
+          { icon: icon }
+        );
         
         marker.bindPopup(`
           <div>
             <h3>${poi.name}</h3>
             <p>${poi.description}</p>
+            ${poi.category ? `<p><strong>Categoría:</strong> ${poi.category}</p>` : ''}
           </div>
         `);
         
