@@ -1,13 +1,9 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
-import { styled } from 'nativewind';
+import { View, Text, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
-
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledImage = styled(Image);
+import { styles as globalStyles } from '../../assets/styles/styles';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -32,44 +28,125 @@ const WelcomeScreen = () => {
   };
   
   return (
-    <StyledView className="flex-1 bg-gray-100 p-6">
-      {/* Header */}
-      <StyledView className="flex-row items-center mt-6">
-        <StyledView className="w-10 h-10 bg-teal-500 rounded-md"></StyledView>
-        <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
-      </StyledView>
-      
-      {/* Main content */}
-      <StyledView className="flex-1 justify-center items-start">
-        <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
-          <StyledText className="text-4xl font-bold text-gray-900 mb-2">
-            Transforma{'\n'}tus <StyledText className="text-teal-500">viajes</StyledText>
-          </StyledText>
-          
-          <StyledText className="text-gray-700 mb-8">
-            Descubre una nueva forma de viajar con nuestra plataforma de 
-            geolocalización gamificada. Registra tus aventuras, completa retos y 
-            conecta con otros viajeros.
-          </StyledText>
-          
-          <Button 
-            title="Comenzar gratis" 
-            onPress={handleRegisterPress} 
-            variant="primary"
-            fullWidth
-            className="mb-3"
-          />
-          
-          <Button 
-            title="Iniciar sesión" 
-            onPress={handleLoginPress}
-            variant="secondary"
-            fullWidth
-          />
-        </StyledView>
-      </StyledView>
-    </StyledView>
+    <ImageBackground
+      source={require('../../assets/images/login_background.webp')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={globalStyles.semi_transparent_overlay} />
+      <View style={styles.container}>
+        {/* Content */}
+        <View style={styles.content}>
+          <View style={styles.contentContainer}>
+            <Text style={styles.title}>
+              <Text style={styles.titleMain}>Transforma{'\n'}tus </Text>
+              <Text style={styles.titleHighlight}>viajes</Text>
+            </Text>
+            
+            <Text style={styles.description}>
+              Descubre una nueva forma de viajar con nuestra plataforma de 
+              geolocalización gamificada. Registra tus aventuras, completa retos y 
+              conecta con otros viajeros.
+            </Text>
+            
+            {/* Buttons */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={styles.primaryButton}
+                onPress={handleRegisterPress}
+              >
+                <Text style={styles.primaryButtonText}>Comenzar gratis</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.secondaryButton}
+                onPress={handleLoginPress}
+              >
+                <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </View>
+    </ImageBackground>
   );
 };
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 15,
+    marginBottom: 50,
+  },
+  contentContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 36,
+    lineHeight: 46,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#1e293b',
+  },
+  titleMain: {
+    color: '#1e293b',
+  },
+  titleHighlight: {
+    color: '#14b8a6',
+  },
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#64748b',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    marginTop: 10,
+    gap: 12,
+  },
+  primaryButton: {
+    backgroundColor: '#14b8a6',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  secondaryButton: {
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  secondaryButtonText: {
+    color: '#334155',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
 
 export default WelcomeScreen; 

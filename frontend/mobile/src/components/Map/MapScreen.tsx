@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
@@ -34,6 +34,36 @@ interface POI {
 interface MapScreenProps {
   distritos?: Distrito[];
 }
+
+// Componente Modal de Alerta personalizado para mantener consistencia con la versión web
+const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
+  if (!visible) return null;
+  
+  return (
+    <Modal
+      transparent={true}
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity 
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <Text style={styles.modalMessage}>{message}</Text>
+            <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+              <Text style={styles.modalButtonText}>Aceptar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+};
 
 // Componente para mostrar el logro al desbloquear un distrito
 const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: string }) => {
@@ -88,6 +118,26 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   });
   // State para almacenar los POIs obtenidos del backend
   const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
+  // Estado para el modal de alertas
+  const [alertModal, setAlertModal] = useState({
+    visible: false,
+    title: '',
+    message: ''
+  });
+
+  // Función para mostrar alertas de manera consistente con la versión web
+  const showAlert = useCallback((title: string, message: string) => {
+    setAlertModal({
+      visible: true,
+      title,
+      message
+    });
+  }, []);
+
+  // Función para cerrar el modal de alerta
+  const closeAlertModal = useCallback(() => {
+    setAlertModal(prev => ({ ...prev, visible: false }));
+  }, []);
 
   // Función para verificar si un punto está dentro de un polígono (distrito)
   const isPointInPolygon = (
@@ -98,18 +148,18 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     const { latitude, longitude } = point;
     const len = polygon.length;
     let j = len - 1;
+
     for (let i = 0; i < len; i++) {
-      const vertex1 = polygon[i];
-      const vertex2 = polygon[j];
-      if (
-        (vertex1.longitude > longitude) !== (vertex2.longitude > longitude) &&
+      const pointI = polygon[i];
+      const pointJ = polygon[j];
+      const intersect =
+        (pointI.longitude > longitude) !== (pointJ.longitude > longitude) &&
         latitude <
-          ((vertex2.latitude - vertex1.latitude) * (longitude - vertex1.longitude)) /
-            (vertex2.longitude - vertex1.longitude) +
-            vertex1.latitude
-      ) {
-        inside = !inside;
-      }
+          ((pointJ.latitude - pointI.latitude) *
+            (longitude - pointI.longitude)) /
+            (pointJ.longitude - pointI.longitude) +
+            pointI.latitude;
+      if (intersect) inside = !inside;
       j = i;
     }
     return inside;
@@ -228,7 +278,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     const startWatchingLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permiso denegado", "Necesitamos acceso a tu ubicación para mostrar el mapa.");
+        showAlert("Permiso denegado", "Necesitamos acceso a tu ubicación para mostrar el mapa.");
         return;
       }
       locationSubscription = await Location.watchPositionAsync(
@@ -288,6 +338,14 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
 
   return (
     <View style={styles.container}>
+      {/* Modal de Alerta */}
+      <AlertModal 
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        onClose={closeAlertModal}
+      />
+      
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
@@ -315,6 +373,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 };
                 setPointsOfInterest((prev) => [...prev, poiConverted]);
               }}
+              showAlert={showAlert}
             />
           </Modal>
           <MapView
@@ -330,13 +389,27 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
               const { coordinate } = e.nativeEvent;
               const { latitude, longitude } = coordinate;
 
+              // Verificar si el punto está dentro de algún distrito
               let poiDistrict = null;
               for (const distrito of distritosBackend) {
                 if (isPointInPolygon({ latitude, longitude }, distrito.coordenadas)) {
-                  poiDistrict = distrito; // Guardamos el ID del distrito
+                  poiDistrict = distrito;
                   break;
                 }
               }
+              
+              // Validamos que el punto esté en un distrito y que el distrito esté desbloqueado
+              if (!poiDistrict) {
+                showAlert('Ubicación no válida', 'No puedes crear un punto de interés fuera de un distrito.');
+                return;
+              }
+              
+              if (!poiDistrict.isUnlocked) {
+                showAlert('Distrito bloqueado', `El distrito "${poiDistrict.nombre}" está bloqueado. Debes desbloquearlo primero para añadir puntos de interés.`);
+                return;
+              }
+              
+              // Si todo está correcto, mostramos el formulario
               setPointOfInterest({
                 ...pointOfInterest,
                 latitude,
@@ -426,6 +499,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "yellow",
     fontWeight: "bold",
+  },
+  // Estilos para el modal de alerta
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '85%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  modalContent: {
+    width: '100%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#2d3748',
+  },
+  modalMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#4a5568',
+  },
+  modalButton: {
+    backgroundColor: '#3182ce',
+    borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
