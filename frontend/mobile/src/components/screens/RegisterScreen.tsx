@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import { styled } from 'nativewind';
+import { View, Text, ScrollView, ImageBackground, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
 import TextInput from '../UI/TextInput';
-
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledScrollView = styled(ScrollView);
+import { styles as globalStyles } from '../../assets/styles/styles';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -76,14 +72,14 @@ const RegisterScreen = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
+
     try {
       // Aquí iría la lógica real de registro
       // await authService.register(formData);
-      
+
       // Simulamos un delay para mostrar el spinner
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // Navegar a la pantalla principal después del registro exitoso
       navigation.navigate('Map');
     } catch (error) {
@@ -99,24 +95,28 @@ const RegisterScreen = () => {
   };
 
   return (
-    <StyledView className="flex-1 bg-gray-100">
-      <StyledScrollView className="flex-1">
-        <StyledView className="flex-1 p-6 justify-center min-h-screen">
-          {/* Header */}
-          <StyledView className="flex-row items-center justify-center mb-6">
-            <StyledView className="w-12 h-12 bg-teal-500 rounded-md"></StyledView>
-            <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
-          </StyledView>
-          
+    <ImageBackground
+      source={require('../../assets/images/login_background.webp')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={globalStyles.semi_transparent_overlay} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.container}>
           {/* Formulario */}
-          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
-            <StyledText className="text-2xl font-bold text-center mb-2">
-              Crea tu cuenta
-            </StyledText>
-            <StyledText className="text-gray-600 text-center mb-6">
-              Comienza a documentar tus aventuras hoy mismo
-            </StyledText>
+          <View style={styles.formContainer}>
+            <View style={styles.logoContainer}>
+              <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+              <Text style={styles.appName}>MapYourWorld</Text>
+            </View>
             
+            <Text style={styles.title}>
+              Crea tu cuenta
+            </Text>
+            <Text style={styles.subtitle}>
+              Comienza a documentar tus aventuras hoy mismo
+            </Text>
+
             <TextInput
               label="Nombre completo"
               placeholder="Nombre completo"
@@ -126,7 +126,7 @@ const RegisterScreen = () => {
               error={errors.fullName}
               icon="user"
             />
-            
+
             <TextInput
               label="Correo electrónico"
               placeholder="Correo electrónico"
@@ -136,7 +136,7 @@ const RegisterScreen = () => {
               error={errors.email}
               icon="mail"
             />
-            
+
             <TextInput
               label="Contraseña"
               placeholder="Contraseña"
@@ -146,7 +146,7 @@ const RegisterScreen = () => {
               error={errors.password}
               icon="lock"
             />
-            
+
             <Button 
               title="Registrarse" 
               onPress={handleRegister}
@@ -154,23 +154,95 @@ const RegisterScreen = () => {
               fullWidth
               className="mt-4 mb-3"
             />
-            
-            <StyledView className="flex-row justify-center mt-4">
-              <StyledText className="text-gray-600">
+
+            <View style={styles.loginPromptContainer}>
+              <Text style={styles.loginPromptText}>
                 ¿Ya tienes una cuenta?{' '}
-              </StyledText>
-              <StyledText 
-                className="text-teal-500 font-medium"
+              </Text>
+              <Text 
+                style={styles.loginLink}
                 onPress={goToLogin}
               >
                 Inicia sesión
-              </StyledText>
-            </StyledView>
-          </StyledView>
-        </StyledView>
-      </StyledScrollView>
-    </StyledView>
+              </Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    minHeight: '100%',
+  },
+  container: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  logo: {
+    width: 35, 
+    height: 35,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 8,
+    color: '#1e293b',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#1e293b',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  loginPromptContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  loginPromptText: {
+    color: '#64748b',
+  },
+  loginLink: {
+    color: '#14b8a6',
+    fontWeight: '500',
+  },
+});
 
 export default RegisterScreen; 

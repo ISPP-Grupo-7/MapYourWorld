@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -8,6 +7,6 @@ export const styles = StyleSheet.create({
   },
   semi_transparent_overlay: {
     ...StyleSheet.absoluteFillObject, // Hace que la capa cubra toda la pantalla
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Blanco con 80% de opacidad
+    backgroundColor: "rgba(255, 255, 255, 0.6)", // Blanco con 60% de opacidad
   },
 });
