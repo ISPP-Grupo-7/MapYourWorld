@@ -704,11 +704,13 @@ const MapScreen = () => {
                   // Convertir el POI recién creado al formato esperado
                   const poiConverted = {
                     ...newPOI,
+                    category: newPOI.category, // Aseguramos que la categoría se incluya
                     location: {
                       type: "Point",
                       coordinates: [newPOI.longitude, newPOI.latitude],
                     },
                   };
+                  console.log('Nuevo POI creado:', poiConverted);
                   setPointsOfInterest((prev) => [...prev, poiConverted]);
                 }}
                 showAlert={showAlert}

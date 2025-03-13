@@ -129,6 +129,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
       const poiForMarker = {
         name: pointOfInterest.name,
         description: pointOfInterest.description,
+        category: pointOfInterest.category,
         latitude: pointOfInterest.latitude,
         longitude: pointOfInterest.longitude,
         district: pointOfInterest.district,
