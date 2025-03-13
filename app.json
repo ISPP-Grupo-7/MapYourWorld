@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "33b75bab-ac02-4505-a9b4-a352afaa52c0"
+      }
+    },
+    "owner": "francodellaguila",
+    "sdkVersion": "52.0.0",
+    "android": {
+      "package": "com.francodellaguila.mapyourworldroot"
+    }
+  }
+}
