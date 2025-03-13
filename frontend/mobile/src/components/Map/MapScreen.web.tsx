@@ -132,7 +132,6 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
   const [mapReady, setMapReady] = useState(false);
   
   // Efecto para inicializar el mapa
@@ -161,6 +160,26 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
       }).addTo(map);
     });
     
+    // Añadir marcadores para los puntos de interés
+    if (pointsOfInterest && pointsOfInterest.length > 0) {
+      console.log(`Renderizando ${pointsOfInterest.length} puntos de interés`);
+      pointsOfInterest.forEach((poi: POI) => {
+        const marker = L.marker([
+          poi.location.coordinates[1], // latitude
+          poi.location.coordinates[0], // longitude
+        ]);
+        
+        marker.bindPopup(`
+          <div>
+            <h3>${poi.name}</h3>
+            <p>${poi.description}</p>
+          </div>
+        `);
+        
+        marker.addTo(map);
+      });
+    }
+    
     // Agregar evento de clic para añadir nuevo POI
     map.on('click', (e: any) => {
       if (onMapClick) {
@@ -180,87 +199,11 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
         mapInstanceRef.current = null;
       }
     };
-  }, [location, distritos, onMapClick]);
-  
-  // Efecto para manejar los marcadores de POI
-  useEffect(() => {
-    if (!mapInstanceRef.current || !mapReady) return;
-    
-    // Limpiar los marcadores existentes
-    markersRef.current.forEach(marker => {
-      marker.remove();
-    });
-    markersRef.current = [];
-    
-    // Añadir nuevos marcadores para los puntos de interés
-    if (pointsOfInterest && pointsOfInterest.length > 0) {
-      console.log(`Actualizando ${pointsOfInterest.length} marcadores de POI`);
-      
-      // Definir un icono personalizado para los marcadores
-      const poiIcon = L.icon({
-        iconUrl: require('leaflet/dist/images/marker-icon.png'),
-        iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-        shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
-      
-      pointsOfInterest.forEach((poi: POI) => {
-        // Verificar que las coordenadas sean válidas
-        if (!poi.location || !poi.location.coordinates || poi.location.coordinates.length < 2) {
-          console.warn(`POI ${poi.name || 'sin nombre'} tiene coordenadas inválidas:`, poi.location);
-          return;
-        }
-        
-        try {
-          const marker = L.marker(
-            [
-              poi.location.coordinates[1], // latitude
-              poi.location.coordinates[0], // longitude
-            ],
-            { icon: poiIcon }
-          );
-          
-          // Añadir un popup con información del POI
-          marker.bindPopup(`
-            <div style="text-align: center;">
-              <h3 style="margin: 5px 0; font-size: 16px; color: #333;">${poi.name}</h3>
-              <p style="margin: 5px 0; font-size: 14px; color: #666;">${poi.description}</p>
-            </div>
-          `);
-          
-          // Añadir el marcador al mapa
-          marker.addTo(mapInstanceRef.current);
-          
-          // Guardar referencia al marcador
-          markersRef.current.push(marker);
-        } catch (error) {
-          console.error(`Error al añadir marcador para POI ${poi.name}:`, error);
-        }
-      });
-    }
-  }, [mapReady, pointsOfInterest]);
+  }, [location, distritos, pointsOfInterest, onMapClick]);
   
   return (
-    <div style={{
-      height: "calc(100vh - 0px)", 
-      width: "100%", 
-      position: "relative",
-      overflow: "hidden"
-    }}>
-      <div 
-        ref={mapContainerRef} 
-        style={{
-          height: "100%", 
-          width: "100%",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          zIndex: 1
-        }} 
-      />
+    <div style={{height: "100vh", width: "100vw"}}>
+      <div ref={mapContainerRef} style={{height: "100%", width: "100%"}} />
     </div>
   );
 };
