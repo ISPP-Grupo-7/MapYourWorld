@@ -1,5 +1,5 @@
 {
-  "name": "mapyourworld-backend-services",
+  "name": "mapyourworld-backend",
   "version": "1.0.0",
   "description": "Servicios backend para MapYourWorld",
   "main": "index.js",
