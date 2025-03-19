@@ -1,0 +1,12 @@
+{
+    "expo": {
+      "extra": {
+        "eas": {
+          "projectId": "757d70e0-f889-46f3-a4bb-8066e43fe863"
+        }
+      },
+      "android": {
+        "package": "com.francodellaguila.mapyourworldfrontend"
+      }
+    }
+  }
