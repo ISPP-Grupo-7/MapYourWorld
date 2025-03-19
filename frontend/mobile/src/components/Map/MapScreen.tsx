@@ -3,7 +3,7 @@ import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, Touc
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
-import { API_URL } from '../../constants/config';
+import api from '../../services/api';
 
 // Tipos para distritos y POIs
 interface Distrito {
@@ -198,10 +198,10 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/districts`);
-      const data = await response.json();
-      if (data.success && data.districts) {
-        const distritosMapeados = data.districts
+      const response = await api.get('/api/districts');
+      
+      if (response.data.success && response.data.districts) {
+        const distritosMapeados = response.data.districts
           .map((distrito: DistritoBackend) => {
             try {
               const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
@@ -236,10 +236,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/poi/all`);
-      const data = await response.json();
-      if (data.pois) {  // Aquí se omite la validación de 'success'
-        setPointsOfInterest(data.pois);
+      const response = await api.get('/api/poi/all');
+      if (response.data.pois) {
+        setPointsOfInterest(response.data.pois);
       } else {
         console.warn("No se pudieron obtener los puntos de interés");
       }
@@ -251,13 +250,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para desbloquear un distrito si el usuario se encuentra dentro de él
   const desbloquearDistrito = async (districtId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/1`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isUnlocked: true }),
+      const response = await api.put(`/api/districts/unlock/${districtId}/1`, {
+        isUnlocked: true
       });
-      const data = await response.json();
-      if (data.success) {
+      
+      if (response.data.success) {
         console.log(`Distrito ${districtId} desbloqueado.`);
         setDistritosBackend((prev) =>
           prev.map((d) => (d.id === districtId ? { ...d, isUnlocked: true } : d))

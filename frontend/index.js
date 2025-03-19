@@ -18,7 +18,7 @@ Para más información, consulta la documentación en la carpeta /docs.
 // entre las aplicaciones web y móvil
 
 // Configuración de API
-exports.API_URL = process.env.API_URL || 'http://localhost:3000';
+exports.API_URL = process.env.API_URL || 'https://mapyourworld.es';
 
 // Configuración de autenticación
 exports.AUTH_STORAGE_KEY = 'mapyourworld_auth';

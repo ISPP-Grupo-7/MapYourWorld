@@ -47,11 +47,11 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'Servidor de desarrollo de MapYourWorld',
     services: [
-      { name: 'Auth Service', url: 'http://localhost:3001' },
-      { name: 'User Service', url: 'http://localhost:3002' },
-      { name: 'Map Service', url: 'http://localhost:3003' },
-      { name: 'Notification Service', url: 'http://localhost:3004' },
-      { name: 'Social Service', url: 'http://localhost:3005' }
+      { name: 'Auth Service', url: 'https://localhost:3001' },
+      { name: 'User Service', url: 'https://localhost:3002' },
+      { name: 'Map Service', url: 'https://localhost:3003' },
+      { name: 'Notification Service', url: 'https://localhost:3004' },
+      { name: 'Social Service', url: 'https://localhost:3005' }
     ] as Service[],
     status: 'online'
   });

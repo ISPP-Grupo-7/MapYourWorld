@@ -119,6 +119,7 @@ const CollaborativeMapListScreen: React.FC = () => {
       setLoading(true);
       console.log(`Obteniendo mapas colaborativos para el usuario: ${userId}`);
       
+      // Usar fetch en lugar de axios
       const response = await fetch(`${API_URL}/api/maps/collaborative/user/${userId}`);
       
       if (!response.ok) {
@@ -142,7 +143,6 @@ const CollaborativeMapListScreen: React.FC = () => {
           // Si son datos de ejemplo, mostramos una notificación sutil
           if (data.isExample) {
             console.log("Mostrando datos de ejemplo");
-            // Opcional: mostrar una notificación o un indicador de "modo demo"
           }
         } else {
           console.log("No se encontraron mapas colaborativos");
@@ -964,4 +964,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollaborativeMapListScreen; 
+export default CollaborativeMapListScreen;

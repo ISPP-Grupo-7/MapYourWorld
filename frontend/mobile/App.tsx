@@ -15,11 +15,10 @@ import RegisterScreen from './src/components/screens/RegisterScreen';
 import MapScreen from './src/components/Map/MapScreen';
 import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
 import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
-import HamburgerMenu from '@/components/UI/HamburgerMenu';
+import HamburgerMenu from './src/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
-import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -40,24 +39,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 // Definimos un wrapper para MapScreen que incluye los distritos de ejemplo
 const MapScreenWithDistritos = (props: any) => {
   // Usar la versión web cuando estamos en navegador
-  if (Platform.OS === 'web') {
-    try {
-      // Importación dinámica del componente web
-      const MapScreenWeb = require('./src/components/Map/MapScreen.web').default;
-      return <MapScreenWeb {...props} />;
-    } catch (error) {
-      console.error("Error cargando MapScreen.web:", error);
-      return (
-        <StyledView className="flex-1 justify-center items-center p-4">
-          <StyledText className="text-lg text-red-500">
-            Error al cargar el mapa web. Por favor, intenta de nuevo.
-          </StyledText>
-        </StyledView>
-      );
-    }
-  } else {
+
     return <MapScreen {...props} />;
-  }
 };
 
 // Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
@@ -67,35 +50,12 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   const userId = props.route?.params?.userId || "user-456";
   
   // Usar la versión web cuando estamos en navegador
-  if (Platform.OS === 'web') {
-    try {
-      // Importación dinámica del componente web
-      const CollaborativeMapScreenWeb = require('./src/components/Map/CollaborativeMapScreen.web').default;
-      return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
-    } catch (error) {
-      console.error("Error cargando CollaborativeMapScreen.web:", error);
-      return (
-        <StyledView className="flex-1 justify-center items-center p-4">
-          <StyledText className="text-lg text-red-500">
-            Error al cargar el mapa colaborativo web. Por favor, intenta de nuevo.
-          </StyledText>
-        </StyledView>
-      );
-    }
-  } else {
+
     return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
-  }
 };
 
 // Definimos un wrapper para ForgotPasswordScreen que selecciona la versión adecuada según la plataforma
-const ForgotPasswordScreenWrapper = (props: any) => {
-  // Usar la versión web cuando estamos en navegador
-  if (Platform.OS === 'web') {
-    return <ForgotPasswordScreenWeb {...props} />;
-  } else {
-    return <ForgotPasswordScreenMobile {...props} />;
-  }
-};
+
 
 // Componente principal de la aplicación
 const AppContent = () => {
@@ -194,7 +154,7 @@ const AppContent = () => {
         />
         <Stack.Screen 
           name="ForgotPassword" 
-          component={ForgotPasswordScreenWrapper}
+          component={ForgotPasswordScreenMobile}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -223,6 +183,6 @@ const App = () => {
 };
 
 // Registramos directamente el componente App como componente raíz de la aplicación
-registerRootComponent(App);
+//registerRootComponent(App);
 
 export default App;

@@ -7,21 +7,29 @@
   "scripts": {
     "build": "tsc -p .",
     "test": "jest",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "amqplib": "0.10.5",
     "bcryptjs": "3.0.2",
     "class-validator": "0.14.1",
     "crypto-js": "4.2.0",
+    "expo": "~52.0.38",
     "express": "4.21.2",
     "jsonwebtoken": "9.0.2",
     "lightningcss": "1.29.1",
+    "mapyourworld-root": "file:..",
+    "mapyourworld-shared": "file:",
     "pg": "8.13.3",
+    "react": "18.3.1",
+    "react-native": "0.76.7",
     "typeorm": "0.3.21",
     "ws": "8.18.1"
   },
   "devDependencies": {
+    "@react-native-community/cli": "18.0.0",
     "@types/amqplib": "0.10.7",
     "@types/bcryptjs": "2.4.6",
     "@types/crypto-js": "4.2.2",

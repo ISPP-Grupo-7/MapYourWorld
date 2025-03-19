@@ -10,6 +10,9 @@
     "run:frontend": "ts-node runFrontend.ts",
     "run:frontend:prod": "ts-node runFrontend.ts --prod"
   },
+  "engines": {
+    "node": ">=18.00.0"
+  },
   "dependencies": {
     "@expo/metro-runtime": "4.0.1",
     "@react-native-async-storage/async-storage": "1.23.1",

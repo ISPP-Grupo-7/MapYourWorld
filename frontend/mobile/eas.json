@@ -15,6 +15,9 @@
     "preview": {
       "distribution": "internal",
       "node": "22.14.0",
+      "env": {
+        "EAS_BUILD_DISABLE_BUNDLE_JAVASCRIPT_STEP": "1"
+      },
       "android": {
         "buildType": "apk"
       }

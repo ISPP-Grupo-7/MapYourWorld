@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { API_URL } from '../../constants/config';
+import api from '../../services/api';
 
 
 interface PuntoDeInteresFormProps {
@@ -148,23 +149,29 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
       delete formattedPoint.latitude;
       delete formattedPoint.longitude;
 
-      const response = await fetch(`${API_URL}/api/poi/sin-token`, {
+      // Usar fetch en lugar de axios
+      const url = `${API_URL}/api/poi/sin-token`;
+      console.log("Enviando datos a:", url);
+      
+      const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formattedPoint),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formattedPoint)
       });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
 
       const data = await response.json();
 
-      if (response.ok) {
-        mostrarAlerta('Éxito', 'Punto de interés creado correctamente.');
-        // Llamamos a onSave para pasar el nuevo POI al componente padre
-        onSave(poiForMarker);
-        setPointOfInterest(initialPoint);
-        setShowForm(false);
-      } else {
-        mostrarAlerta('Error', data.error || 'No se pudo crear el punto de interés.');
-      }
+      mostrarAlerta('Éxito', 'Punto de interés creado correctamente.');
+      // Llamamos a onSave para pasar el nuevo POI al componente padre
+      onSave(poiForMarker);
+      setPointOfInterest(initialPoint);
+      setShowForm(false);
     } catch (error) {
       console.error("Error al guardar el punto de interés:", error);
       mostrarAlerta('Error', 'Ha ocurrido un error al guardar el punto de interés.');

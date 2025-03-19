@@ -57,3 +57,5 @@ uploads/
 
 # Archivos de bloqueo
 package-lock.json
+
+android/

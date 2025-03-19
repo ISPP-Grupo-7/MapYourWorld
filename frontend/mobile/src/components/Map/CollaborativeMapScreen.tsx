@@ -6,6 +6,7 @@ import PuntoDeInteresForm from "../POI/PoiForm";
 import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import api from '../../services/api';
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
@@ -184,8 +185,8 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       setLoading(true);
       // En lugar de obtener todos los distritos, obtenemos solo los del mapa colaborativo
       console.log(`Obteniendo distritos para el mapa colaborativo ${mapId}`);
-      const response = await fetch(`${API_URL}/api/districts/map/${mapId}`);
-      const data = await response.json();
+      const response = await api.get(`/api/maps/${mapId}/districts`);
+      const data = response.data;
       console.log("Respuesta de distritos:", data);
 
       if (data.success && data.districts && data.districts.length > 0) {
@@ -333,8 +334,8 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const fetchMapUsers = async () => {
     try {
       console.log(`Obteniendo usuarios para el mapa colaborativo ${mapId}`);
-      const response = await fetch(`${API_URL}/api/maps/users/${mapId}`);
-      const data = await response.json();
+      const response = await api.get(`/api/maps/${mapId}/users`);
+      const data = response.data;
       console.log("Respuesta de usuarios del mapa colaborativo:", data);
       
       if (data.success && data.users) {
@@ -1046,4 +1047,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollaborativeMapScreen; 
+export default CollaborativeMapScreen;
