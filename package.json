@@ -158,7 +158,21 @@
       "favicon": "./assets/favicon.png"
     },
     "doctor": {
-      "reactNativeDirectoryCheck": false
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false,
+        "exclude": [
+          "react-native-maps",
+          "jwt-decode",
+          "@react-native-async-storage/async-storage",
+          "react-native-gesture-handler",
+          "react-native-reanimated",
+          "react-native-screens",
+          "react-native-safe-area-context",
+          "react-native-svg",
+          "native-notify",
+          "react-native-vector-icons"
+        ]
+      }
     }
   }
 }
