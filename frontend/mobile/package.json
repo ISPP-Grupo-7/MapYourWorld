@@ -13,7 +13,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "type-check": "tsc --noEmit",
     "test": "jest",
-    "clean": "npx rimraf node_modules package-lock.json && npm install --force"
+    "clean": "npx rimraf node_modules package-lock.json && npm install --force",
+    "expo:doctor": "npx expo-doctor"
   },
   "dependencies": {
     "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
@@ -151,8 +152,25 @@
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
         "exclude": [
-          "react-native-maps",
           "jwt-decode",
+          "@babel/plugin-proposal-export-namespace-from", 
+          "@emotion/react", 
+          "@emotion/styled", 
+          "@expo/metro-runtime", 
+          "@mui/icons-material", 
+          "@mui/material", 
+          "chart.js", 
+          "date-fns", 
+          "jose", 
+          "leaflet", 
+          "lightningcss",
+          "moment", 
+          "react-chartjs-2", 
+          "react-icons", 
+          "react-router-dom", 
+          "styled-components", 
+          "tailwindcss", 
+          "yup",
           "@react-native-async-storage/async-storage",
           "react-native-gesture-handler",
           "react-native-reanimated",
@@ -163,7 +181,8 @@
           "react-native-vector-icons",
           "@tanstack/react-query",
           "nativewind",
-          "lottie-react-native"
+          "lottie-react-native",
+          "react-native-maps"
         ]
       }
     }

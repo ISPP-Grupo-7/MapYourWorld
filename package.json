@@ -19,6 +19,7 @@
     "start:expo-web": "cd frontend/mobile && npx expo start --web --project-root .",
     "start:expo-android": "cd frontend/mobile && npx expo start --android --project-root .",
     "start:expo-ios": "cd frontend/mobile && npx expo start --ios --project-root .",
+    "expo-doctor": "cd frontend/mobile && npx expo-doctor --verbose",
     "start": "concurrently \"cd backend && npm run dev:gateway\" \"cd frontend/mobile && npm run web\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:web": "cd frontend/mobile && npm run web",
@@ -129,50 +130,5 @@
     "pg": "8.13.3",
     "typeorm": "0.3.21",
     "typescript": "5.8.2"
-  },
-  "expo": {
-    "name": "MapYourWorld-mobile",
-    "slug": "mapyourworld-mobile",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "doctor": {
-      "reactNativeDirectoryCheck": {
-        "listUnknownPackages": false,
-        "exclude": [
-          "react-native-maps",
-          "jwt-decode",
-          "@react-native-async-storage/async-storage",
-          "react-native-gesture-handler",
-          "react-native-reanimated",
-          "react-native-screens",
-          "react-native-safe-area-context",
-          "react-native-svg",
-          "native-notify",
-          "react-native-vector-icons"
-        ]
-      }
-    }
   }
 }
