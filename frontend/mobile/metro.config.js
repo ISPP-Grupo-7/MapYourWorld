@@ -8,6 +8,10 @@ const projectRoot = __dirname;
 
 const config = getDefaultConfig(projectRoot);
 
+// Entrada explícita para solucionar problemas de bundling
+config.resolver.sourceExts = ['js', 'jsx', 'ts', 'tsx', 'json'];
+config.resolver.resolverMainFields = ['browser', 'main'];
+
 // Agregamos las rutas en workspaceRoot a las watchFolders
 config.watchFolders = [workspaceRoot];
 

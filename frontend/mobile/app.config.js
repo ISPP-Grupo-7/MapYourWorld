@@ -3,7 +3,8 @@ module.exports = {
   slug: "mapyourworld-mobile",
   version: "1.0.0",
   orientation: "portrait",
-  // entryPoint: "./index.js", // Punto de entrada principal
+
+  entryPoint: "./index.js", // Punto de entrada principal explícito
 
   // Deshabilitamos temporalmente las referencias a los recursos
   // icon: "./assets/icon.png",
