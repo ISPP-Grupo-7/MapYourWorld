@@ -12,6 +12,7 @@ interface Distrito {
   nombre: string;
   coordenadas: { latitude: number; longitude: number }[];
   isUnlocked: boolean;
+  regionId: string;
 }
 
 interface DistritoBackend {
@@ -20,6 +21,18 @@ interface DistritoBackend {
   description: string;
   boundaries: any;
   isUnlocked: boolean;
+  region_assignee?: { // ⬅ Agregar esta propiedad opcional
+    id: string;
+    name: string;
+    description: string;
+    map_assignee: {
+      id: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      is_colaborative: boolean;
+    };
+  };
 }
 
 interface POI {
@@ -203,11 +216,49 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     }
   };
 
+  const fetchUserMap = async (userId: string): Promise<any> => {
+    const url = `${API_URL}/api/maps/principalMap/user/${userId}`;
+  
+    try {
+      const response = await fetch(url, {
+        method: "GET", // Cambia a "POST", "PUT", "DELETE" si es necesario
+        headers: {
+          "Content-Type": "application/json",
+          // Agrega otros headers si es necesario, como tokens de autenticación
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      throw error;
+    }
+  };
+  
+    
   // Función para obtener los distritos desde el backend
   const fetchDistritos = async () => {
+
+
     try {
+
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/districts`);
+
+    // Obtener userId del contexto
+    if (!user?.id) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    // Obtener el mapa del usuario
+      const userMap = await fetchUserMap(user.id); // Esperamos el resultado correctamente
+      console.log("Datos recibidos del mapa del usuario:", userMap);
+      setLoading(true);
+      const response = await fetch(`${API_URL}/api/districts/map/${userMap.map.id}`);
       const data = await response.json();
       
 
@@ -225,6 +276,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 nombre: distrito.name,
                 coordenadas: coordenadasTransformadas,
                 isUnlocked: distrito.isUnlocked,
+                regionId: distrito.region_assignee ? distrito.region_assignee.id : null, 
               };
             } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
@@ -247,7 +299,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/poi/all`);
+      if (!user?.id) {
+        throw new Error("Usuario no autenticado");
+      }
+      const userMap = await fetchUserMap(user.id); // Esperamos el resultado correctamente
+      const response = await fetch(`${API_URL}/api/poi/map/${userMap.map.id}`);
       const data = await response.json();
       if (data.pois) {  // Aquí se omite la validación de 'success'
         setPointsOfInterest(data.pois);
@@ -260,9 +316,12 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   };
 
   // Función para desbloquear un distrito si el usuario se encuentra dentro de él
-  const desbloquearDistrito = async (districtId: string) => {
+  const desbloquearDistrito = async (districtId: string, regionId:String) => {
     try {
-      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/1`, {
+      if (!user?.id) {
+        throw new Error("Usuario no autenticado");
+      }
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${user.id}/${regionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isUnlocked: true }),
@@ -327,9 +386,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         }
       }
       if (distritoEncontrado) {
-        const { id, nombre, isUnlocked } = distritoEncontrado;
+        const { id, nombre, isUnlocked, regionId } = distritoEncontrado;
         if (!isUnlocked) {
-          desbloquearDistrito(id);
+          desbloquearDistrito(id, regionId);
         }
         if (!distritosVisitados.has(nombre)) {
           setDistritosVisitados(new Set(distritosVisitados).add(nombre));

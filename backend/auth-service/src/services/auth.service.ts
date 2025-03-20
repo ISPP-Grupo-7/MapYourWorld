@@ -57,9 +57,19 @@ export const registerUser = async (userData: any): Promise<User> => {
     newUser.password = hashedPassword;
     newUser.is_active = true; // Activamos la cuenta automáticamente (podría cambiarse si se requiere verificación)
     newUser.profile = savedProfile;
+
+
     
     // Guardar el usuario en la base de datos
-    const savedUser = await repo.save(newUser);
+    let savedUser = await repo.save(newUser);
+
+    const token = generateToken({
+      userId: newUser.id.toString(),
+      email: newUser.email
+    });
+    
+    savedUser.token_data = token;
+    savedUser = await repo.save(savedUser);
     
     // 5. Crear mapa y distritos para el usuario
     try {

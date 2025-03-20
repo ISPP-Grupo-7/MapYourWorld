@@ -104,6 +104,12 @@ const RegisterScreen = () => {
       isValid = false;
     }
     
+    const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+    if (formData.picture && !urlRegex.test(formData.picture.trim())) {
+      newErrors.picture = 'Debe ser una URL válida';
+      isValid = false;
+    }
 
     setErrors(newErrors);
     return isValid;
@@ -309,6 +315,39 @@ const RegisterScreen = () => {
                     {errors.username && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
                         {errors.username}
+                      </div>
+                    )}
+                  </div>
+
+                  {/*URL de avatar */}
+                  <div className="input-container" style={{ marginBottom: 20 }}>
+                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                      URL de avatar
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="URL de avatar"
+                        value={formData.picture}
+                        onChange={(e) => handleChange('picture', e.target.value)}
+                        style={{ 
+                          width: '100%',
+                          paddingLeft: '35px',
+                          paddingRight: '10px',
+                          height: '44px',
+                          borderColor: errors.picture ? '#e53e3e' : undefined
+                        }}
+                      />
+                    </div>
+                    {errors.picture && (
+                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                        {errors.picture}
                       </div>
                     )}
                   </div>

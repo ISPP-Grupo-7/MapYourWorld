@@ -16,13 +16,13 @@ export class PointOfInterest {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column({ nullable: false })
   name!: string;
 
   @Column({ nullable: true })
   description!: string;
 
-  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: false })
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: false, unique:true })
   location!: Geometry;
 
   @Column({ type: 'enum', enum: Category })

@@ -136,6 +136,30 @@ export default class MapRepository {
         await this.mapRepo.remove(map);
     }
 
+    async getPrincipalMapForUser(userId: string): Promise<Map> {
+        try {
+            // Buscar al usuario
+            const user = await this.userRepo.findOne({ 
+                where: { id: userId }, 
+            });
+            
+            if (!user) {
+                throw new Error("No se encuentra el usuario")
+            }
+            
+            // Filtramos solo los mapas colaborativos
+            const principalMap = await this.mapRepo.findOne({ where: { user_created: {id: userId}, is_colaborative:false }, relations: ['user_created'] });
+            if (!principalMap){
+                throw new Error("No se encuentra el mapa principal del usuario")
+            }
+            
+            return principalMap
+        } catch (error) {
+            console.error(`Error al obtener mapas colaborativos para el usuario ${userId}:`, error);
+            throw error;
+        }
+    }
+
     async getCollaborativeMapsForUser(userId: string): Promise<Map[]> {
         try {
             // Buscar al usuario

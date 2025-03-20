@@ -7,11 +7,9 @@ const router: Router = Router();
 router.post('/', POIController.createPOI);
 
 // Crear POI sin token
-router.post('/sin-token', POIController.createPOISinToken);
 
 // Rutas específicas primero
 router.get('/all', POIController.getAllPOIs);
-router.get('/nearby', POIController.findNearbyPOIs);
 router.get('/map/:mapId', POIController.getPOIsByMapId);
 
 // Rutas con parámetros de ID al final

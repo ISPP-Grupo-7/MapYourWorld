@@ -45,31 +45,7 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
 
 
 
-export const createPOISinToken = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  try {
-    const poiData = req.body;
 
-    // Extraer las coordenadas y convertirlas a un tipo geométrico de PostGIS
-
-    // Crear el objeto Geometry adecuado para PostGIS
-
-
-    // Actualizar los datos con la geometría convertida
-    const updatedPOIData = {
-      ...poiData,
-    };
-
-    // Llamar al servicio para crear el nuevo POI
-    const newPOI = await POIService.createPOISinToken(updatedPOIData);
-
-    res.status(201).json(newPOI);
-  } catch (error) {
-    console.error('Error al crear el punto de interés:', error);
-    res.status(400).json({
-      error: error instanceof Error ? error.message : 'Error al crear el punto de interés'
-    });
-  }
-};
 
 
 /**
@@ -153,12 +129,9 @@ export const deletePOI = async (req: AuthenticatedRequest, res: Response): Promi
       return;
     }
 
-    const deleted = await POIService.deletePOI(poiId, userId);
+    await POIService.deletePOI(poiId, userId);
 
-    if (!deleted) {
-      res.status(404).json({ error: 'Punto de interés no encontrado' });
-      return;
-    }
+
 
     res.status(204).send();
   } catch (error) {
@@ -172,40 +145,7 @@ export const deletePOI = async (req: AuthenticatedRequest, res: Response): Promi
 /**
  * Busca puntos de interés cercanos a una ubicación geográfica
  */
-export const findNearbyPOIs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  try {
-    const { latitude, longitude, radius, category } = req.query;
 
-    if (!latitude || !longitude || !radius) {
-      res.status(400).json({
-        error: 'Latitud, longitud y radio son parámetros obligatorios'
-      });
-      return;
-    }
-
-    const lat = parseFloat(latitude as string);
-    const lng = parseFloat(longitude as string);
-    const radiusKm = parseFloat(radius as string);
-
-    if (isNaN(lat) || isNaN(lng) || isNaN(radiusKm)) {
-      res.status(400).json({
-        error: 'Latitud, longitud y radio deben ser valores numéricos válidos'
-      });
-      return;
-    }
-
-    // Aplicar filtros adicionales si existen
-    const filters = category ? { category: category as string } : undefined;
-
-    const pois = await POIService.findNearbyPOIs(lat, lng, radiusKm, filters);
-    res.status(200).json(pois);
-  } catch (error) {
-    console.error('Error al buscar puntos de interés cercanos:', error);
-    res.status(500).json({
-      error: error instanceof Error ? error.message : 'Error al buscar puntos de interés cercanos'
-    });
-  }
-};
 /**
  * Obtiene todos los puntos de interés
  */
@@ -236,14 +176,17 @@ export const getPOIsByMapId = async (req: Request, res: Response): Promise<void>
 
     // Por simplicidad, devolvemos una lista vacía por ahora
     // En una implementación real, buscaríamos los POIs en la base de datos
+    const pois = await POIService.getPointsOfInterestByMapId(mapId)
     console.log(`Controlador POI: No hay POIs para el mapa ${mapId}, devolviendo lista vacía`);
     
     res.status(200).json({ 
       success: true, 
-      pois: [] 
+      pois: pois
     });
   } catch (error) {
     console.error('Error al obtener POIs por mapa:', error);
     res.status(500).json({ success: false, message: 'Error al obtener POIs por mapa' });
   }
 };
+
+

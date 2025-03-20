@@ -192,7 +192,7 @@ const CollaborativeMapScreenWeb: React.FC<{ mapId: string; userId: string }> = (
       // Intentar obtener ubicación actual del usuario
       if (typeof navigator !== 'undefined' && navigator.geolocation) {
         console.log("Obteniendo geolocalización para el mapa colaborativo...");
-        navigator.geolocation.getCurrentPosition(
+        const watchId = navigator.geolocation.watchPosition(
           (position) => {
             console.log("Posición obtenida:", position.coords);
             setLocation([position.coords.latitude, position.coords.longitude]);
@@ -204,8 +204,11 @@ const CollaborativeMapScreenWeb: React.FC<{ mapId: string; userId: string }> = (
             setLocation([40.416775, -3.70379]); // Madrid por defecto si falla
             setLoading(false);
           },
-          { timeout: 10000, enableHighAccuracy: true }
+          { timeout: 100000, enableHighAccuracy: true, maximumAge: 0 }
         );
+        return () => {
+          navigator.geolocation.clearWatch(watchId);
+        };
       } else {
         console.log("Geolocalización no disponible para el mapa colaborativo");
         setError("Tu navegador no soporta geolocalización.");

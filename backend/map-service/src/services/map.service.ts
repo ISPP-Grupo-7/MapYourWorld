@@ -190,6 +190,27 @@ export const deleteMap = async (MapId: string): Promise<{ success: boolean; mess
 };
 
 /**
+ * Obtiene el mapa principal del usuario
+ * @param userId ID del usuario
+ */
+export const getPrincipalMapForUser = async (userId: string): Promise<Map> => {
+  try {
+    // Buscar mapas donde el usuario participa (está en users_joined)
+    const map = await repo.getPrincipalMapForUser(userId);
+    
+    if (!map ) {
+      console.log(`No se encontro el mapa principal del usuario ${userId}`);
+      throw new Error("No se encontro el mapa principal del usuario")
+    }
+    
+    return map;
+  } catch (error) {
+    console.error(`Error al obtener el mapa principal para el usuario ${userId}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Obtiene todos los mapas colaborativos en los que participa un usuario
  * @param userId ID del usuario
  */

@@ -350,6 +350,40 @@ export const inviteUserToMap = async (req: Request, res: Response): Promise<void
   }
 };
 
+export const getPrincipalMapForUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    console.log(`Obteniendo mapa individual para el usuario ${userId}`);
+
+    if (!userId) {
+      res.status(400).json({ success: false, message: 'Falta el ID del usuario' });
+      return;
+    }
+    
+    try {
+      // Obtener el mapa individual del usuario 
+      const map = await MapService.getPrincipalMapForUser(userId);
+      res.status(200).json({ success: true, map});
+    } catch (error) {
+      console.error(`Error al obtener el mapa principal del usuario ${userId}:`, error);
+            
+        res.status(200).json({ 
+        success: false, 
+        isExample: true
+      });
+    }
+  } catch (error) {
+    console.error('Error al obtener el mapa principal del usuario:', error);
+
+    
+    res.status(200).json({ 
+      success: false, 
+      isExample: true
+    });
+  }
+};
+
+
 /**
  * Obtiene todos los mapas colaborativos en los que participa un usuario
  */

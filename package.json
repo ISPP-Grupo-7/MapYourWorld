@@ -159,7 +159,9 @@
       "favicon": "./assets/favicon.png"
     },
     "doctor": {
-      "reactNativeDirectoryCheck": false
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
     }
   }
 }

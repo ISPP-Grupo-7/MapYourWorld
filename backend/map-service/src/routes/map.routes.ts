@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createMap, getMapById, updateMap, deleteMap, createMapColaborative, getUsersOnMapById, createOrGetCollaborativeMap, inviteUserToMap, getCollaborativeMapsForUser } from '../controllers/map.controller';
+import { createMap, getMapById, updateMap, deleteMap, createMapColaborative, getUsersOnMapById, createOrGetCollaborativeMap, inviteUserToMap, getCollaborativeMapsForUser, getPrincipalMapForUser } from '../controllers/map.controller';
 
 const router: Router = Router();
 
@@ -10,6 +10,8 @@ router.post('/createColaborative', createMapColaborative);
 router.post('/createOrGetCollaborative', createOrGetCollaborativeMap);
 
 router.post('/invite', inviteUserToMap);
+
+router.get('/principalMap/user/:userId', getPrincipalMapForUser);
 
 // Ruta para obtener los mapas colaborativos de un usuario
 router.get('/collaborative/user/:userId', getCollaborativeMapsForUser);
