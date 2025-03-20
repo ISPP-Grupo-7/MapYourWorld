@@ -8,6 +8,12 @@ import { Platform } from "react-native";
 const getBackendUrl = () => {
   console.log("Obteniendo URL de backend. Plataforma:", Platform.OS);
   
+  // Si estamos en una versión de producción (APK instalada), usamos la URL de Azure
+  if (!__DEV__) {
+    console.log("Entorno de producción detectado, usando URL de Azure");
+    return "https://mapyourworld.es"; // Cambia esto a tu URL real de Azure
+  }
+  
   // Si estamos en web, intenta obtener la IP del servidor actual
   if (Platform.OS === 'web') {
     try {
