@@ -20,6 +20,7 @@ import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
+import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -94,6 +95,15 @@ const ForgotPasswordScreenWrapper = (props: any) => {
     return <ForgotPasswordScreenWeb {...props} />;
   } else {
     return <ForgotPasswordScreenMobile {...props} />;
+  }
+};
+
+const UserAchievementsScreenWrapper = (props: any) => {
+  if (Platform.OS === 'web') {
+    const WebUserAchievementsScreen = require('./src/components/Achievements/UserAchievementsScreen.web').default;
+    return <WebUserAchievementsScreen {...props} />;
+  } else {
+    return <UserAchievementsScreen {...props} />;
   }
 };
 
@@ -206,6 +216,22 @@ const AppContent = () => {
               </View>
             ),
           }} 
+        />
+        <Stack.Screen 
+          name="UserAchievementsScreen" 
+          component={UserAchievementsScreenWrapper}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Logros</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

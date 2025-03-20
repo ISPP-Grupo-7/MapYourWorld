@@ -22,5 +22,11 @@ router.get('/achievements', achievementController.getAchievements);
  */
 router.get('/achievements/name/:name', achievementController.getAchievementByName);
 
+/**
+ * Obtiene un logro según su id.
+ * GET /achievements/:id
+ */
+router.get('/achievements/:id', achievementController.getAchievementById);
+
 
 export default router;

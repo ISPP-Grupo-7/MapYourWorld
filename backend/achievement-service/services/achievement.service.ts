@@ -17,20 +17,18 @@ const repo = new AchievementRepository();
  */
 
 //crear logro
-
-
 export const createAchievement = async (
-  AchievementData: Omit<Achievement, 'id'>,
-): Promise<void> => {
-
+  achievementData: Omit<Achievement, 'id'>
+): Promise<Achievement> => {
   try {
-    repo.createAchievement(AchievementData)
-
+    const newAchievement = await repo.createAchievement(achievementData);
+    return newAchievement;
   } catch (error) {
     console.error("Error en createAchievement:", error);
     throw new Error("Error al crear el logro");
   }
 };
+
 
 //obtener todos los logros
 export const getAchievements = async (): Promise<Achievement[] | null> => {
@@ -49,5 +47,15 @@ export const getAchievementByName = async (name: string): Promise<Achievement | 
     return a;
   } catch (error) {
     throw new Error("Error al obtener logro por nombre");
+  }
+};
+
+//obtener logro por id
+export const getAchievementById = async (id: string): Promise<Achievement | null> => {
+  try {
+    const a = await repo.findById(id);
+    return a;
+  } catch (error) {
+    throw new Error("Error al obtener logro por id");
   }
 };

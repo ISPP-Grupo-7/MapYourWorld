@@ -31,11 +31,14 @@ export class UserAchievementRepository {
 
     }
 
-    async getAchievementsByUserId(userId: string): Promise<UserAchievement[]>{
-            const logrosUsuario = await this.userAchievementRepo.find({ where: { user: { id: userId }}})
-        return logrosUsuario
-    }
-
+    async getAchievementsByUserId(userId: string): Promise<UserAchievement[]> {
+        const logrosUsuario = await this.userAchievementRepo.find({
+          where: { user: { id: userId } },
+          relations: ["achievement"],
+        });
+        return logrosUsuario;
+      }
+      
 
     async getUsersByAchievementId(achievementId:string): Promise<User[] | null>{
 

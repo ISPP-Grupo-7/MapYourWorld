@@ -9,11 +9,12 @@ export const createAchievement = async (req: Request, res: Response, next: NextF
   try {
     const achievementData = req.body;
     const newAchievement = await AchievementService.createAchievement(achievementData);
-    res.status(201).json(newAchievement);
+    res.status(201).json({ success: true, ...newAchievement });
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * Obtiene todos los logros
@@ -45,3 +46,21 @@ export const getAchievementByName = async (req: Request, res: Response, next: Ne
     next(error);
   }
 };
+
+/**
+ * Obtiene un logro por id
+ * GET /achievements/:id
+ */
+export const getAchievementById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const achievement = await AchievementService.getAchievementById(id);
+    if (!achievement) {
+      res.status(404).json({ message: 'Logro no encontrado' });
+      return;
+    }
+    res.json(achievement);
+  } catch (error) {
+    next(error);
+  }
+}

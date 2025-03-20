@@ -18,9 +18,15 @@ export  class AchievementRepository {
       }
 
     
-    async createAchievement(achievementData: Omit<Achievement, 'id'>): Promise<void> {
-        await this.achievementRepo.save(achievementData);
+      async createAchievement(achievementData: Omit<Achievement, 'id'>): Promise<Achievement> {
+        const newAchievement = await this.achievementRepo.save(achievementData);
+        return newAchievement;
+      }      
+
+    async findById(id: string): Promise<Achievement | null> {
+      return this.achievementRepo.findOne({ where: { id } });
     }
+  
     //no se implementna métodos adicionales ya que con los básicos de typeorm es suficiente
     //se deja esta clase como punto de extensión
 }
