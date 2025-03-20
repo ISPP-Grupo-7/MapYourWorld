@@ -1,5 +1,1 @@
-import { registerRootComponent } from 'expo';
-import App from './App';
-
-// Registrar el componente raíz
-registerRootComponent(App); 
+console.log('Starting MapYourWorld app...'); require('./App');

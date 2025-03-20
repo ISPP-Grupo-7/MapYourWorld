@@ -26,7 +26,13 @@ module.exports = {
   },
 
   android: {
-    package: "com.francodellaguila2.mapyourworldmobile"
+    package: "com.mapyourworld.app", // Nombre del paquete para Android
+    adaptiveIcon: {
+      // foregroundImage: "./assets/adaptive-icon.png",
+      backgroundColor: "#ffffff"
+    },
+    // Forzar la inclusión del bundle
+    bundleAssetName: "index.android.bundle",
   },
 
   web: {
@@ -37,6 +43,15 @@ module.exports = {
   // Desactivamos el auto-update check para evitar problemas
   updates: {
     enabled: false
+  },
+
+  // Configuración javascript engine
+  jsEngine: "hermes",
+
+  // Bundle en producción
+  developmentClient: false,
+  packagerOpts: {
+    dev: false
   },
 
   extra: {

@@ -8,12 +8,15 @@ const projectRoot = __dirname;
 
 const config = getDefaultConfig(projectRoot);
 
-// Entrada explícita para solucionar problemas de bundling
-config.resolver.sourceExts = ['js', 'jsx', 'ts', 'tsx', 'json'];
+// Configuración simplificada para resolver problemas de bundling
+config.resolver.sourceExts = ['jsx', 'js', 'ts', 'tsx', 'json'];
 config.resolver.resolverMainFields = ['browser', 'main'];
 
 // Agregamos las rutas en workspaceRoot a las watchFolders
 config.watchFolders = [workspaceRoot];
+
+// Configuración de assetExts para incluir todos los tipos de archivos necesarios
+config.resolver.assetExts = [...config.resolver.assetExts, 'db', 'sqlite', 'json', 'png', 'jpg', 'svg'];
 
 // Incluimos el módulo de shared
 config.resolver.nodeModulesPaths = [
@@ -42,7 +45,6 @@ config.resolver.disableHierarchicalLookup = false;
 config.resolver.enableGlobalPackages = true;
 
 // Configuramos los assetExts y sourceExts
-config.resolver.assetExts = [...config.resolver.assetExts, 'db', 'sqlite', 'json', 'png', 'jpg', 'svg'];
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'jsx', 'json', 'js', 'ts', 'tsx', 'cjs', 'mjs'];
 
 // Configuración específica para la transformación

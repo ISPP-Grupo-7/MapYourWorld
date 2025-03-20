@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, StyleSheet, Image, Alert, Platform } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,8 +8,12 @@ import TextInput from '@components/UI/TextInput';
 import {styles} from '@assets/styles/styles';
 import { useAuth } from '../../contexts/AuthContext';
 import { RootStackParamList } from '../../navigation/types';
-require ('../../assets/styles/web.css')
-require ('../../assets/styles/auth.css')
+
+// Importar CSS solo en entorno web
+if (Platform.OS === 'web') {
+  require ('../../assets/styles/web.css')
+  require ('../../assets/styles/auth.css')
+}
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
