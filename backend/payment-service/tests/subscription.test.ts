@@ -43,6 +43,7 @@ const dummyUser: User = {
   receivedFriendRequests: [],
   maps_joined: [],
   subscription: {} as any,
+  userDistrict: [],
 };
 
 describe('Subscription Service', () => {

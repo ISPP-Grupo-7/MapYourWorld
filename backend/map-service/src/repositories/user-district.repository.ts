@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../../../database/appDataSource';
-import { UserDistrict } from '../models/user-district.model';
+import { Color, UserDistrict } from '../models/user-district.model';
 import { District } from '../models/district.model';
 
 export class UserDistrictRepository {
@@ -35,7 +35,7 @@ export class UserDistrictRepository {
         }
     }
 
-    async assignColorToUserDistrict(userId: string, districtId: string, color: string): Promise<UserDistrict> {
+    async assignColorToUserDistrict(userId: string, districtId: string, color: Color): Promise<UserDistrict> {
         try {
             // Buscar si ya existe una asignación
             let userDistrict = await this.repo.createQueryBuilder("userDistrict")

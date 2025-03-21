@@ -4,7 +4,7 @@ import { AppDataSource } from '../../../database/appDataSource'; // Importa la i
 import { Map } from '../models/map.model';
 import { Region } from '../models/region.model';
 import { User } from '../../../auth-service/src/models/user.model';
-import { UserDistrict } from '../models/user-district.model';
+import { Color, UserDistrict } from '../models/user-district.model';
 
 export default class DistrictRepository {
     private districtRepo: Repository<District>;
@@ -76,7 +76,7 @@ export default class DistrictRepository {
             const userDistrict = new UserDistrict();
             userDistrict.user = discoveredBy;
             userDistrict.district = district;
-            userDistrict.color = '#000000'; // Poner los colores definidos
+            userDistrict.color = Color.AZUL; // Poner los colores definidos(Los colores definidos son los posibles valores del enum Color)
             await this.userDistrictRepo.save(userDistrict);
         }
         return await this.districtRepo.save(district);
