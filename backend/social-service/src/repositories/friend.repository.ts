@@ -53,7 +53,6 @@ export default class FriendRepository  {
    * Actualiza una relación de amistad.
    */
   async findAllUsersByName(nameData: string): Promise<User[]> {
-    // Usamos "LIKE" para buscar coincidencias parciales en el nombre de usuario
     const users = await this.userRepo.createQueryBuilder('user')
       .where('user.profile.username LIKE :name', { username: `%${nameData}%` })
       .getMany();
@@ -64,18 +63,28 @@ export default class FriendRepository  {
     return users;
   }
 
-  async updateFriendStatus(friendId: string): Promise<Friend> {
-    const friend_encontrado = await this.getFriendById(friendId)
-    friend_encontrado.status = FriendStatus.ACCEPTED
-    return this.friendRepo.save(friend_encontrado);
+  async updateFriendStatus(
+    friendId: string,
+    newStatus: FriendStatus
+  ): Promise<Friend> {
+    const friend = await this.getFriendById(friendId);
+    friend.status = newStatus;
+    return await this.friendRepo.save(friend);
   }
-
 
   /**
-   * Elimina una relación de amistad.
-   */
-  async deleteFriend(id: string): Promise<void> {
-    await this.friendRepo.delete(id);
-  }
+ * Busca si existe alguna relación de amistad entre dos usuarios, en cualquier estado 
+ * y en cualquier dirección
+ */
+async findExistingFriendship(userId1: string, userId2: string): Promise<Friend | null> {
+  return this.friendRepo
+    .createQueryBuilder('friend')
+    .where(
+      '(friend.requesterId = :user1 AND friend.recipientId = :user2) OR ' +
+      '(friend.requesterId = :user2 AND friend.recipientId = :user1)', 
+      { user1: userId1, user2: userId2 }
+    )
+    .getOne();
+}
 }
 

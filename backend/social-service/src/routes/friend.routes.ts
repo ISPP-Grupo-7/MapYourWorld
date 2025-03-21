@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createFriendController, listFriendsController, findFriendByIdController, listSearchUserController, deleteFriendController, updateFriendStatusController } from '../controllers/friend.controller';
+import { createFriendController, listFriendsController, findFriendByIdController, listSearchUserController, updateFriendStatusController } from '../controllers/friend.controller';
 
 const router: Router = Router();
 
@@ -9,10 +9,7 @@ router.get('/search/:nameData', listSearchUserController);
 
 router.get('/:friendId', findFriendByIdController);
 
-router.put('/update/:friendId', updateFriendStatusController);
-
-router.delete('/delete/:friendId', deleteFriendController);
-
+router.put('/update/:friendId/:status', updateFriendStatusController);
 
 router.get('/list/:status/:userId', listFriendsController);
 

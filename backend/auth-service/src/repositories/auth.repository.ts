@@ -38,7 +38,8 @@ export class AuthRepository {
   async findWithPassword(email: string): Promise<User | null> {
     return this.repository.findOne({ 
       where: { email },
-      select: ['id', 'email', 'password', 'is_active']
+      select: ['id', 'email', 'password', 'is_active', 'role', 'token_data'],
+      relations: ['profile']
     });
   }
 
@@ -87,5 +88,14 @@ export class AuthRepository {
    */
   async save(user: User): Promise<User> {
     return await this.repository.save(user);
+  }
+
+  /**
+   * Elimina un usuario
+   * @param id ID del usuario
+   */
+  async delete(id: string): Promise<boolean> {
+    const result = await this.repository.delete({ id });
+    return result.affected !== undefined && result.affected !== null && result.affected > 0;
   }
 }

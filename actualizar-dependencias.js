@@ -256,7 +256,8 @@ function sincronizarDependencias() {
       'ts-node': '^10.9.2',
       'webpack': '^5.98.0',
       'webpack-cli': '^6.0.1',
-      'webpack-dev-server': '5.2.0'
+      'webpack-dev-server': '5.2.0',
+      "supertest": "7.0.0"
     };
     
     // Dependencias específicas para el backend
@@ -321,7 +322,8 @@ function sincronizarDependencias() {
       'nodemon': '3.1.9',
       'chalk': '5.4.1',
       'cross-env': '7.0.3',
-      'babel-plugin-module-resolver': '5.0.2'
+      'babel-plugin-module-resolver': '5.0.2',
+      "supertest": "7.0.0"
     };
     
     // Actualizar cada package.json encontrado

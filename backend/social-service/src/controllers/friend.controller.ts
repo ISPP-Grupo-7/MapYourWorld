@@ -14,13 +14,16 @@ export const createFriendController = async (req: Request, res: Response): Promi
     res.status(201).json(newFriend); // Retornamos el nuevo amigo creado
 
   } catch (error) {
-    res.status(500).json({ message:'Error al crear amistad:', error });
+    res.status(500).json({ 
+      message: 'Error al crear amistad:', 
+      error: error instanceof Error ? error.message : error 
+    });
   }
 };
 
 export const listFriendsController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status } = req.query; // Obtenemos el estado de la solicitud de amistad (PENDING/ACCEPTED)
+    const { status } = req.params; // Obtenemos el estado de la solicitud de amistad (PENDING/ACCEPTED)
     const { userId } = req.params; // Obtenemos el ID del usuario de la URL
 
     if (!status || !userId) {
@@ -34,7 +37,10 @@ export const listFriendsController = async (req: Request, res: Response): Promis
     res.status(200).json(friends);
 
   } catch (error) {
-    res.status(500).json({ message: 'Error al listar amigos:', error });
+    res.status(500).json({ 
+      message: 'Error al listar amigos:', 
+      error: error instanceof Error ? error.message : error 
+    });
   }
 };
 
@@ -77,26 +83,15 @@ export const listSearchUserController = async (req: Request, res: Response): Pro
 export const updateFriendStatusController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { friendId } = req.params; // Obtenemos el ID del amigo desde la URL
+    const { status } = req.params;
 
-    const result = await FriendService.updateFriendStatus(friendId);
+    const statusEnum = FriendStatus[status as keyof typeof FriendStatus];
+    const result = await FriendService.updateFriendStatus(friendId, statusEnum);
 
     res.status(200).json(result);
 
   } catch (error) {
     console.error();
     res.status(500).json({ message: 'Error al actualizar el estado de la amistad:', error });
-  }
-};
-
-export const deleteFriendController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { friendId } = req.params; // Obtenemos el ID del amigo desde la URL
-
-    await FriendService.deleteFriend(friendId);
-    res.status(204).send(); // Retorna un 204 sin contenido si se eliminó correctamente
-
-  } catch (error) {
-    console.error();
-    res.status(500).json({ message: 'Error al eliminar la amistad:', error });
   }
 };

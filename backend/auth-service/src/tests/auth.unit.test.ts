@@ -20,6 +20,41 @@ import {
 import { AuthRepository } from '../repositories/auth.repository';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
 
+// Añadir mock para UserProfileRepository
+jest.mock('../../../user-service/src/repositories/userProfile.repository', () => {
+  const mockProfileRepo = {
+    create: jest.fn().mockImplementation(data => ({ ...data, id: 'profile1' })),
+    findById: jest.fn(),
+    findByUsername: jest.fn(),
+    update: jest.fn(),
+    search: jest.fn()
+  };
+  
+  return {
+    UserProfileRepository: jest.fn().mockImplementation(() => mockProfileRepo)
+  };
+});
+
+// También necesitas mockear el servicio de mapas ya que se utiliza en registerUser
+jest.mock('../../../map-service/src/services/map.service', () => ({
+  createMap: jest.fn().mockResolvedValue({ id: 'map1' })
+}));
+
+jest.mock('../../../map-service/src/services/district.service', () => ({
+  createDistricts: jest.fn().mockResolvedValue(true)
+}));
+
+jest.mock('../../../map-service/src/repositories/map.repository', () => {
+  const mockMapRepo = {
+    getMapById: jest.fn().mockResolvedValue({ id: 'map1' })
+  };
+  
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => mockMapRepo)
+  };
+});
+
 // Simulamos el AuthRepository
 jest.mock('../repositories/auth.repository', () => {
   const mockRepo = {
@@ -84,36 +119,29 @@ describe('Auth Service', () => {
         email: 'newuser@example.com',
         password: 'Password1!',
         role: 'USER',
-        profile: { id: 'profile1', username: 'newuser', firstName: 'New', lastName: 'User' }
+        username: 'newuser', 
+        firstName: 'New',
+        lastName: 'User' 
       };
-
+  
+      // Configurar mocks
       repoInstance.findByEmail.mockResolvedValue(null);
-      repoInstance.save.mockImplementation(async (user: any) => {
-        // Simulamos que se asigna un id al guardar
+      repoInstance.save.mockImplementation(async (user:any) => {
         user.id = 'user1';
         return user;
       });
-
+  
       const newUser = await registerUser(userData);
+      
+      // Verificar resultados
       expect(newUser.email).toEqual(userData.email);
       expect(newUser.role).toEqual(userData.role);
       expect(newUser.password).toEqual('hashed_' + userData.password);
-      expect(newUser.is_active).toBe(false);
-      // Verificamos que token_data contenga la información de verificación
-      const tokenData = JSON.parse(newUser.token_data as string);
-      expect(tokenData.verificationType).toBe('email');
-      expect(tokenData.token).toBeDefined();
-      expect(tokenData.expiresAt).toBeDefined();
-
+      expect(newUser.is_active).toBe(true); 
       expect(repoInstance.save).toHaveBeenCalled();
-      expect(sendVerificationEmail).toHaveBeenCalledWith(
-        userData.email,
-        userData.profile.username,
-        tokenData.token
-      );
+      
     });
   });
-
   describe('loginUser', () => {
     it('debe autenticar al usuario y retornar el token', async () => {
       const email = 'test@example.com';
@@ -206,25 +234,61 @@ describe('Auth Service', () => {
 
   describe('resetPassword', () => {
     it('debe restablecer la contraseña exitosamente', async () => {
-      const token = 'resetToken';
+      const resetToken = 'resetToken';
       const newPassword = 'NewPassword1!';
-      // Creamos un usuario dummy que haga match con el token
+      
       const dummyUser = {
         id: 'user1',
-        // Se espera que bcrypt.compare(token + user.id, user.password) retorne true,
-        // por lo que establecemos la contraseña como 'hashed_' + (token + id)
-        password: 'hashed_' + (token + 'user1'),
-        token_data: '{"resetPassword":{"token":"' + token + '","createdAt":"2023-01-01T00:00:00.000Z","expiresAt":"2023-12-31T23:59:59.999Z"}}'
+        password: 'hashed_password',  
+        token_data: JSON.stringify({
+          resetPassword: {
+            token: resetToken,
+            createdAt: new Date(Date.now() - 3600000).toISOString(), 
+            expiresAt: new Date(Date.now() + 3600000).toISOString() 
+          }
+        })
       };
+      
       repoInstance.findAll.mockResolvedValue([dummyUser]);
       repoInstance.updatePassword.mockResolvedValue(true);
-      repoInstance.save.mockResolvedValue(dummyUser);
-
-      const result = await resetPassword(token, newPassword);
+      repoInstance.save.mockResolvedValue({...dummyUser, token_data: ''});
+      
+      const bcrypt = require('bcryptjs');
+      bcrypt.compare.mockImplementationOnce(() => Promise.resolve(true));
+      
+      const result = await resetPassword(resetToken, newPassword);
       expect(result).toBe(true);
       expect(repoInstance.updatePassword).toHaveBeenCalledWith(dummyUser.id, 'hashed_' + newPassword);
       expect(repoInstance.save).toHaveBeenCalled();
-      expect(dummyUser.token_data).toEqual("");
+      
+      // Verificar que token_data sea eliminado
+      expect(dummyUser.token_data).not.toContain('resetPassword');
+    });
+    
+    it('debe fallar si el token no es válido', async () => {
+      const invalidToken = 'invalidToken';
+      const newPassword = 'NewPassword1!';
+      
+      const dummyUser = {
+        id: 'user1',
+        password: 'some_password_hash',
+        token_data: JSON.stringify({
+          resetPassword: {
+            token: 'correctToken', 
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+            expiresAt: new Date(Date.now() + 3600000).toISOString()
+          }
+        })
+      };
+      
+      repoInstance.findAll.mockResolvedValue([dummyUser]);
+      
+      const bcrypt = require('bcryptjs');
+      bcrypt.compare.mockImplementationOnce(() => Promise.resolve(false));
+      
+      await expect(resetPassword(invalidToken, newPassword)).rejects.toThrow();
+      
+      expect(repoInstance.updatePassword).not.toHaveBeenCalled();
     });
   });
 

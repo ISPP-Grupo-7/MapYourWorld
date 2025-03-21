@@ -19,6 +19,8 @@ import {
   export enum FriendStatus {
     PENDING = 'PENDING',
     ACCEPTED = 'ACCEPTED',
+    BLOCKED = 'BLOCKED',
+    DELETED = 'DELETED',
   }
   
   @Entity('friend')
