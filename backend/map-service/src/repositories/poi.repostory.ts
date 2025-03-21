@@ -45,7 +45,6 @@ export class PointOfInterestRepository {
 
 
     async getPoiById(poiId: string): Promise<PointOfInterest | null> {
-        
 
         const poi =await this.poiRepo.findOne({where:{id:poiId}, relations:["user"]})
 
