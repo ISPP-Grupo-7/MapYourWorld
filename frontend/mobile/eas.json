@@ -1,21 +1,28 @@
 {
-    "cli": {
-      "version": ">= 15.0.15",
-      "appVersionSource": "remote"
+  "cli": {
+    "version": ">= 15.0.15",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "distribution": "internal"
     },
-    "build": {
-      "development": {
-        "developmentClient": true,
-        "distribution": "internal"
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle",
+        "credentialsSource": "local"
       },
-      "preview": {
-        "distribution": "internal"
-      },
-      "production": {
-        "autoIncrement": true
+      "env": {
+        "NODE_ENV": "production",
+        "API_URL": "https://mapyourworld.es"
       }
-    },
-    "submit": {
-      "production": {}
     }
+  },
+  "submit": {
+    "production": {}
   }
+}

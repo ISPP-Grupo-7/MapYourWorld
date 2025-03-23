@@ -4,7 +4,10 @@ module.exports = {
   version: "1.0.0",
   orientation: "portrait",
 
-  entryPoint: "./index.js", // Punto de entrada principal explícito
+  // Cambia la línea del punto de entrada para usar indexForBundle.js en producción
+  entryPoint: process.env.NODE_ENV === 'production' 
+    ? "./indexForBundle.js" 
+    : "./index.js",
 
   // Deshabilitamos temporalmente las referencias a los recursos
   // icon: "./assets/icon.png",
@@ -49,19 +52,20 @@ module.exports = {
   jsEngine: "hermes",
 
   // Bundle en producción
-  developmentClient: false,
+  developmentClient: process.env.NODE_ENV !== 'production', // false en producción
   packagerOpts: {
-    dev: false
+    dev: process.env.NODE_ENV !== 'production' // false en producción
   },
 
   extra: {
     rootDir: __dirname,
     eas: {
-      projectId: "757d70e0-f889-46f3-a4bb-8066e43fe863" // ID del proyecto en EAS
+      projectId: "620b1165-0238-4807-8766-6b2c3c1b76aa" // ID del proyecto en EAS
     },
-    API_URL: "https://mapyourworld.es"
+    API_URL: "https://mapyourworld.es",
+    enableNetworkDebugging: true
   },
 
   // Habilitar la nueva arquitectura explícitamente
-  newArchEnabled: true
+  newArchEnabled: false
 };
