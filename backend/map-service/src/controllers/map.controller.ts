@@ -86,10 +86,6 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
 export const getMapById = async (req: Request, res: Response): Promise<void> => {
   try {
     const MapId = req.params.MapId;
-    if(!MapId){
-      res.status(400).json({ success: false, message: 'Falta el ID del mapa' });
-      return;
-    }
     const Map = await MapService.getMapById(MapId);
 
     if (!Map) {

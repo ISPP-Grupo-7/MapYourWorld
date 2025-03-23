@@ -3,7 +3,7 @@ import { joinMap } from '../controllers/collab.map.controller';
 
 const router: Router = Router();
 
-router.put('/join/:mapId/:userId', joinMap);
+router.put('/join', joinMap);
 
 
 

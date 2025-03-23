@@ -25,36 +25,54 @@ const districtsData = geojsonData.features.map((feature: any, index: number) => 
     user: null
 }));
 
-
+const profile1 = {
+    id:"00000000-0000-0000-0000-000000000001",
+    username:"user1",
+    firstName:"user",
+    lastName:"1",
+    picture: ""
+}
 
 const user1 = {
     email:"user1@gmail.com" ,
     password:"user12345*",
-    username:"user1",
-    firstName:"User",
-    lastName:"1"
+    role: Role.USER,
+    token_data: "",
+    profile: profile1.id
 }
 
+const profile2 = {
+    id:"00000000-0000-0000-0000-000000000002",
+    username:"user2",
+    firstName:"user",
+    lastName:"2",
+    picture: ""
+}
 
 const user2 = {
     email:"user2@gmail.com" ,
     password:"user12345*",
-    username:"user2",
-     firstName:"User",
-     lastName:"2"
+    role: Role.USER,
+    token_data: "",
+    profile: profile2.id
 }
 
 
 
-
+const profileAdmin = {
+    id:"00000000-0000-0000-0000-000000000003",
+    username:"user",
+    firstName:"admin",
+    lastName:"3",
+    picture: ""
+}
 
 const userAdmin = {
     email:"userAdmin@gmail.com" ,
     password:"admin12345*",
     role: Role.ADMIN,
-    username:"admin",
-    firstName:"admin",
-    lastName:"admin"
+    token_data: "",
+    profile: profileAdmin.id
 }
 export async function createAllDistricts() {
     try {
@@ -98,12 +116,15 @@ export async function createUsers() {
         }
 
         //Creación usuario1
+        await createUserProfile(profile1)
         await registerUser(user1);
 
         //Creación usuario2
+        await createUserProfile(profile2)
         await registerUser(user2);
 
         //Creación usuario3
+        await createUserProfile(profileAdmin)
         await registerUser(userAdmin);
     
         

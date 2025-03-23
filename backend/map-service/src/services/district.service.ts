@@ -87,7 +87,7 @@ export const createDistricts = async (
 
 
     for (let i = 0; i < numberOfRegions; i++) {
-      const regionName = geojsonData.region_name;
+      const regionName = `Región ${i + 1}`;
       const regionData = {
         name: regionName,
         description: `Región generada para ${regionName}`,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, FlatList } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
@@ -25,7 +25,6 @@ interface Distrito {
   isUnlocked: boolean;
   unlockedByUserId?: string;
   colorIndex?: number;
-  regionId: string;
 }
 
 interface DistritoBackend {
@@ -35,18 +34,6 @@ interface DistritoBackend {
   boundaries: any;
   isUnlocked: boolean;
   user?: { id: string };
-  region_assignee?: { 
-    id: string;
-    name: string;
-    description: string;
-    map_assignee: {
-      id: string;
-      name: string;
-      description: string;
-      createdAt: string;
-      is_colaborative: boolean;
-    };
-  };
 }
 
 interface MapUser {
@@ -220,8 +207,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                 unlockedByUserId: distrito.user?.id,
                 colorIndex: distrito.user && mapUsers.length > 0 
                   ? mapUsers.find((u: { id: string; username: string; colorIndex: number }) => u.id === distrito.user?.id)?.colorIndex 
-                  : undefined,
-                regionId: distrito.region_assignee ? distrito.region_assignee.id : null
+                  : undefined
               };
             } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
@@ -393,10 +379,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para desbloquear un distrito en el mapa colaborativo
-  const desbloquearDistrito = async (districtId: string, regionId: string) => {
+  const desbloquearDistrito = async (districtId: string) => {
     try {
       console.log(`Desbloqueando distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
-      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`, {
+      const response = await fetch(`${API_URL}/api/districts/unlock/collaborative/${districtId}/${userId}/${mapId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
       });
@@ -658,11 +644,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       }
       
       if (distritoEncontrado) {
-        const { id, nombre, isUnlocked, unlockedByUserId, regionId } = distritoEncontrado;
+        const { id, nombre, isUnlocked, unlockedByUserId } = distritoEncontrado;
         
         // Solo intentamos desbloquear si no está ya desbloqueado por otro usuario
         if (!isUnlocked) {
-          desbloquearDistrito(id, regionId);
+          desbloquearDistrito(id);
           if (!distritosVisitados.has(nombre)) {
             setDistritosVisitados(new Set(distritosVisitados).add(nombre));
             setDistritoActual(nombre);
@@ -702,16 +688,8 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     );
   };
 
+  // Modal para invitar amigos
   const renderInviteFriendsModal = () => {
-    // Lista estática de amigos (solo para vista visual)
-    const friends = [
-      "Amigo 1",
-      "Amigo 2",
-      "Amigo 3",
-      "Amigo 4",
-      "Amigo 5",
-    ];
-  
     return (
       <Modal
         visible={showInviteModal}
@@ -722,38 +700,39 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Invitar Amigos</Text>
-            <Text style={styles.modalSubtitle}>
-              Máximo 5 amigos (6 usuarios en total)
-            </Text>
-  
-            {/* Listado de Amigos (solo visual) */}
-            <FlatList
-              data={friends}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.invitedItem}>
-                  <Text style={styles.friendName}>{item}</Text>
-                  <TouchableOpacity style={styles.inviteButton} disabled>
-                    <Text style={styles.inviteButtonText}>Invitar</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-  
-            {/* Sección de Amigos Invitados (solo visual, no funcional) */}
-            <Text style={styles.invitedTitle}>Amigos invitados:</Text>
-            <View style={styles.invitedItem}>
-              <Text style={styles.friendName}>Amigo 1</Text>
-              <TouchableOpacity disabled>
-                <Icon name="close" size={20} color="red" />
+            <Text style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</Text>
+            
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email del amigo"
+                value={friendEmail}
+                onChangeText={setFriendEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TouchableOpacity style={styles.inviteButton} onPress={inviteFriend}>
+                <Text style={styles.inviteButtonText}>Invitar</Text>
               </TouchableOpacity>
             </View>
-  
-            {/* Botón para cerrar el modal */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowInviteModal(false)}
-            >
+            
+            {invitedFriends.length > 0 && (
+              <>
+                <Text style={styles.invitedTitle}>Amigos invitados:</Text>
+                {invitedFriends.map((email, index) => (
+                  <View key={index} style={styles.invitedItem}>
+                    <Text>{email}</Text>
+                    <TouchableOpacity onPress={() => {
+                      setInvitedFriends(invitedFriends.filter((_, i) => i !== index));
+                    }}>
+                      <Icon name="close" size={20} color="red" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </>
+            )}
+            
+            <TouchableOpacity style={styles.closeButton} onPress={() => setShowInviteModal(false)}>
               <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -761,7 +740,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       </Modal>
     );
   };
-  
 
   // Botón para recargar los datos
   const renderReloadButton = () => {
@@ -1015,29 +993,25 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#0096C7", // Tono medio para el botón
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    backgroundColor: "#4CAF50",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 15,
+    borderRadius: 5,
   },
   inviteButtonText: {
-    color: "#fff",
-    fontSize: 14,
+    color: "white",
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    backgroundColor: "#f44336",
+    padding: 10,
+    borderRadius: 5,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   closeButtonText: {
-    color: "#fff",
-    fontSize: 16,
+    color: "white",
     fontWeight: "bold",
   },
   invitedTitle: {
@@ -1052,11 +1026,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     paddingVertical: 8,
-  },
-  friendName: {
-    fontSize: 16,
-    color: "#023E8A",
-    flex: 1,
   },
   reloadButton: {
     position: "absolute",

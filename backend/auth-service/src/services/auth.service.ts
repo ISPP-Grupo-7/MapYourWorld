@@ -14,13 +14,10 @@ import { UserProfile } from '../../../user-service/src/models/userProfile.model'
 import { createMap } from '../../../map-service/src/services/map.service';
 import { createDistricts } from '../../../map-service/src/services/district.service';
 import MapRepository from '../../../map-service/src/repositories/map.repository';
-import { PlanType, Subscription } from '../../../payment-service/models/subscription.model';
-import SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
 
 const repo = new AuthRepository();
 const profileRepo = new UserProfileRepository();
 const mapRepo = new MapRepository();
-const subscriptionsRepo = new SubscriptionRepository()
 
 export const getUserById = async (userId: string): Promise<User | null> => {
   return await repo.findById(userId);
@@ -83,17 +80,6 @@ export const registerUser = async (userData: any): Promise<User> => {
       console.error('Error al crear mapa o distritos:', mapError);
       // No fallamos el registro si el mapa no se puede crear
     }
-
-    const suscriptionUserData = new Subscription()
-
-    const now = new Date();
-    suscriptionUserData.plan = PlanType.FREE
-    suscriptionUserData.user = newUser
-    suscriptionUserData.is_active = true
-
-    await subscriptionsRepo.create(suscriptionUserData)
-
-    
 
     return savedUser;
   } catch (error) {

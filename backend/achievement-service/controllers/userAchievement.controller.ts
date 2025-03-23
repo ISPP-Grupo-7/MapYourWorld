@@ -22,7 +22,7 @@ export const createAchievement = async (req: Request, res: Response, next: NextF
  */
 export const getAchievementsByUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId  = req.params.userId;
+    const { userId } = req.params;
     const userAchievements = await UserAchievementService.getAchievementsByUser(userId);
     res.json(userAchievements);
   } catch (error) {

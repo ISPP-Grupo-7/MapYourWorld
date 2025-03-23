@@ -15,12 +15,10 @@ import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
 import subscriptionRoutes from './payment-service/routes/subscription.routes';
 import { createAchievements } from './achievement-service/mocks/achievement_create';
-import StripeRoutes from "./payment-service/routes/stripe.routes"
 import userAchievementRoutes from './achievement-service/routes/userAchievement.routes';
 import achievementRoutes from './achievement-service/routes/achievement.routes';
 import https from 'https';
 import fs from 'fs';
-
 
 dotenv.config();
 
@@ -49,10 +47,8 @@ app.use('/api/maps', mapRoutes)
 app.use('/api/collabMap', collabMapRoutes)
 app.use('/api/payment', paymentRoutes)
 app.use('/api/subscriptions', subscriptionRoutes);
-app.use('/api/stripe', StripeRoutes)
 app.use('/api/user-achievements', userAchievementRoutes);
 app.use('/api/achievements', achievementRoutes);
-
 
 
 // Interfaz para los servicios

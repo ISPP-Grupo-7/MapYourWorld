@@ -18,16 +18,23 @@ export class Subscription {
     @Column({ type: 'enum', enum: PlanType, default: PlanType.FREE })
     plan!: PlanType;
 
-    @Column({ type: 'date' , nullable:true})
+    @Column({ type: 'date' })
     startDate!: Date;
 
-    @Column({ type: 'date' , nullable:true})
+    @Column({ type: 'date' })
     endDate!: Date;
 
     @Column({ type: 'boolean', default : false })
     is_active!: boolean;
 
+    @Column({ type: 'boolean', default : false })
+    autoRenew!: boolean;
 
+    @Column({ type: 'date'})
+    createdAt!: Date;
+
+    @Column({ type: 'date'})
+    updatedAt!: Date;
 
     @OneToOne(() => User, (user) => user.subscription)
     @JoinColumn()
