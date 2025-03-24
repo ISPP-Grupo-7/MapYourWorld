@@ -12,7 +12,7 @@ const StyledScrollView = styled(ScrollView);
 const StyledInput = styled(TextInput);
 
 const SocialScreen = () => {
-  const [friendRequests, setFriendRequests] = useState<{ id: string; name: string }[]>([]);
+  const [friendRequests, setFriendRequests] = useState<{ id: string; name: string; requestType: string, mapId: string}[]>([]);
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
   const [searchResults, setSearchResults] = useState<{ id: string; name: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +72,9 @@ const SocialScreen = () => {
         setFriendRequests(
           data.map((friend) => ({
             id: friend.id,
-            name: friend.requester.email, // O usar otra propiedad según lo que devuelva el backend
+            name: friend.requester.email,
+            requestType: friend.requestType,
+            mapId: friend.requestType === 'MAP' ? friend.map.id || null : null,
           }))
         );
       } else {
@@ -102,6 +104,27 @@ const SocialScreen = () => {
       }
     } catch (error) {
       console.error(`Error al actualizar solicitud (${status}):`, error);
+    }
+  };
+
+
+  const joinMap = async (friendId: string, status: 'ACCEPTED' | 'DELETED', mapId: string) => {
+    console.log(`Uniendo a mapa ${mapId} con estado ${userId}`);
+    try {
+      const response = await fetch(`${API_URL}/api/collabMap/join/${mapId}/${userId}`, {
+        method: "PUT",
+      });
+      const data = await response.json();
+      if (data.success) {
+        if (status === 'ACCEPTED' && user) {
+          Alert.alert("Invitación Aceptada, te has unido al mapa");
+        } else {
+          Alert.alert("Invitación Rechazada", `${data.name} ha sido eliminada.`);
+        }
+        setFriendRequests(friendRequests.filter((r) => r.id !== friendId));
+      }
+    } catch (error) {
+      console.error(`Error al actualizar Invitación (${status}):`, error);
     }
   };
 
@@ -169,15 +192,41 @@ const SocialScreen = () => {
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
       {friendRequests.length > 0 ? (
         friendRequests.map((request) => (
-          <StyledView key={request.id} className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2">
-            <StyledText className="text-lg text-gray-800 font-semibold">{request.name}</StyledText>
-            <StyledView className="flex-row">
-              <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'ACCEPTED')} className="mr-4">
-                <StyledText className="text-[#2196F3] font-medium">Aceptar</StyledText>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'DELETED')}>
-                <StyledText className="text-red-500 font-medium">Rechazar</StyledText>
-              </TouchableOpacity>
+          <StyledView 
+            key={request.id} 
+            className="mb-4 border-b border-gray-200 pb-2"
+          >
+            {/* Contenedor flexible para el texto y los botones */}
+            <StyledView className="flex-row flex-wrap items-center justify-between gap-2">
+              {/* Mensaje dinámico según el tipo de solicitud */}
+              <StyledText className="text-lg text-gray-800 font-semibold flex-1 flex-shrink">
+                {request.requestType === 'FRIEND' 
+                  ? `${request.name} quiere ser tu amigo.` 
+                  : `${request.name} te ha invitado a un mapa.`}
+              </StyledText>
+  
+              {/* Botones de acción */}
+              <StyledView className="flex-row gap-2">
+                <TouchableOpacity
+                  onPress={() => 
+                    request.requestType === 'FRIEND' 
+                      ? updateFriendStatus(request.id, 'ACCEPTED') 
+                      : joinMap(request.id, 'ACCEPTED', request.mapId)
+                  }
+                >
+                  <StyledText className="text-[#2196F3] font-medium">Aceptar</StyledText>
+                </TouchableOpacity>
+  
+                <TouchableOpacity
+                  onPress={() => 
+                    request.requestType === 'FRIEND' 
+                      ? updateFriendStatus(request.id, 'DELETED') 
+                      : joinMap(request.id, 'DELETED', request.mapId)
+                  }
+                >
+                  <StyledText className="text-red-500 font-medium">Rechazar</StyledText>
+                </TouchableOpacity>
+              </StyledView>
             </StyledView>
           </StyledView>
         ))
@@ -186,6 +235,8 @@ const SocialScreen = () => {
       )}
     </StyledView>
   );
+  
+  
 
   const renderSearch = () => (
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
@@ -223,12 +274,11 @@ const SocialScreen = () => {
           </TouchableOpacity>
         ))}
       </StyledView>
-
+  
       {activeTab === 'amigos' && renderFriends()}
       {activeTab === 'solicitudes' && renderRequests()}
       {activeTab === 'buscar' && renderSearch()}
     </StyledScrollView>
   );
 };
-
-export default SocialScreen;
+export default SocialScreen; 

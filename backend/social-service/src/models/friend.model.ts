@@ -57,6 +57,7 @@ import {
     requestType!: RequestType;
 
     @ManyToOne(() => Map, (map) => map, { nullable: true })
+    @JoinColumn({ name: 'mapId' })
     map!: Map;
   
     @CreateDateColumn()

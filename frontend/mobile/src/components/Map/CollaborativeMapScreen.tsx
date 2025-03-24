@@ -6,6 +6,7 @@ import PuntoDeInteresForm from "../POI/PoiForm";
 import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
@@ -135,6 +136,22 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const [friendEmail, setFriendEmail] = useState<string>('');
   const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
+
+  
+  const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
+  
+  const { user } = useAuth();
+  useEffect(() => {
+      console.log("Usuario actual en Social:", user);
+    }, [user]);
+  
+    useEffect(() => {
+      if (user && user.id) {
+        console.log("Cargando amigos para el usuario:", user.id);
+        fetchFriends(user.id);
+        
+      }
+    }, [user]);
 
   // Función para verificar si un punto está dentro de un polígono (distrito)
   const isPointInPolygon = (
@@ -528,55 +545,24 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para invitar a un amigo al mapa colaborativo
-  const inviteFriend = async () => {
-    if (!friendEmail || friendEmail.trim() === '') {
-      Alert.alert("Error", "Por favor, introduce un email válido");
-      return;
-    }
-    
-    if (invitedFriends.length >= 5) { // Máximo 6 usuarios incluyendo el creador
-      Alert.alert("Límite alcanzado", "Solo puedes invitar a 5 amigos a un mapa colaborativo");
-      return;
-    }
-    
-    try {
-      // Obtener el userId actual del almacenamiento o usar el prop
-      const storedUserId = await AsyncStorage.getItem('userId');
-      const effectiveUserId = storedUserId || userId || 'user-456';
-      
-      // Llamar al endpoint para invitar al usuario
-      const response = await fetch(`${API_URL}/api/maps/invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mapId,
-          userEmail: friendEmail,
-          invitedByUserId: effectiveUserId
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al enviar la invitación');
+    const sendFriendRequest = async (friendId: string) => {
+      try {
+        console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
+        const response = await fetch(`${API_URL}/api/friends/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+        });
+        console.log("Respuesta del backend:", response);
+        const data = await response.json();
+        
+        if (data.success) {
+          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+        }
+      } catch (error) {
+        console.error("Error al enviar solicitud:", error);
       }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Añadir el email a la lista de invitados para mostrarlo en la UI
-        setInvitedFriends([...invitedFriends, friendEmail]);
-        setFriendEmail('');
-        Alert.alert("Éxito", `Se ha enviado una invitación a ${friendEmail}`);
-      } else {
-        throw new Error(data.message || 'Error al procesar la invitación');
-      }
-    } catch (error) {
-      console.error("Error al invitar amigo:", error);
-      Alert.alert("Error", `No se pudo enviar la invitación: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-    }
-  };
+    };
 
   // Función para iniciar el seguimiento de ubicación
   const startLocationTracking = async () => {
@@ -702,65 +688,73 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     );
   };
 
-  const renderInviteFriendsModal = () => {
-    // Lista estática de amigos (solo para vista visual)
-    const friends = [
-      "Amigo 1",
-      "Amigo 2",
-      "Amigo 3",
-      "Amigo 4",
-      "Amigo 5",
-    ];
-  
-    return (
-      <Modal
-        visible={showInviteModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowInviteModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Invitar Amigos</Text>
-            <Text style={styles.modalSubtitle}>
-              Máximo 5 amigos (6 usuarios en total)
-            </Text>
-  
-            {/* Listado de Amigos (solo visual) */}
-            <FlatList
-              data={friends}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.invitedItem}>
-                  <Text style={styles.friendName}>{item}</Text>
-                  <TouchableOpacity style={styles.inviteButton} disabled>
-                    <Text style={styles.inviteButtonText}>Invitar</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-  
-            {/* Sección de Amigos Invitados (solo visual, no funcional) */}
-            <Text style={styles.invitedTitle}>Amigos invitados:</Text>
-            <View style={styles.invitedItem}>
-              <Text style={styles.friendName}>Amigo 1</Text>
-              <TouchableOpacity disabled>
-                <Icon name="close" size={20} color="red" />
+    const fetchFriends = async (userId: string) => {
+      try {
+        console.log(`Solicitando amigos para el usuario: ${userId}`);
+        const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+        const data = await response.json();
+    
+        console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+    
+        if (Array.isArray(data)) {
+          // Si la respuesta es directamente un array de usuarios, lo asignamos
+          setFriends(data.map((user) => ({
+            id: user.id,
+            name: user.email, // Puedes usar otra propiedad si el backend la tiene
+          })));
+        } else {
+          console.warn("Formato inesperado en la respuesta de amigos:", data);
+        }
+      } catch (error) {
+        console.error("Error al obtener amigos:", error);
+      }
+    };
+
+    const renderInviteFriendsModal = () => {
+      return (
+        <Modal
+          visible={showInviteModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowInviteModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Invitar Amigos</Text>
+              <Text style={styles.modalSubtitle}>
+                Máximo 5 amigos (6 usuarios en total)
+              </Text>
+    
+              <FlatList
+                data={friends}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.invitedItem}>
+                    <Text style={styles.friendName}>{item.name}</Text>
+                    <TouchableOpacity 
+                      style={styles.inviteButton} 
+                      onPress={() => sendFriendRequest(item.id)}
+                    >
+                      <Text style={styles.inviteButtonText}>Invitar</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+    
+              {/* Botón para cerrar el modal */}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowInviteModal(false)}
+              >
+                <Text style={styles.closeButtonText}>Cerrar</Text>
               </TouchableOpacity>
             </View>
-  
-            {/* Botón para cerrar el modal */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowInviteModal(false)}
-            >
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-    );
-  };
+        </Modal>
+      );
+    };
+    
+    
   
 
   // Botón para recargar los datos

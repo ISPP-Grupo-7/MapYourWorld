@@ -32,10 +32,8 @@ export const sendRequestFriend = async (
       if(!map){
         throw new Error("El mapa no fue encontrado");
       }
-    }
-
-    // Verificar si ya existe una relación entre estos usuarios
-    const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
+    }else{
+      const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
 
     if (existingFriendship && existingFriendship.requestType === RequestType.FRIEND) {
       if (existingFriendship.status === FriendStatus.PENDING) {
@@ -52,6 +50,8 @@ export const sendRequestFriend = async (
         return await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
       }
     }
+    }
+
 
     
     const requester = await userRepo.findById(requesterId);
@@ -63,6 +63,7 @@ export const sendRequestFriend = async (
       throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
     }
     
+    if(map){
     const usersMap = await mapRepo.getUsersOnMapById(map.id)
     const usuariosMapId = usersMap.map(user => user.id)
 
@@ -74,6 +75,9 @@ export const sendRequestFriend = async (
     if (!usuariosMapId.includes(requester.id)){
       throw new Error("No puede invitar si no está unido al mapa")
     }
+
+    }
+
     // Crear la solicitud de amistad
     const newFriend = new Friend();
     newFriend.requester = requester;
