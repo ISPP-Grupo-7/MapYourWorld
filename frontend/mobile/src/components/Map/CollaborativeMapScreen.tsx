@@ -10,12 +10,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
-  "#FF0000", // Rojo
-  "#00FF00", // Verde
-  "#0000FF", // Azul
-  "#FFFF00", // Amarillo
-  "#FF00FF", // Magenta
-  "#00FFFF", // Cian
+  "#2196f3", // Rojo
+  "#4cb050", // Verde
+  "#fec107", // Azul
+  "#fec107", // Amarillo
+  "#ea1e63", // Magenta
+  "#9c27b3", // Cian
   // Asegúrate de que el tamaño de este arreglo sea suficiente para el número de usuarios
 ];
 
@@ -617,29 +617,34 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     }
   }, [location, distritosBackend, userColorIndex]);
 
-  // Renderizar la información de los usuarios y sus colores
   const renderUserColorLegend = () => {
     return (
       <View style={styles.legendContainer}>
         <Text style={styles.legendTitle}>Usuarios</Text>
         <ScrollView style={{ maxHeight: 150 }}>
-          {mapUsers.map((user, index) => (
-            <View key={index} style={styles.legendItem}>
-              <View 
-                style={[
-                  styles.colorSquare, 
-                  { backgroundColor: USER_COLORS[user.colorIndex] }
-                ]} 
-              />
-              <Text style={styles.legendText}>
-                {user.username} {user.id === userId ? "(Tú)" : ""}
-              </Text>
-            </View>
-          ))}
+          {mapUsers.map((user, index) => {
+            // Usamos (user as any).color para acceder al valor asignado en fetchMapUsers
+            const assignedColor = (user as any).color || USER_COLORS[user.colorIndex] || "#000";
+            console.log(`Leyenda: Usuario ${user.username} tiene color ${assignedColor}`);
+            return (
+              <View key={index} style={styles.legendItem}>
+                <View 
+                  style={[
+                    styles.colorSquare, 
+                    { backgroundColor: assignedColor }
+                  ]} 
+                />
+                <Text style={styles.legendText}>
+                  {user.username} {user.id === userId ? "(Tú)" : ""}
+                </Text>
+              </View>
+            );
+          })}
         </ScrollView>
       </View>
     );
   };
+  
 
     const fetchFriends = async (userId: string) => {
       try {
