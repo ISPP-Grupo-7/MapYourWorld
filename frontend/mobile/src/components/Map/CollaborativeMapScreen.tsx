@@ -10,13 +10,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
-  "#2196f3", // Rojo
-  "#4cb050", // Verde
-  "#fec107", // Azul
-  "#fec107", // Amarillo
-  "#ea1e63", // Magenta
-  "#9c27b3", // Cian
-  // Asegúrate de que el tamaño de este arreglo sea suficiente para el número de usuarios
+  "#2196f34D", 
+  "#4cb0504D", 
+  "#fec1074D", 
+  "#ff97004D", 
+  "#ea1e634D", 
+  "#9c27b34D", 
 ];
 
 // Tipos para distritos y POIs
