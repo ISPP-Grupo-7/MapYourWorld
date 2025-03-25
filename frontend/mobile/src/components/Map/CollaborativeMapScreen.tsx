@@ -10,12 +10,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
-  "#2196f34D", 
-  "#4cb0504D", 
-  "#fec1074D", 
-  "#ff97004D", 
-  "#ea1e634D", 
-  "#9c27b34D", 
+  "#2196f399", 
+  "#4cb05099", 
+  "#fec10799", 
+  "#ff970099", 
+  "#ea1e6399", 
+  "#9c27b399", 
 ];
 
 // Tipos para distritos y POIs
@@ -580,7 +580,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       stopLocationTracking();
     };
   }, [mapId]);
-
+  
+  useEffect(() => {
+    if (mapUsers.length > 0) {
+      fetchDistricts();
+    }
+  }, [mapUsers]);
   // Verificar si el usuario se encuentra dentro de algún distrito y desbloquearlo si es necesario
   useEffect(() => {
     if (location && distritosBackend.length > 0 && userColorIndex >= 0) {
