@@ -365,15 +365,26 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
     try {
       const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
       const data = await response.json();
-      if (Array.isArray(data)) {
-        setFriends(
-          data.map((u: any) => ({ id: u.id, name: u.email || u.username }))
-        );
+      console.log("Respuesta de amigos:", data);
+      if (data.success && Array.isArray(data.friends)) {
+        setFriends(data.friends.map((u: any) => ({ id: u.id, name: u.email || u.username })));
+      } else if (Array.isArray(data)) {
+        // Caso en que la respuesta sea directamente un array
+        setFriends(data.map((u: any) => ({ id: u.id, name: u.email || u.username })));
+      } else {
+        console.warn("Formato inesperado en la respuesta de amigos:", data);
       }
     } catch (error) {
       console.error("Error fetching friends:", error);
     }
   };
+  useEffect(() => {
+    if (showInviteModal && user && user.id) {
+      console.log("Modal abierto, cargando amigos para el usuario:", user.id);
+      fetchFriends(user.id);
+    }
+  }, [showInviteModal, user]);
+  
 
 const desbloquearDistrito = async (districtId: string, regionId: string) => {
   try {
@@ -435,11 +446,13 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
   };
 
   const sendFriendRequest = async (friendId: string) => {
+    console.log("Enviando solicitud de amistad a:", friendId);
+    console.log("Mapa actual:", mapId);
     try {
       const response = await fetch(`${API_URL}/api/friends/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId }),
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
       });
       const data = await response.json();
       if (data.success) {
