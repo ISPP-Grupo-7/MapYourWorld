@@ -115,5 +115,14 @@ export default class FriendRepository {
       .getMany();
   }
 
+  async deleteFriendInvitation(friendId: string): Promise<void> {
+    await this.friendRepo.createQueryBuilder()
+      .delete()
+      .from(Friend)
+      .where("id = :friendId", { friendId })
+      .execute();
+  }
+  
+
   
 }

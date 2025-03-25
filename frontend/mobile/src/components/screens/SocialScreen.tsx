@@ -113,6 +113,10 @@ const SocialScreen = () => {
     try {
       const response = await fetch(`${API_URL}/api/collabMap/join/${mapId}/${userId}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify({ friendId }), // Aquí se incluye el friendId
       });
       const data = await response.json();
       if (data.success) {
