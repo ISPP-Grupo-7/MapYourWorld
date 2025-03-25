@@ -159,7 +159,7 @@ const LeafletMap = ({
   }, [location, distritos, pointsOfInterest, onMapClick]);
 
   return (
-    <div ref={mapContainerRef} style={{ height: "100vh", width: "100vw" }} />
+    <div ref={mapContainerRef} style={{ position: "absolute", top: 0, left: 0, height: "100vh", width: "100vw", zIndex: 1 }} />
   );
 };
 
@@ -375,40 +375,40 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
     }
   };
 
-  const desbloquearDistrito = async (districtId: string, regionId: string) => {
-    try {
-      // Buscar el distrito en el estado actual
-      const distritoActual = distritosBackend.find((d) => d.id === districtId);
-      // Suponiendo que "rgba(128, 128, 128, 0.7)" es el color por defecto de un distrito bloqueado
-      if (distritoActual && distritoActual.isUnlocked && distritoActual.color !== "rgba(128, 128, 128, 0.7)") {
-        // El distrito ya tiene asignado un color; no se procede a cambiarlo.
-        return;
-      }
-      
-      const userColor = USER_COLORS[userColorIndex];
-      const response = await fetch(
-        `${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ color: userColor }),
-        }
-      );
-      const data = await response.json();
-      if (data.success) {
-        setDistritosBackend((prev) =>
-          prev.map((d) =>
-            d.id === districtId
-              ? { ...d, isUnlocked: true, unlockedByUserId: userId, color: userColor }
-              : d
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error unlocking district:", error);
+const desbloquearDistrito = async (districtId: string, regionId: string) => {
+  try {
+    // Buscar el distrito en el estado actual
+    const distritoActual = distritosBackend.find((d) => d.id === districtId);
+    // Suponiendo que "rgba(128, 128, 128, 0.7)" es el color por defecto de un distrito bloqueado
+    if (distritoActual && distritoActual.isUnlocked && distritoActual.color !== "rgba(128, 128, 128, 0.7)") {
+      // El distrito ya tiene asignado un color; no se procede a cambiarlo.
+      return;
     }
-  };
-  
+    
+    const userColor = USER_COLORS[userColorIndex];
+    const response = await fetch(
+      `${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ color: userColor }),
+      }
+    );
+    const data = await response.json();
+    if (data.success) {
+      setDistritosBackend((prev) =>
+        prev.map((d) =>
+          d.id === districtId
+            ? { ...d, isUnlocked: true, unlockedByUserId: userId, color: userColor }
+            : d
+        )
+      );
+    }
+  } catch (error) {
+    console.error("Error unlocking district:", error);
+  }
+};
+
   // Asegurar que el mapa colaborativo existe (crear o recuperar)
   const ensureCollaborativeMapExists = async () => {
     try {
