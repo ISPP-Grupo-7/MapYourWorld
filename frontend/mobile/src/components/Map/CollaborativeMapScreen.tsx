@@ -10,12 +10,13 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
-  "rgba(76, 175, 80, 0.5)",  // Verde
-  "rgba(255, 152, 0, 0.5)",  // Naranja
-  "rgba(255, 235, 59, 0.5)", // Amarillo
-  "rgba(33, 150, 243, 0.5)", // Azul
-  "rgba(156, 39, 176, 0.5)", // Púrpura
-  "rgba(244, 67, 54, 0.5)"   // Rojo
+  "#FF0000", // Rojo
+  "#00FF00", // Verde
+  "#0000FF", // Azul
+  "#FFFF00", // Amarillo
+  "#FF00FF", // Magenta
+  "#00FFFF", // Cian
+  // Asegúrate de que el tamaño de este arreglo sea suficiente para el número de usuarios
 ];
 
 // Tipos para distritos y POIs
@@ -27,6 +28,7 @@ interface Distrito {
   unlockedByUserId?: string;
   colorIndex?: number;
   regionId: string;
+  color: string;
 }
 
 interface DistritoBackend {
@@ -133,11 +135,9 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Nuevos estados para invitación de amigos
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-  const [friendEmail, setFriendEmail] = useState<string>('');
-  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
-  const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
-
   
+  
+  const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
   
   const { user } = useAuth();
@@ -212,123 +212,70 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const fetchDistricts = async () => {
     try {
       setLoading(true);
-      // En lugar de obtener todos los distritos, obtenemos solo los del mapa colaborativo
       console.log(`Obteniendo distritos para el mapa colaborativo ${mapId}`);
+  
+      // Obtener los distritos del mapa colaborativo
       const response = await fetch(`${API_URL}/api/districts/map/${mapId}`);
       const data = await response.json();
       console.log("Respuesta de distritos:", data);
-
-      if (data.success && data.districts && data.districts.length > 0) {
-        const distritosMapeados = data.districts
-          .map((distrito: DistritoBackend) => {
-            try {
-              const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-              if (coordenadasTransformadas.length < 3) {
-                console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
-                return null;
-              }
-              
-              // Incluimos información sobre qué usuario ha desbloqueado el distrito
-              return {
-                id: distrito.id,
-                nombre: distrito.name,
-                coordenadas: coordenadasTransformadas,
-                isUnlocked: distrito.isUnlocked,
-                unlockedByUserId: distrito.user?.id,
-                colorIndex: distrito.user && mapUsers.length > 0 
-                  ? mapUsers.find((u: { id: string; username: string; colorIndex: number }) => u.id === distrito.user?.id)?.colorIndex 
-                  : undefined,
-                regionId: distrito.region_assignee ? distrito.region_assignee.id : null
-              };
-            } catch (error) {
-              console.error(`Error procesando distrito ${distrito.name}:`, error);
-              return null;
-            }
-          })
-          .filter((d: Distrito | null): d is Distrito => d !== null);
-        setDistritosBackend(distritosMapeados);
-      } else {
-        console.warn("No se pudieron cargar los distritos del mapa colaborativo o la lista está vacía");
-        // Intentar obtener los distritos del mapa individual como fallback
-        console.log("Intentando obtener distritos del mapa individual como fallback");
+  
+      if (!data.success || !data.districts || data.districts.length === 0) {
+        console.warn("No se pudieron cargar los distritos del mapa colaborativo");
+        setDistritosBackend([]);
+        return;
+      }
+  
+      // Obtener los colores de los usuarios que han desbloqueado distritos
+      const userColors = new Map();
+  
+      for (const user of mapUsers) {
         try {
-          const fallbackResponse = await fetch(`${API_URL}/api/districts`);
-          const fallbackData = await fallbackResponse.json();
+          const colorResponse = await fetch(`${API_URL}/api/districts/user-districts/${user.id}`);
+          const colorData = await colorResponse.json();
           
-          if (fallbackData.success && fallbackData.districts) {
-            console.log("Usando distritos del mapa individual como fallback");
-            const distritosMapeados = fallbackData.districts
-              .map((distrito: DistritoBackend) => {
-                try {
-                  const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-                  if (coordenadasTransformadas.length < 3) {
-                    return null;
-                  }
-                  return {
-                    id: distrito.id,
-                    nombre: distrito.name,
-                    coordenadas: coordenadasTransformadas,
-                    isUnlocked: false,
-                    unlockedByUserId: undefined,
-                    colorIndex: undefined
-                  };
-                } catch (error) {
-                  return null;
-                }
-              })
-              .filter((d: Distrito | null): d is Distrito => d !== null);
-            setDistritosBackend(distritosMapeados);
-          } else {
-            Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+          if (colorData.success && colorData.userDistricts) {
+            colorData.userDistricts.forEach((ud: any) => {
+              userColors.set(ud.districtId, ud.color);
+            });
           }
-        } catch (fallbackError) {
-          console.error("Error al obtener distritos de fallback:", fallbackError);
-          Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+        } catch (colorError) {
+          console.error(`Error al obtener colores del usuario ${user.id}:`, colorError);
         }
       }
+  
+      // Mapear los distritos con los colores correctos
+      const distritosMapeados = data.districts.map((distrito: DistritoBackend) => {
+        try {
+          const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
+          if (coordenadasTransformadas.length < 3) {
+            console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
+            return null;
+          }
+  
+          return {
+            id: distrito.id,
+            nombre: distrito.name,
+            coordenadas: coordenadasTransformadas,
+            isUnlocked: distrito.isUnlocked,
+            unlockedByUserId: distrito.user?.id,
+            color: userColors.get(distrito.id) || "rgba(128, 128, 128, 0.7)", // Color gris si no hay asignado
+            regionId: distrito.region_assignee ? distrito.region_assignee.id : null,
+          };
+        } catch (error) {
+          console.error(`Error procesando distrito ${distrito.name}:`, error);
+          return null;
+        }
+      }).filter((d: Distrito | null): d is Distrito => d !== null);
+  
+      setDistritosBackend(distritosMapeados);
     } catch (error) {
       console.error("Error al obtener los distritos del mapa colaborativo:", error);
-      // Intentar obtener los distritos del mapa individual como fallback
-      console.log("Error capturado: Intentando obtener distritos del mapa individual como fallback");
-      try {
-        const fallbackResponse = await fetch(`${API_URL}/api/districts`);
-        const fallbackData = await fallbackResponse.json();
-        
-        if (fallbackData.success && fallbackData.districts) {
-          console.log("Usando distritos del mapa individual como fallback después de error");
-          const distritosMapeados = fallbackData.districts
-            .map((distrito: DistritoBackend) => {
-              try {
-                const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-                if (coordenadasTransformadas.length < 3) {
-                  return null;
-                }
-                return {
-                  id: distrito.id,
-                  nombre: distrito.name,
-                  coordenadas: coordenadasTransformadas,
-                  isUnlocked: false,
-                  unlockedByUserId: undefined,
-                  colorIndex: undefined
-                };
-              } catch (error) {
-                return null;
-              }
-            })
-            .filter((d: Distrito | null): d is Distrito => d !== null);
-          setDistritosBackend(distritosMapeados);
-        } else {
-          Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
-        }
-      } catch (fallbackError) {
-        console.error("Error al obtener distritos de fallback:", fallbackError);
-        Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
-      }
+      Alert.alert("Error", "No se pudieron cargar los distritos");
     } finally {
       setLoading(false);
     }
   };
-
+  
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
@@ -366,63 +313,68 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.log(`Obteniendo usuarios para el mapa colaborativo ${mapId}`);
       const response = await fetch(`${API_URL}/api/maps/users/${mapId}`);
       const data = await response.json();
-      console.log("Respuesta de usuarios del mapa colaborativo:", data);
       
       if (data.success && data.users) {
-        // Asignar un color a cada usuario (máximo 6 colores)
-        const usersWithColors = data.users.map((user: { id: string; username: string }, index: number) => ({
-          id: user.id,
-          username: user.username || `Usuario ${index + 1}`,
-          colorIndex: index % USER_COLORS.length
-        }));
-        
+        // Obtener colores ya asignados para evitar duplicados
+        const assignedColors: { [key: string]: string } = {}; // idUsuario -> color
+
+        // Recorrer usuarios y asignar colores únicos
+        const usersWithColors = data.users.map((user: { id: string; username: string; color?: string }, index: number) => {
+          let color = user.color; // Intentamos recuperar su color de la BD
+          
+          if (!color) {
+            // Buscar el primer color disponible que no esté asignado aún
+            const availableColorIndex = USER_COLORS.findIndex((col) => !Object.values(assignedColors).includes(col));
+            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080"; // Gris si no hay colores disponibles
+            
+            // Guardamos la asignación en el objeto temporal
+            assignedColors[user.id] = color;
+          }
+
+          return {
+            id: user.id,
+            username: user.username || `Usuario ${index + 1}`,
+            color: color
+          };
+        });
+
         setMapUsers(usersWithColors);
-        
+
         // Encontrar el color del usuario actual
-        const currentUser = usersWithColors.find((user: { id: string; username: string; colorIndex: number }) => user.id === userId);
+        const currentUser = usersWithColors.find((user: MapUser) => user.id === userId);
         if (currentUser) {
-          setUserColorIndex(currentUser.colorIndex);
+          setUserColorIndex(USER_COLORS.indexOf(currentUser.color) || 0);
         } else {
-          // Si el usuario actual no está en la lista, le asignamos un color por defecto
-          console.log(`Usuario actual (${userId}) no encontrado en la lista, asignando color por defecto`);
           setUserColorIndex(0); // Verde por defecto
         }
       } else {
         console.warn("No se pudieron obtener los usuarios del mapa colaborativo");
-        // En caso de error, asignamos al menos un usuario (el actual) con un color
-        setMapUsers([{
-          id: userId,
-          username: "Tú",
-          colorIndex: 0 // Verde por defecto
-        }]);
-        setUserColorIndex(0);
       }
     } catch (error) {
       console.error("Error al obtener los usuarios del mapa colaborativo:", error);
-      // En caso de error, asignamos al menos un usuario (el actual) con un color
-      setMapUsers([{
-        id: userId,
-        username: "Tú",
-        colorIndex: 0 // Verde por defecto
-      }]);
-      setUserColorIndex(0);
     }
-  };
+};
 
   // Función para desbloquear un distrito en el mapa colaborativo
   const desbloquearDistrito = async (districtId: string, regionId: string) => {
     try {
       console.log(`Desbloqueando distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
+      const userColor = USER_COLORS[userColorIndex]; // Obtener color asignado al usuario
+      
       const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ color: userColor }) // Enviamos el color
       });
+      
       const data = await response.json();
       console.log("Respuesta de desbloqueo:", data);
       
       if (data.success) {
         console.log(`Distrito ${districtId} desbloqueado en mapa colaborativo.`);
-        // Actualizamos el distrito en el estado local
+        console.log(`Color asignado: ${userColor}`);
+  
+        // Actualizar el distrito en el estado local con el color correcto
         setDistritosBackend((prev) =>
           prev.map((d) => 
             d.id === districtId 
@@ -430,7 +382,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                   ...d, 
                   isUnlocked: true, 
                   unlockedByUserId: userId,
-                  colorIndex: userColorIndex 
+                  color: userColor // Usamos el color asignado
                 } 
               : d
           )
@@ -442,6 +394,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.error("Error al desbloquear el distrito en el mapa colaborativo:", error);
     }
   };
+  
 
   // Función para inicializar el mapa colaborativo
   const initializeMap = async () => {
@@ -823,19 +776,22 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             }}
             showsUserLocation={true}
           >
-            {distritosBackend.map((distrito, index) => (
-              <Polygon
-                key={index}
-                coordinates={distrito.coordenadas}
-                strokeColor={"#808080"}
-                fillColor={
-                  distrito.isUnlocked && distrito.colorIndex !== undefined
-                    ? USER_COLORS[distrito.colorIndex]
-                    : "rgba(128, 128, 128, 0.7)"
-                }
-                strokeWidth={2}
-              />
-            ))}
+           {distritosBackend.map((distrito, index) => {
+  return (
+    <Polygon
+      key={index}
+      coordinates={distrito.coordenadas}
+      strokeColor={"#808080"}
+      fillColor={
+        distrito.isUnlocked && distrito.color
+          ? distrito.color
+          : "rgba(128, 128, 128, 0.7)"
+      }
+      strokeWidth={2}
+    />
+  );
+})}
+
             {pointsOfInterest.map((poi, index) => {
               // Convertir las coordenadas del POI (se asume que vienen en formato [lng, lat])
               const poiCoordinates = {

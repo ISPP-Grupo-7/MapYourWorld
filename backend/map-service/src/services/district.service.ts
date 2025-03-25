@@ -215,14 +215,15 @@ export const updateDistrict = async (
 export const unlockDistrict = async (
   districtId: string,
   userId: string,
-  regionId: string
+  regionId: string,
+  color: string
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
   // TODO: Implementar el desbloqueo de un distrito
   // 1. Verificar si el usuario puede desbloquear el distrito
-  const unlockedDistrict = await repo.unlockDistrict(districtId, userId, regionId);
+  const unlockedDistrict = await repo.unlockDistrict(districtId, userId, regionId, color);
   // 3. Publicar evento de distrito desbloqueado
   if (unlockedDistrict.isUnlocked === true) {
     return { success: true, message: 'Distrito desbloqueado correctamente' };

@@ -44,7 +44,7 @@ export default class DistrictRepository {
         return await this.districtRepo.save(district);
     }
 
-    async unlockDistrict(districtId: string, userId:string , regionId:string ): Promise<District> {
+    async unlockDistrict(districtId: string, userId:string , regionId:string, color: string ): Promise<District> {
         const district = await this.districtRepo.findOne({where:
             {   
                 id:districtId,
@@ -76,7 +76,7 @@ export default class DistrictRepository {
             const userDistrict = new UserDistrict();
             userDistrict.user = discoveredBy;
             userDistrict.district = district;
-            userDistrict.color = '#000000'; // Poner los colores definidos
+            userDistrict.color = color; // Poner los colores definidos
             await this.userDistrictRepo.save(userDistrict);
         }
         return await this.districtRepo.save(district);
