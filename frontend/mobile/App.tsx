@@ -21,6 +21,7 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 import SocialScreen from './src/components/screens/SocialScreen';
+import SocialScreenWeb from './src/components/screens/SocialScreen.web';
 
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
@@ -116,6 +117,20 @@ const SubscriptionScreenWrapper = (props: any) => {
   }
 };
 
+const SocialScreenWrapper= (props: any) => {
+  if (Platform.OS === 'web') {
+    const SocialScreenWeb = require('@/components/screens/SocialScreen.web').default;
+    return <SocialScreenWeb {...props} />;
+  } try {
+    const SocialScreen = require('@/components/screens/SocialScreen').default;
+    return (
+        <SocialScreen {...props} />
+    );
+  } catch (error) {
+    console.error("Error cargando SocialScreen:", error);
+    return null;
+}
+};
 
 
 // Componente principal de la aplicación
@@ -199,7 +214,7 @@ const AppContent = () => {
         />
         <Stack.Screen 
           name="SocialScreen" 
-          component={SocialScreen}
+          component={SocialScreenWrapper}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
