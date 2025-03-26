@@ -287,6 +287,20 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
         setDistritosBackend([]);
         return;
       }
+      // Obtener los colores asignados para el usuario actual
+      let userColors = new Map<string, string>();
+      try {
+        const colorResponse = await fetch(`${API_URL}/api/districts/user-districts/${userId}`);
+        const colorData = await colorResponse.json();
+        if (colorData.success && colorData.userDistricts) {
+          colorData.userDistricts.forEach((ud: any) => {
+            userColors.set(ud.districtId, ud.color);
+          });
+        }
+      } catch (colorError) {
+        console.error("Error al obtener colores de distrito:", colorError);
+      }
+      
       const distritosMapeados = data.districts
         .map((distrito: DistritoBackend) => {
           const coords = transformarCoordenadasGeoJSON(distrito.boundaries);
@@ -297,11 +311,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
             coordenadas: coords,
             isUnlocked: distrito.isUnlocked,
             unlockedByUserId: distrito.user?.id,
-            color: "rgba(128, 128, 128, 0.7)", // Color por defecto (se actualizará al desbloquear)
+            color: userColors.get(distrito.id) || "rgba(128, 128, 128, 0.7)",
             regionId: distrito.region_assignee ? distrito.region_assignee.id : null,
           } as Distrito;
         })
         .filter((d: Distrito | null): d is Distrito => d !== null);
+        
       setDistritosBackend(distritosMapeados);
     } catch (error) {
       console.error("Error fetching districts:", error);
