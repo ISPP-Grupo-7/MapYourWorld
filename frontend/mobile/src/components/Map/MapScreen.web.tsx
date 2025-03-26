@@ -19,6 +19,9 @@ interface POI {
   };
 }
 
+const EXACT_COORDS: [number, number] = [37.357942, -5.986782]; // coordenadas ETSII
+const ubicacionFalsa = true;
+
 // Componente de Modal para alertas personalizado
 const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
   if (!visible) return null;
@@ -323,7 +326,7 @@ const MapScreen = () => {
       fetchPOIs();
 
       // En web usamos la API de geolocalización del navegador
-      if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      if (typeof navigator !== 'undefined' && navigator.geolocation && ubicacionFalsa == false) {
         console.log("Obteniendo geolocalización...");
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -345,9 +348,9 @@ const MapScreen = () => {
         );
       } else {
         console.log("Geolocalización no disponible");
-        setError("Tu navegador no soporta geolocalización.");
-        // Ubicación por defecto
-        setLocation([40.416775, -3.703790]);
+        //setError("Tu navegador no soporta geolocalización.");
+        // Ubicación por defecto coordenadas ETSII
+        setLocation([37.357942, -5.986782]);
         setLoading(false);
       }
     }
@@ -385,7 +388,13 @@ const MapScreen = () => {
       console.log("Obteniendo distritos...");
       setLoading(true);
       console.log("Fetching from:", `${API_URL}/api/districts`);
-      const response = await fetch(`${API_URL}/api/districts`);
+      const response = await fetch(`${API_URL}/api/districts`, {
+  method: 'GET',
+  headers: {
+    'Access-Control-Request-Method': 'GET', // O el método que vayas a usar
+    'Origin': '*', // El dominio desde donde haces la solicitud
+  }
+});
       if (!response.ok) {
         throw new Error(`Error de red: ${response.status} ${response.statusText}`);
       }

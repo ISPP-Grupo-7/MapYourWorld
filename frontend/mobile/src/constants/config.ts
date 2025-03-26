@@ -22,16 +22,16 @@ const getBackendUrl = () => {
       if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
         // Usamos el mismo hostname que la aplicación web
         console.log(`Usando hostname del servidor: ${hostname}`);
-        return `http://${hostname}:3000`;
+        return `https://${hostname}:3000`;
       }
       
       // En desarrollo local web, usa localhost
       console.log("Desarrollo local web detectado, usando localhost:3000");
-      return 'http://localhost:3000';
+      return 'https://localhost:3000';
     } catch (error) {
       console.warn("Error al obtener la ubicación del navegador:", error);
       console.log("Usando fallback para web: localhost:3000");
-      return 'http://localhost:3000';
+      return 'https://localhost:3000';
     }
   }
 
@@ -44,7 +44,7 @@ const getBackendUrl = () => {
     console.warn("No se pudo obtener la IP de Expo.");
     // Como fallback, usamos una IP estática que el usuario puede cambiar según su red
     console.log("Usando IP estática como fallback: 192.168.1.33:3000");
-    return "http://192.168.1.33:3000";
+    return "https://192.168.1.33:3000";
   }
 
   try {
@@ -55,15 +55,15 @@ const getBackendUrl = () => {
     if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
       console.warn("IP extraída no válida:", ip);
       console.log("Usando IP estática como fallback: 192.168.1.33:3000");
-      return "http://192.168.1.33:3000";
+      return "https://192.168.1.33:3000";
     }
 
     console.log(`Usando IP de Expo: ${ip}:3000`);
-    return `http://${ip}:3000`;
+    return `https://${ip}:3000`;
   } catch (error) {
     console.error("Error al procesar la URL de Expo:", error);
     console.log("Usando IP estática como fallback: 192.168.1.33:3000");
-    return "http://192.168.1.33:3000";
+    return "https://192.168.1.33:3000";
   }
 };
 

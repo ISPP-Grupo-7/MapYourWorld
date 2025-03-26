@@ -12,12 +12,18 @@ import friendRoutes from './social-service/src/routes/friend.routes';
 import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
+import https from 'https';
+import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Permite orígenes seguros
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -66,11 +72,15 @@ const startServer = async () => {
     await createAllDistricts();
 
     await createUsers();
-
+    const httpsOptions = {
+       key: fs.readFileSync('/etc/nginx/ssl/nginx.key'),
+       cert: fs.readFileSync('/etc/nginx/ssl/nginx.crt')
+    };
     // Iniciar servidor
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor de desarrollo MapYourWorld iniciado en el puerto ${PORT}`);
-    });
+    https.createServer(httpsOptions, app).listen(PORT, () => {
+       console.log('🚀 Servidor HTTPS en https://52.143.134.165:',PORT);
+     });
+
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error);
     process.exit(1);
