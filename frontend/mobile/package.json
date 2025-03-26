@@ -50,6 +50,7 @@
     "jwt-decode": "4.0.0",
     "leaflet": "1.9.4",
     "lightningcss": "1.29.1",
+    "mapyourworld-mobile": "file:",
     "moment": "^2.30.1",
     "native-notify": "^4.0.9",
     "nativewind": "2.0.11",
