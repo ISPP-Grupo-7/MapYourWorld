@@ -287,20 +287,26 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
         setDistritosBackend([]);
         return;
       }
-      // Obtener los colores asignados para el usuario actual
+      
+      // Crear un mapa para almacenar el color de cada distrito según cada usuario
       let userColors = new Map<string, string>();
-      try {
-        const colorResponse = await fetch(`${API_URL}/api/districts/user-districts/${userId}`);
-        const colorData = await colorResponse.json();
-        if (colorData.success && colorData.userDistricts) {
-          colorData.userDistricts.forEach((ud: any) => {
-            userColors.set(ud.districtId, ud.color);
-          });
+      
+      // Iterar sobre todos los usuarios del mapa para obtener sus colores
+      for (const user of mapUsers) {
+        try {
+          const colorResponse = await fetch(`${API_URL}/api/districts/user-districts/${user.id}`);
+          const colorData = await colorResponse.json();
+          if (colorData.success && colorData.userDistricts) {
+            colorData.userDistricts.forEach((ud: any) => {
+              userColors.set(ud.districtId, ud.color);
+            });
+          }
+        } catch (err) {
+          console.error(`Error al obtener colores del usuario ${user.id}:`, err);
         }
-      } catch (colorError) {
-        console.error("Error al obtener colores de distrito:", colorError);
       }
       
+      // Mapear los distritos y asignar el color obtenido, si existe
       const distritosMapeados = data.districts
         .map((distrito: DistritoBackend) => {
           const coords = transformarCoordenadasGeoJSON(distrito.boundaries);
@@ -325,6 +331,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
       setLoading(false);
     }
   };
+  
 
   const fetchPOIs = async () => {
     try {
@@ -519,6 +526,12 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
       setError("Geolocalización no soportada");
     }
   }, [mapId]);
+
+  useEffect(() => {
+    if (mapUsers.length > 0) {
+      fetchDistricts();
+    }
+  }, [mapUsers]);
 
   // Verificar si el usuario está dentro de un distrito y desbloquearlo si corresponde
   useEffect(() => {
