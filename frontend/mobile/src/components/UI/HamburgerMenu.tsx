@@ -42,7 +42,13 @@ const HamburgerMenu = () => {
               <Text style={styles.menuItemText}>Mapas Colaborativos</Text>
             </TouchableOpacity>
 
-          
+            <TouchableOpacity
+              onPress={() => handleNavigate('UserStats')}
+              style={styles.menuItem}
+            >
+              <Text style={styles.menuItemText}>Estadísticas</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity 
               onPress={() => handleNavigate('UserAchievementsScreen')} 
               style={styles.menuItem}

@@ -13,6 +13,7 @@ import { Subscription } from '../payment-service/models/subscription.model';
 import { Achievement } from '../achievement-service/models/achievement.model';
 import { UserAchievement } from '../achievement-service/models/userAchievement.model';
 import { UserDistrict } from '../map-service/src/models/user-district.model';
+import { UserStat } from '../stat-service/models/userStat.model';
 
 export const AppDataSource = new DataSource({
     type: 'postgres', // O el tipo de base de datos que uses (mysql, sqlite, etc.)
@@ -24,7 +25,7 @@ export const AppDataSource = new DataSource({
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
     dropSchema: false, // Asegúrate de que esto esté en false para no perder datos
     logging: true,
-    entities: [District, UserProfile, User, Friend, Region, PointOfInterest, Map, Payment, Subscription,Achievement,UserAchievement, UserDistrict, Photo], // Aquí van todas tus entidades
+    entities: [District, UserProfile, User, Friend, Region, PointOfInterest, Map, Payment, Subscription,Achievement,UserAchievement, UserDistrict, Photo, UserStat], // Aquí van todas tus entidades
     migrations: [],
     subscribers: [],
     extra: {

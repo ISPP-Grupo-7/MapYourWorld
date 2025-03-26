@@ -20,6 +20,7 @@ import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
+import UserStatsScreen from './src/components/Stats/UserStatsScreen';
 import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
 import AdvertisementForm from '@/components/screens/AdvertismentForm';
 
@@ -116,15 +117,21 @@ const SubscriptionScreenWrapper = (props: any) => {
   }
 };
 
-
-
-
 const UserAchievementsScreenWrapper = (props: any) => {
   if (Platform.OS === 'web') {
     const WebUserAchievementsScreen = require('./src/components/Achievements/UserAchievementsScreen.web').default;
     return <WebUserAchievementsScreen {...props} />;
   } else {
     return <UserAchievementsScreen {...props} />;
+  }
+};
+
+const UserStatsScreenWrapper = (props: any) => {
+  if (Platform.OS === 'web') {
+    const WebUserStatsScreen = require('./src/components/Stats/UserStatsScreen.web').default;
+    return <WebUserStatsScreen {...props} />;
+  } else {
+    return <UserStatsScreen {...props} />;
   }
 };
 
@@ -251,8 +258,7 @@ const AppContent = () => {
               </View>
             ),
           }} 
-        />
-        
+        />    
         <Stack.Screen 
           name="Payment" 
           component={SubscriptionScreenWrapper}
@@ -280,6 +286,22 @@ const AppContent = () => {
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
                 <StyledText className="text-xl font-bold ml-2 text-gray-800">Logros</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }}
+        />
+        <Stack.Screen 
+          name="UserStats" 
+          component={UserStatsScreenWrapper}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Estadísticas</StyledText>
               </View>
             ),
             headerRight: () => <HamburgerMenu />,
