@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Puerto para el servidor de desarrollo
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3010;
 
 
 // Definir las rutas
@@ -43,11 +43,11 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'Servidor de desarrollo de MapYourWorld',
     services: [
-      { name: 'Auth Service', url: 'http://localhost:3001' },
-      { name: 'User Service', url: 'http://localhost:3002' },
-      { name: 'Map Service', url: 'http://localhost:3003' },
-      { name: 'Notification Service', url: 'http://localhost:3004' },
-      { name: 'Social Service', url: 'http://localhost:3005' }
+      { name: 'Auth Service', url: 'http://localhost:3011' },
+      { name: 'User Service', url: 'http://localhost:3012' },
+      { name: 'Map Service', url: 'http://localhost:3013' },
+      { name: 'Notification Service', url: 'http://localhost:3014' },
+      { name: 'Social Service', url: 'http://localhost:3015' }
     ] as Service[],
     status: 'online'
   });

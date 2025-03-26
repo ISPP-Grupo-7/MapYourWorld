@@ -17,17 +17,23 @@ import subscriptionRoutes from './payment-service/routes/subscription.routes';
 import { createAchievements } from './achievement-service/mocks/achievement_create';
 import userAchievementRoutes from './achievement-service/routes/userAchievement.routes';
 import achievementRoutes from './achievement-service/routes/achievement.routes';
+import https from 'https';
+import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Permite orígenes seguros
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3010;
 
 // Definir las rutas
 
@@ -55,11 +61,11 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'Servidor de desarrollo de MapYourWorld',
     services: [
-      { name: 'Auth Service', url: 'http://localhost:3001' },
-      { name: 'User Service', url: 'http://localhost:3002' },
-      { name: 'Map Service', url: 'http://localhost:3003' },
-      { name: 'Notification Service', url: 'http://localhost:3004' },
-      { name: 'Social Service', url: 'http://localhost:3005' }
+      { name: 'Auth Service', url: 'http://localhost:3011' },
+      { name: 'User Service', url: 'http://localhost:3012' },
+      { name: 'Map Service', url: 'http://localhost:3013' },
+      { name: 'Notification Service', url: 'http://localhost:3014' },
+      { name: 'Social Service', url: 'http://localhost:3015' }
     ] as Service[],
     status: 'online'
   });
@@ -78,10 +84,17 @@ const startServer = async () => {
     // Poblar la base de datos con logros
     await createAchievements();
 
-    // Iniciar servidor
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor de desarrollo MapYourWorld iniciado en el puerto ${PORT}`);
-    });
+    const httpsOptions = {
+       key: fs.readFileSync('/etc/nginx/ssl/nginx.key'),
+       cert: fs.readFileSync('/etc/nginx/ssl/nginx.crt')
+    };
+
+    // Crear y arrancar el servidor HTTPS
+    const server = https.createServer(httpsOptions, app);
+
+    server.listen(3010, '0.0.0.0', () => {
+      console.log(`🚀 Servidor HTTPS en https://52.143.134.165:${PORT}`);
+     });
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error);
     process.exit(1);

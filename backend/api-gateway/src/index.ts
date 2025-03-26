@@ -33,7 +33,7 @@ dotenv.config();
 
 // Inicializar app Express
 const app: Express = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3010;
 const NOMBRE_SERVICIO = 'api-gateway';
 
 // Crear servidor HTTP para poder montar WebSockets

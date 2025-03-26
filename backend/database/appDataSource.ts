@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
     port: 5432,
     username: 'postgres',
     password: 'mapyourworld13',
-    database: 'mapyourworldDB',
+    database: 'mapyourworlddb2',
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
     dropSchema: false, // Asegúrate de que esto esté en false para no perder datos
     logging: true,

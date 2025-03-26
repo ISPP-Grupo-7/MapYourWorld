@@ -7,7 +7,13 @@ import { Platform } from "react-native";
 
 const getBackendUrl = () => {
   console.log("Obteniendo URL de backend. Plataforma:", Platform.OS);
-  
+
+  // Si estamos en una versión de producción (APK instalada), usamos la URL de Azure
+  if (!__DEV__) {
+    console.log("Entorno de producción detectado, usando URL de Azure");
+    return "https://mapyourworld.es"; // Cambia esto a tu URL real de Azure
+  }
+
   // Si estamos en web, intenta obtener la IP del servidor actual
   if (Platform.OS === 'web') {
     try {
@@ -22,16 +28,16 @@ const getBackendUrl = () => {
       if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
         // Usamos el mismo hostname que la aplicación web
         console.log(`Usando hostname del servidor: ${hostname}`);
-        return `http://${hostname}:3000`;
+        return `https://${hostname}:3010`;
       }
       
       // En desarrollo local web, usa localhost
       console.log("Desarrollo local web detectado, usando localhost:3000");
-      return 'http://localhost:3000';
+      return 'https://localhost:3010'; // Cambia esto si tu servidor está en otro puerto
     } catch (error) {
       console.warn("Error al obtener la ubicación del navegador:", error);
       console.log("Usando fallback para web: localhost:3000");
-      return 'http://localhost:3000';
+      return 'https://localhost:3010'; // Cambia esto si tu servidor está en otro puerto
     }
   }
 
@@ -43,8 +49,8 @@ const getBackendUrl = () => {
   if (!expoUrl) {
     console.warn("No se pudo obtener la IP de Expo.");
     // Como fallback, usamos una IP estática que el usuario puede cambiar según su red
-    console.log("Usando IP estática como fallback: 192.168.1.33:3000");
-    return "http://192.168.1.33:3000";
+    console.log("Usando IP estática como fallback: https://mapyourworld.es");
+    return "https://mapyourworld.es:3010";
   }
 
   try {
@@ -54,21 +60,22 @@ const getBackendUrl = () => {
     // Comprobación adicional para asegurarse de que la IP sea válida
     if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
       console.warn("IP extraída no válida:", ip);
-      console.log("Usando IP estática como fallback: 192.168.1.33:3000");
-      return "http://192.168.1.33:3000";
+      console.log("Usando IP estática como fallback: https://mapyourworld.es");
+      return "https://mapyourworld.es:3010";
     }
 
     console.log(`Usando IP de Expo: ${ip}:3000`);
-    return `http://${ip}:3000`;
+    return 'https://mapyourworld.es:3010';  // Cambia esto según tu entorno de Expo si es necesario
   } catch (error) {
     console.error("Error al procesar la URL de Expo:", error);
-    console.log("Usando IP estática como fallback: 192.168.1.33:3000");
-    return "http://192.168.1.33:3000";
+    console.log("Usando IP estática como fallback: 1https://mapyourworld.es");
+    return "https://mapyourworld.es:3010";
   }
 };
 
-// Configuración de API
-//export const API_URL = process.env.API_URL || `http://localhost:3000`;
+
+//Configuración de API
+//export const API_URL = process.env.API_URL || `http://localhost:3010`;
 export const API_URL = getBackendUrl();
 console.log("API_URL configurada como:", API_URL);
 export const API_TIMEOUT = 30000; // 30 segundos
