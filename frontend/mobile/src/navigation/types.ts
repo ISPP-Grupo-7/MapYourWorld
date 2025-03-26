@@ -14,13 +14,20 @@ export type RootStackParamList = {
   Map: undefined;
   Profile: { userId: string };
   MapList: undefined;
+  SocialScreen: undefined;
 
   // Pantallas de mapas
   MapDetail: { mapId: string };
   CollaborativeMapListScreen: undefined;
   CollaborativeMapScreen: { mapId: string; userId: string };
-  
+
   // Otras pantallas
   POIDetail: { poiId: string };
   Settings: undefined;
+  AdvertisementForm: undefined;
+  Payment: undefined;
+  UserAchievementsScreen: undefined;
+
+  // Pantallas de administración
+  DashboardAdmin: undefined;
 }; 

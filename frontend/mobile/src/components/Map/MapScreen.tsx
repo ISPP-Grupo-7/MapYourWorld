@@ -275,7 +275,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 id: distrito.id,
                 nombre: distrito.name,
                 coordenadas: coordenadasTransformadas,
-                isUnlocked: distrito.isUnlocked,
+                isUnlocked: distrito.isUnlocked === true,
                 regionId: distrito.region_assignee ? distrito.region_assignee.id : null, 
               };
             } catch (error) {

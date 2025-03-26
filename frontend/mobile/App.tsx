@@ -20,6 +20,12 @@ import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
+import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
+import AdvertisementForm from '@/components/screens/AdvertismentForm';
+import DashboardAdmin from '@/components/screens/DashboardAdmin';
+import SocialScreen from './src/components/screens/SocialScreen';
+import SocialScreenWeb from './src/components/screens/SocialScreen.web';
+
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -61,6 +67,48 @@ const MapScreenWithDistritos = (props: any) => {
 };
 
 // Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
+
+
+// Definimos un wrapper para ForgotPasswordScreen que selecciona la versión adecuada según la plataforma
+const ForgotPasswordScreenWrapper = (props: any) => {
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    return <ForgotPasswordScreenWeb {...props} />;
+  } else {
+    return <ForgotPasswordScreenMobile {...props} />;
+  }
+};
+
+const SubscriptionScreenWrapper = (props: any) => {
+  if (Platform.OS === 'web') {
+    const SubscriptionScreenWeb = require('@/components/screens/SubscriptionScreen.web').default;
+    return <SubscriptionScreenWeb {...props} />;
+  } 
+
+  try {
+    const SubscriptionScreen = require('@/components/screens/SubscriptionScreen').default;
+    return (
+        <SubscriptionScreen {...props} />
+    );
+  } catch (error) {
+    console.error("Error cargando SubscriptionScreen:", error);
+    return null;
+  }
+};
+
+
+
+
+const UserAchievementsScreenWrapper = (props: any) => {
+  if (Platform.OS === 'web') {
+    const WebUserAchievementsScreen = require('./src/components/Achievements/UserAchievementsScreen.web').default;
+    return <WebUserAchievementsScreen {...props} />;
+  } else {
+    return <UserAchievementsScreen {...props} />;
+  }
+};
+
+// Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
 const CollaborativeMapScreenWithParams = (props: any) => {
   // Obtenemos el mapId y userId de los parámetros de navegación
   const mapId = props.route?.params?.mapId || "map-123";
@@ -87,14 +135,19 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   }
 };
 
-// Definimos un wrapper para ForgotPasswordScreen que selecciona la versión adecuada según la plataforma
-const ForgotPasswordScreenWrapper = (props: any) => {
-  // Usar la versión web cuando estamos en navegador
+const SocialScreenWrapper= (props: any) => {
   if (Platform.OS === 'web') {
-    return <ForgotPasswordScreenWeb {...props} />;
-  } else {
-    return <ForgotPasswordScreenMobile {...props} />;
-  }
+    const SocialScreenWeb = require('@/components/screens/SocialScreen.web').default;
+    return <SocialScreenWeb {...props} />;
+  } try {
+    const SocialScreen = require('@/components/screens/SocialScreen').default;
+    return (
+        <SocialScreen {...props} />
+    );
+  } catch (error) {
+    console.error("Error cargando SocialScreen:", error);
+    return null;
+}
 };
 
 // Componente principal de la aplicación
@@ -140,6 +193,20 @@ const AppContent = () => {
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
             <StyledText className="text-xl font-bold ml-2 text-gray-800">Login</StyledText>
+          </View>
+          )
+          
+        }}/>
+        <Stack.Screen name="AdvertisementForm" 
+        component={AdvertisementForm} 
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={require('./src/assets/images/logo.png')} 
+              style={{ width: 35, height: 35, marginRight: 5 }}
+            />
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Publicítate</StyledText>
           </View>
           )
           
@@ -206,6 +273,71 @@ const AppContent = () => {
               </View>
             ),
           }} 
+        />
+        
+        <Stack.Screen 
+          name="Payment" 
+          component={SubscriptionScreenWrapper}
+           options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+             <StyledText className="text-xl font-bold ml-2 text-gray-800">Pago</StyledText>
+              </View>
+            ),
+          }} 
+          />
+        
+        <Stack.Screen 
+          name="UserAchievementsScreen" 
+          component={UserAchievementsScreenWrapper}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Logros</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }}
+        />
+        
+        <Stack.Screen 
+          name="SocialScreen" 
+          component={SocialScreenWrapper}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Amigos</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }} 
+        />
+      <Stack.Screen 
+          name="DashboardAdmin" 
+          component={DashboardAdmin}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Dashboard de administrador</StyledText>
+              </View>
+            )
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

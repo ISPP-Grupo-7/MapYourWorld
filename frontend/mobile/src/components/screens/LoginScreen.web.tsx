@@ -8,12 +8,9 @@ import TextInput from '@components/UI/TextInput';
 import {styles} from '@assets/styles/styles';
 import { useAuth } from '../../contexts/AuthContext';
 import { RootStackParamList } from '../../navigation/types';
-
-// Importar CSS solo en entorno web
-if (Platform.OS === 'web') {
-  require ('../../assets/styles/web.css')
-  require ('../../assets/styles/auth.css')
-}
+import AsyncStorage from '@react-native-async-storage/async-storage';
+require ('../../assets/styles/web.css')
+require ('../../assets/styles/auth.css')
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -37,6 +34,7 @@ const LoginScreen = () => {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -73,14 +71,22 @@ const LoginScreen = () => {
     setIsLoading(true);
     
     try {
-      // Usar el contexto de autenticación para iniciar sesión
       const success = await signIn(formData.email, formData.password);
       
       if (success) {
-        // Si el inicio de sesión fue exitoso, navegar a la pantalla principal
-        navigation.navigate('Map');
+        // Recuperar el usuario actualizado desde AsyncStorage
+        const storedUser = await AsyncStorage.getItem('@MapYourWorld:user');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+  
+        console.log('Rol del usuario:', parsedUser?.role);
+  
+        if (parsedUser?.role === 'ADMIN') {
+          navigation.navigate('DashboardAdmin');
+        } else {
+          navigation.navigate('Map');
+        }
       }
-    } catch (error) {
+    }  catch (error) {
       console.error('Error al iniciar sesión:', error);
     } finally {
       setIsLoading(false);
@@ -107,6 +113,10 @@ const LoginScreen = () => {
   const handleForgotPassword = () => {
     // Navegar a la pantalla de recuperación de contraseña
     navigation.navigate('ForgotPassword');
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
   };
 
   // Estilos CSS personalizados para los campos de entrada
@@ -218,18 +228,41 @@ const LoginScreen = () => {
                     </svg>
                   </div>
                   <input
-                    type="password"
+                    type={isPasswordVisible ? "text" : "password"}
                     placeholder="Contraseña"
                     value={formData.password}
                     onChange={(e) => handleChange('password', e.target.value)}
                     style={{ 
                       width: '100%',
                       paddingLeft: '35px',
-                      paddingRight: '10px',
+                      paddingRight: '40px',
                       height: '44px',
                       borderColor: errors.password ? '#e53e3e' : undefined
                     }}
                   />
+                  <div 
+                    style={{ 
+                      position: 'absolute', 
+                      right: 10, 
+                      top: '50%', 
+                      transform: 'translateY(-50%)', 
+                      color: isPasswordVisible ? '#2bbbad' : '#999',
+                      cursor: 'pointer'
+                    }}
+                    onClick={togglePasswordVisibility}
+                  >
+                    {isPasswordVisible ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </div>
                 </div>
                 {errors.password && (
                   <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
@@ -255,58 +288,42 @@ const LoginScreen = () => {
             </div>
             
             <div style={{ width: '100%' }}>
-              <button 
+              <button
                 onClick={handleLogin}
+                disabled={isLoading}
                 style={{
-                  width: '100%',
-                  backgroundColor: APP_TEAL,
+                  backgroundColor: '#2bbbad',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '12px 0',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
+                  padding: '0 16px',
                   cursor: 'pointer',
-                  marginBottom: '12px',
-                  height: '44px',
-                  transition: 'background-color 0.2s'
-                }}
-              >
-                {isLoading ? 'Cargando...' : 'Iniciar sesión'}
-              </button>
-              
-              <button 
-                onClick={handleTestMode}
-                style={{
+                  fontWeight: 600,
                   width: '100%',
-                  backgroundColor: '#f5f5f5',
-                  color: '#333',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  padding: '12px 0',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  marginBottom: '20px',
-                  height: '44px',
-                  transition: 'background-color 0.2s'
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                Entrar en Modo Prueba
+                {isLoading ? (
+                  <div className="loader" style={{ width: '20px', height: '20px' }}></div>
+                ) : (
+                  'Iniciar sesión'
+                )}
               </button>
               
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 15 }}>
-                <div style={{ color: '#666', fontSize: '15px' }}>
+              <div style={{ textAlign: 'center', marginTop: 20 }}>
+                <span style={{ color: '#666', fontSize: '14px' }}>
                   ¿No tienes una cuenta?{' '}
-                </div>
-                <a 
+                </span>
+                <a
                   onClick={goToRegister}
-                  style={{ 
-                    color: APP_TEAL, 
-                    marginLeft: '5px', 
-                    fontWeight: 'bold', 
+                  style={{
+                    color: APP_TEAL,
                     cursor: 'pointer',
-                    fontSize: '15px',
+                    fontWeight: 500,
+                    fontSize: '14px',
                     textDecoration: 'none'
                   }}
                 >

@@ -7,18 +7,23 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Role, User } from '../models/user.model';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
-import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
+import { generateToken, verifyToken } from '../../../../shared/security/jwt';
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 import { createMap } from '../../../map-service/src/services/map.service';
 import { createDistricts } from '../../../map-service/src/services/district.service';
 import MapRepository from '../../../map-service/src/repositories/map.repository';
+import { PlanType, Subscription } from '../../../payment-service/models/subscription.model';
+import SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
+import { createPOIsOnLagMaps } from '../../../map-service/src/services/poi.service';
+
+
 
 const repo = new AuthRepository();
-const profileRepo = new UserProfileRepository()
+const profileRepo = new UserProfileRepository();
 const mapRepo = new MapRepository();
-
+const subscriptionsRepo = new SubscriptionRepository()
 
 export const getUserById = async (userId: string): Promise<User | null> => {
   return await repo.findById(userId);
@@ -58,30 +63,34 @@ export const registerUser = async (userData: any): Promise<User> => {
     newUser.is_active = true; // Activamos la cuenta automáticamente (podría cambiarse si se requiere verificación)
     newUser.profile = savedProfile;
 
-
-    
     // Guardar el usuario en la base de datos
-    let savedUser = await repo.save(newUser);
+    const savedUser = await repo.save(newUser);
 
-    const token = generateToken({
-      userId: newUser.id.toString(),
-      email: newUser.email
-    });
-    
-    savedUser.token_data = token;
-    savedUser = await repo.save(savedUser);
-    
     // 5. Crear mapa y distritos para el usuario
     try {
       const newMap = await createMap(savedUser.id);
       if (newMap) {
         const savedMap = await mapRepo.getMapById(newMap.id);
         await createDistricts(savedMap.id);
+        await createPOIsOnLagMaps(savedMap.id)
+
       }
     } catch (mapError) {
       console.error('Error al crear mapa o distritos:', mapError);
       // No fallamos el registro si el mapa no se puede crear
     }
+
+    const suscriptionUserData = new Subscription()
+
+    suscriptionUserData.plan = PlanType.FREE
+    suscriptionUserData.user = newUser
+    suscriptionUserData.is_active = true
+
+    await subscriptionsRepo.create(suscriptionUserData)
+
+
+
+
 
     return savedUser;
   } catch (error) {
@@ -118,15 +127,16 @@ export const loginUser = async (email: string, password: string): Promise<{ user
     }
 
     // 4. Generar token JWT
-    const token = generateToken({
-      userId: user.id.toString(),
-      email: user.email
-    });
-    
+    const token = generateToken(
+      { sub: user.id, email: user.email },
+      process.env.JWT_SECRET || 'development-secret-key',
+      { expiresIn: '1h' }
+    );
+
     // 5. Guardar el token en el campo token_data
     user.token_data = token;
     await repo.save(user);
-    
+
     // 6. Devolver usuario y token (sin contraseña)
     const { password: _, ...userWithoutPassword } = user;
     return { user: userWithoutPassword as User, token };
@@ -150,24 +160,24 @@ export const verifyUserToken = async (token: string): Promise<{
 }> => {
   try {
     // 1. Verificar firma y expiración del token
-    const decoded = verifyToken(token);
-    if (!decoded) {
+    const result = verifyToken(token, process.env.JWT_SECRET || 'development-secret-key');
+    if (!result.valid || !result.payload) {
       throw new Error('Token inválido o expirado');
     }
-    
+
     // 2. Obtener información actualizada del usuario
-    const user = await repo.findById(decoded.userId);
+    const user = await repo.findById(result.payload.sub);
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
-    
+
     // 3. Verificar que el token está en token_data
     if (user.token_data !== token) {
       throw new Error('Sesión inválida. Por favor, inicie sesión nuevamente');
     }
-    
+
     return {
-      userId: user.id.toString(),
+      userId: user.id,
       email: user.email,
       role: user.role
     };

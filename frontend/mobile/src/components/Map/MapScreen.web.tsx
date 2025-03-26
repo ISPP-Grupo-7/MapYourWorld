@@ -140,10 +140,12 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
   const mapInstanceRef = useRef<any>(null);
   const userMarkerRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
+  const distritosRef = useRef<any[]>([]);
+  const distritosLayerRef = useRef<any>(null);
   
-  // Efecto para inicializar el mapa
+  // Efecto para inicializar el mapa - esto solo debe ocurrir UNA VEZ
   useEffect(() => {
-    if (!mapContainerRef.current || !L) return;
+    if (!mapContainerRef.current || !L || mapInstanceRef.current) return;
     
     console.log("Inicializando mapa Leaflet manualmente");
     
@@ -155,17 +157,117 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     
-    // Añadir distritos al mapa
-    distritos.forEach((distrito: any, index: number) => {
-      console.log(`Renderizando distrito ${index}: ${distrito.nombre}`);
-      const color = distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)";
-      
-      L.polygon(distrito.coordenadas, {
-        fillColor: color,
-        color: color,
-        fillOpacity: 0.4
-      }).addTo(map);
+    // Crear un grupo de capas para los distritos y guardarlo en la referencia
+    distritosLayerRef.current = L.layerGroup().addTo(map);
+    
+    // Crear un icono personalizado para el marcador del usuario
+    const userIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/149/149060.png', // Icono de ubicación/persona
+      iconSize: [32, 32],
+      iconAnchor: [16, 16], // Punto de anclaje central
+      popupAnchor: [0, -16]
     });
+    
+    // Añadir marcador de ubicación del usuario
+    try {
+      console.log("Creando marcador de usuario en:", [location[0], location[1]]);
+      const userMarker = L.marker([location[0], location[1]], {
+        icon: userIcon,
+        zIndexOffset: 1000, // Para que aparezca por encima de otros marcadores
+      });
+      
+      userMarker.bindPopup(`
+        <div>
+          <h3>Tu ubicación</h3>
+          <p>Lat: ${location[0].toFixed(6)}</p>
+          <p>Lng: ${location[1].toFixed(6)}</p>
+        </div>
+      `);
+      userMarker.addTo(map);
+      userMarkerRef.current = userMarker;
+    } catch (err) {
+      console.error("Error al crear marcador de usuario:", err);
+    }
+    
+    // Agregar evento de clic para añadir nuevo POI
+    map.on('click', (e: any) => {
+      if (onMapClick) {
+        const latlng = e.latlng;
+        onMapClick({ latitude: latlng.lat, longitude: latlng.lng });
+      }
+    });
+    
+    // Guardar referencia al mapa
+    mapInstanceRef.current = map;
+    setMapReady(true);
+    
+    // Limpieza al desmontar
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        distritosLayerRef.current = null;
+        distritosRef.current = [];
+      }
+    };
+  }, []);  // Solo se ejecuta una vez al montar el componente
+  
+  // Efecto para actualizar la posición del marcador del usuario cuando cambia location
+  useEffect(() => {
+    if (userMarkerRef.current && mapInstanceRef.current && mapReady) {
+      try {
+        console.log("Actualizando posición del marcador a:", [location[0], location[1]]);
+    userMarkerRef.current.setLatLng([location[0], location[1]]);
+    
+        // Actualizar contenido del popup
+        userMarkerRef.current.bindPopup(`
+          <div>
+            <h3>Tu ubicación</h3>
+            <p>Lat: ${location[0].toFixed(6)}</p>
+            <p>Lng: ${location[1].toFixed(6)}</p>
+          </div>
+        `);
+      } catch (err) {
+        console.error("Error al actualizar posición del marcador:", err);
+      }
+    }
+  }, [location, mapReady]);
+  
+  // Efecto para renderizar los distritos - solo cuando cambia el array de distritos
+  useEffect(() => {
+    if (!mapInstanceRef.current || !distritosLayerRef.current || !mapReady) return;
+    
+    // Solo renderizamos los distritos si han cambiado
+    if (distritosRef.current !== distritos) {
+      console.log("Actualizando capa de distritos...");
+      
+      // Limpiar la capa de distritos actual
+      distritosLayerRef.current.clearLayers();
+      
+      // Añadir los distritos actualizados
+      distritos.forEach((distrito: any, index: number) => {
+        // Evitamos loggear cada distrito para reducir la sobrecarga en la consola
+        if (index === 0) {
+          console.log(`Renderizando distritos (total: ${distritos.length})`);
+        }
+        
+        const color = distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)";
+        
+        L.polygon(distrito.coordenadas, {
+          fillColor: color,
+          color: color,
+          fillOpacity: 0.4
+        }).addTo(distritosLayerRef.current);
+      });
+      
+      // Guardar referencia a los distritos actuales para comparar en la próxima actualización
+      distritosRef.current = distritos;
+    }
+  }, [distritos, mapReady]);
+  
+  // Efecto para renderizar los puntos de interés
+  useEffect(() => {
+    if (!mapInstanceRef.current || !mapReady) return;
     
     // Añadir marcadores para los puntos de interés
     if (pointsOfInterest && pointsOfInterest.length > 0) {
@@ -237,87 +339,17 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
           </div>
         `);
         
-        marker.addTo(map);
+        marker.addTo(mapInstanceRef.current);
       });
     }
-    
-    // Crear un icono personalizado para el marcador del usuario
-    const userIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/149/149060.png', // Icono de ubicación/persona
-      iconSize: [32, 32],
-      iconAnchor: [16, 16], // Punto de anclaje central
-      popupAnchor: [0, -16]
-    });
-    
-    // Añadir marcador de ubicación del usuario
-    try {
-      console.log("Creando marcador de usuario en:", [location[0], location[1]]);
-      const userMarker = L.marker([location[0], location[1]], {
-        icon: userIcon,
-        zIndexOffset: 1000, // Para que aparezca por encima de otros marcadores
-      });
-      
-      userMarker.bindPopup(`
-        <div>
-          <h3>Tu ubicación</h3>
-          <p>Lat: ${location[0].toFixed(6)}</p>
-          <p>Lng: ${location[1].toFixed(6)}</p>
-        </div>
-      `);
-      userMarker.addTo(map);
-      userMarkerRef.current = userMarker;
-    } catch (err) {
-      console.error("Error al crear marcador de usuario:", err);
-    }
-    
-    // Agregar evento de clic para añadir nuevo POI
-    map.on('click', (e: any) => {
-      if (onMapClick) {
-        const latlng = e.latlng;
-        onMapClick({ latitude: latlng.lat, longitude: latlng.lng });
-      }
-    });
-    
-    // Guardar referencia al mapa
-    mapInstanceRef.current = map;
-    setMapReady(true);
-    
-    // Limpieza al desmontar
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [distritos, pointsOfInterest, onMapClick]);
-  
-  // Efecto para actualizar la posición del marcador del usuario cuando cambia location
-  useEffect(() => {
-    if (userMarkerRef.current && mapInstanceRef.current && mapReady) {
-      try {
-        console.log("Actualizando posición del marcador a:", [location[0], location[1]]);
-        userMarkerRef.current.setLatLng([location[0], location[1]]);
-        
-        // Actualizar contenido del popup
-        userMarkerRef.current.bindPopup(`
-          <div>
-            <h3>Tu ubicación</h3>
-            <p>Lat: ${location[0].toFixed(6)}</p>
-            <p>Lng: ${location[1].toFixed(6)}</p>
-          </div>
-        `);
-      } catch (err) {
-        console.error("Error al actualizar posición del marcador:", err);
-      }
-    }
-  }, [location, mapReady]);
+  }, [pointsOfInterest, mapReady]);
   
   return (
     <div style={{height: "100vh", width: "100vw"}}>
       <div ref={mapContainerRef} style={{height: "100%", width: "100%"}} />
       {/* Información de depuración */}
-      <div style={{
-        position: 'absolute',
+        <div style={{
+          position: 'absolute',
         bottom: '10px',
         left: '10px',
         backgroundColor: 'rgba(255,255,255,0.8)',
@@ -330,7 +362,7 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
         <div><strong>Coordenadas actuales:</strong></div>
         <div>Lat: {location[0].toFixed(6)}</div>
         <div>Lng: {location[1].toFixed(6)}</div>
-      </div>
+        </div>
     </div>
   );
 };
@@ -402,7 +434,7 @@ const MapScreen = () => {
     longitude: 0,
     district: "",
   });
-  
+
   // Estado para el modal de alertas
   const [alertModal, setAlertModal] = useState({
     visible: false,
@@ -414,6 +446,7 @@ const MapScreen = () => {
   const [leafletReady, setLeafletReady] = useState(false);
   const [mostrarLogro, setMostrarLogro] = useState(false);
   const [distritoActual, setDistritoActual] = useState<string>("");
+  const lastCheckedLocationRef = useRef<[number, number] | null>(null);
   
   // Función para mostrar alerta en modal
   const showAlert = (title: string, message: string) => {
@@ -450,12 +483,12 @@ const MapScreen = () => {
           // Importamos el CSS - El linter TypeScript puede quejarse, pero esto funciona en entorno web
           if (typeof document !== 'undefined') {
             // Creamos una etiqueta link en el head para cargar el CSS
-            const linkElement = document.createElement('link');
-            linkElement.rel = 'stylesheet';
-            linkElement.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            linkElement.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-            linkElement.crossOrigin = '';
-            document.head.appendChild(linkElement);
+          const linkElement = document.createElement('link');
+          linkElement.rel = 'stylesheet';
+          linkElement.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          linkElement.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+          linkElement.crossOrigin = '';
+          document.head.appendChild(linkElement);
             console.log("CSS de Leaflet cargado manualmente");
           }
           
@@ -490,7 +523,7 @@ const MapScreen = () => {
     
     loadLeaflet();
   }, []);
-
+  
   // Efectos para cargar datos y ubicación
   useEffect(() => {
     console.log("MapScreen.web useEffect");
@@ -501,14 +534,14 @@ const MapScreen = () => {
       fetchPOIs();
 
       // Configuramos expo-location
-      const configurarUbicacion = async () => {
-        try {
+    const configurarUbicacion = async () => {
+      try {
           console.log("Configurando expo-location...");
           
           // Reemplazamos navigator.geolocation con expo-location
-          const { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
           
-          if (status !== 'granted') {
+        if (status !== 'granted') {
             console.warn("Permiso de ubicación denegado");
             setError("No se concedió permiso para acceder a tu ubicación. Usando coordenadas de respaldo.");
             
@@ -524,9 +557,9 @@ const MapScreen = () => {
             }, 2000);
             
             setLoading(false);
-            return;
-          }
-          
+          return;
+        }
+        
           console.log("Permiso de ubicación concedido, intentando obtener la ubicación real...");
           
           // Intentamos obtener la ubicación real
@@ -583,10 +616,10 @@ const MapScreen = () => {
           }, 2000);
           
           setLoading(false);
-        }
-      };
-      
-      configurarUbicacion();
+      }
+    };
+    
+    configurarUbicacion();
     }
   }, [leafletReady, error]);
 
@@ -596,11 +629,11 @@ const MapScreen = () => {
       console.log("Distritos cargados, verificando ubicación...");
       checkDistrictUnlock(location);
       
-      // Configuramos un timer para repetir la verificación periódicamente
+      // Configuramos un timer para repetir la verificación periódicamente, pero con un intervalo mucho más largo
       const timer = setInterval(() => {
         console.log("Verificación periódica de distrito...");
         checkDistrictUnlock(location);
-      }, 10000); // Cada 10 segundos
+      }, 300000); // Cada 5 minutos (300000ms) en lugar de cada 10 segundos
       
       return () => clearInterval(timer);
     }
@@ -610,7 +643,16 @@ const MapScreen = () => {
   const checkDistrictUnlock = (userLocation: [number, number]) => {
     if (!distritos || distritos.length === 0) return;
     
+    // Evitamos verificaciones demasiado frecuentes para la misma ubicación
+    if (lastCheckedLocationRef.current && 
+        lastCheckedLocationRef.current[0] === userLocation[0] && 
+        lastCheckedLocationRef.current[1] === userLocation[1]) {
+      console.log("Ubicación sin cambios, omitiendo verificación");
+      return;
+    }
+    
     console.log("Verificando distrito para coordenadas:", userLocation);
+    lastCheckedLocationRef.current = userLocation;
     
     // Creamos el punto con coordenadas invertidas para que coincida con el formato esperado
     const point = { lat: userLocation[0], lng: userLocation[1] };
@@ -644,10 +686,14 @@ const MapScreen = () => {
       }
     }).sort((a, b) => a.distancia - b.distancia);
     
+    // Solo mostrar los 3 distritos más cercanos para reducir el log
     console.log("Distritos ordenados por proximidad:", distritosOrdenados.slice(0, 3).map(d => `${d.nombre}: ${d.distancia}`));
     
+    // Verificar solo los 10 distritos más cercanos en lugar de todos
+    const distritosAVerificar = distritosOrdenados.slice(0, 10);
+    
     // Verificar primero los distritos más cercanos
-    for (const distrito of distritosOrdenados) {
+    for (const distrito of distritosAVerificar) {
       if (!distrito.coordenadas || distrito.coordenadas.length < 3) {
         continue;
       }
@@ -687,14 +733,6 @@ const MapScreen = () => {
     }
     
     console.log("No se encontró ningún distrito que contenga el punto actual");
-    
-    // Como último recurso, desbloqueamos el primer distrito no desbloqueado
-    // Esto es una solución temporal para asegurar que funcione la demo
-    const primerDistritoNoDesbloqueado = distritos.find(d => !d.isUnlocked);
-    if (primerDistritoNoDesbloqueado) {
-      console.log("Como medida alternativa, desbloqueando el primer distrito no desbloqueado:", primerDistritoNoDesbloqueado.nombre);
-      desbloquearDistrito(primerDistritoNoDesbloqueado.id);
-    }
   };
 
   // Función para desbloquear un distrito
@@ -793,7 +831,7 @@ const MapScreen = () => {
           "Content-Type": "application/json",
         },
       });
-
+      
       if (!response.ok) {
         throw new Error(`Error en la solicitud: ${response.statusText}`);
       }
@@ -829,14 +867,15 @@ const MapScreen = () => {
                 console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
                 return null;
               }
+              // Respetamos exactamente el valor de isUnlocked que viene del backend
               return {
                 id: distrito.id,
                 nombre: distrito.name,
                 coordenadas: coordenadasTransformadas,
-                isUnlocked: distrito.isUnlocked,
+                isUnlocked: distrito.isUnlocked === true, // Aseguramos que sea un booleano y respetamos el valor original
                 regionId: distrito.region_assignee ? distrito.region_assignee.id : null,
               };
-            } catch (error) {
+    } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
               return null;
             }
@@ -1043,8 +1082,8 @@ const MapScreen = () => {
           style={{
             position: 'fixed',
             top: 0,
-            left: 0,
-            right: 0,
+          left: 0,
+          right: 0,
             bottom: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             display: 'flex',
@@ -1061,13 +1100,13 @@ const MapScreen = () => {
         >
           <div 
             style={{ 
-              backgroundColor: 'white',
+          backgroundColor: 'white',
               borderRadius: '12px', 
-              padding: '20px',
+          padding: '20px',
               maxWidth: '90%',
               width: '380px',
               maxHeight: '90vh', 
-              overflow: 'auto',
+          overflow: 'auto',
               boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
             }}
           >
@@ -1146,10 +1185,10 @@ const MapScreen = () => {
             </h1>
 
             <div className="form-container">
-              <PuntoDeInteresForm
-                pointOfInterest={pointOfInterest}
-                setPointOfInterest={setPointOfInterest}
-                setShowForm={setShowForm}
+          <PuntoDeInteresForm
+            pointOfInterest={pointOfInterest}
+            setPointOfInterest={setPointOfInterest}
+            setShowForm={setShowForm}
                 onSave={(newPOI: any) => {
                   // Convertir el POI recién creado al formato esperado
                   const poiConverted = {
@@ -1163,8 +1202,8 @@ const MapScreen = () => {
                   console.log('Nuevo POI creado:', poiConverted);
                   setPointsOfInterest((prev) => [...prev, poiConverted]);
                 }}
-                showAlert={showAlert}
-              />
+            showAlert={showAlert}
+          />
             </div>
           </div>
         </div>
@@ -1180,7 +1219,7 @@ const MapScreen = () => {
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
           <ActivityIndicator size="large" color="#0000ff" />
-        </div>
+    </div>
       )}
       
       {/* Componente de Logro */}
