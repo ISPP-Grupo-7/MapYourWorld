@@ -7,9 +7,12 @@ import { AppDataSource } from '../../../database/appDataSource';
 import { PointOfInterest } from '../models/poi.model';
 import { Between, Repository, IsNull, Not } from 'typeorm';
 import { PointOfInterestRepository } from '../repositories/poi.repostory';
+import {AuthRepository} from '../../../auth-service/src/repositories/auth.repository';
+import { Role } from '../../../auth-service/src/models/user.model';
 
 // Initialize repository
 const poiRepository = new PointOfInterestRepository();
+const authRepository = new AuthRepository();
 /**
  * Crea un nuevo punto de interés
  * @param poiData Datos del punto de interés a crear
@@ -40,6 +43,24 @@ export const createPOI = async (
 
   
   return await poiRepository.createPoi(poiData, userId);
+};
+
+
+
+export const createPOIInAllMaps = async (
+  poiData: Omit<PointOfInterest, 'id'>,
+  userId: string
+): Promise<void> => {
+  const usuarioCreador = await authRepository.findById(userId);
+  if (!usuarioCreador) {
+    throw new Error('El usuario no existe');
+  }
+
+  if(usuarioCreador.role !== Role.ADMIN){
+    throw new Error('No tienes permisos para crear puntos de interés en todos los mapas');
+  }
+
+  await poiRepository.createPoiInAllMaps(poiData);
 };
 
 
@@ -175,5 +196,23 @@ export const getPointsOfInterestByMapId = async (mapId:string): Promise<PointOfI
 
   return pois;
 };
+
+
+export const getPointsBusinessAndUnique = async (): Promise<PointOfInterest[] | null> => {
+
+  const pois = await poiRepository.getUniquePointsOfInterestBusiness();
+  if (!pois) {
+    return null;
+  }
+
+  return pois;
+
+
+}
+
+export const createPOIsOnLagMaps = async (mapId:string): Promise<void> => {
+  const poisList = await poiRepository.getUniquePointsOfInterestBusiness();
+  await poiRepository.createPOIsOnLagMaps(poisList, mapId);  
+}
 
 

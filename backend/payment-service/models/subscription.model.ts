@@ -7,8 +7,6 @@ export enum PlanType{
     PREMIUM = 'PREMIUM'
 }
 
-
-
 @Entity('subscriptions')
 export class Subscription {
 
@@ -18,23 +16,14 @@ export class Subscription {
     @Column({ type: 'enum', enum: PlanType, default: PlanType.FREE })
     plan!: PlanType;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'date' , nullable:true})
     startDate!: Date;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'date' , nullable:true})
     endDate!: Date;
 
     @Column({ type: 'boolean', default : false })
     is_active!: boolean;
-
-    @Column({ type: 'boolean', default : false })
-    autoRenew!: boolean;
-
-    @Column({ type: 'date'})
-    createdAt!: Date;
-
-    @Column({ type: 'date'})
-    updatedAt!: Date;
 
     @OneToOne(() => User, (user) => user.subscription)
     @JoinColumn()

@@ -12,7 +12,7 @@ import MapRepository from '../repositories/map.repository';
 import * as fs from 'fs';
 import { Geometry } from 'geojson';
 import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
-import { Color, UserDistrict } from '../models/user-district.model';
+import { UserDistrict } from '../models/user-district.model';
 import RegionRepository from '../repositories/region.repository';
 
 const filePath = 'database/map.geojson';
@@ -87,7 +87,7 @@ export const createDistricts = async (
 
 
     for (let i = 0; i < numberOfRegions; i++) {
-      const regionName = `Región ${i + 1}`;
+      const regionName = geojsonData.region_name;
       const regionData = {
         name: regionName,
         description: `Región generada para ${regionName}`,
@@ -215,14 +215,15 @@ export const updateDistrict = async (
 export const unlockDistrict = async (
   districtId: string,
   userId: string,
-  regionId: string
+  regionId: string,
+  color: string
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
   // TODO: Implementar el desbloqueo de un distrito
   // 1. Verificar si el usuario puede desbloquear el distrito
-  const unlockedDistrict = await repo.unlockDistrict(districtId, userId, regionId);
+  const unlockedDistrict = await repo.unlockDistrict(districtId, userId, regionId, color);
   // 3. Publicar evento de distrito desbloqueado
   if (unlockedDistrict.isUnlocked === true) {
     return { success: true, message: 'Distrito desbloqueado correctamente' };
@@ -320,7 +321,7 @@ export const unlockCollaborativeDistrict = async (
 
     // Crear un objeto UserDistrict que cumpla con el modelo actualizado
     const userdistrict = {
-      color: Color.AZUL,
+      color: "pepe",
       user: user,
       district: district
     };
@@ -353,7 +354,7 @@ export const unlockCollaborativeDistrict = async (
 export const simulateUserPassingByDistrict = async (
   userId: string,
   districtId: string,
-  color: Color = Color.AZUL, // Valor por defecto
+  color: string = "pepe", // Valor por defecto
   mapId?: string // Opcional: ID del mapa colaborativo
 ): Promise<{
   success: boolean;

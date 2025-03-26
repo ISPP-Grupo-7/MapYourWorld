@@ -18,8 +18,7 @@ export const createSubscription = async (subscriptionData: Partial<Subscription>
             throw new Error("No se ha proporcionado información de suscripción");
         }
         const now = new Date();
-        subscriptionData.createdAt = now;
-        subscriptionData.updatedAt = now;
+
         subscriptionData.startDate = now;
         subscriptionData.endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 días después
 
@@ -37,9 +36,7 @@ export const createSubscription = async (subscriptionData: Partial<Subscription>
         newSubscription.startDate = subscriptionData.startDate;
         newSubscription.endDate = subscriptionData.endDate;
         newSubscription.is_active = subscriptionData.is_active;
-        newSubscription.autoRenew = subscriptionData.autoRenew ?? false;
-        newSubscription.createdAt = subscriptionData.createdAt;
-        newSubscription.updatedAt = subscriptionData.updatedAt;
+
         if (!subscriptionData.user) {
             throw new Error("El campo 'user' es obligatorio para crear una suscripción");
         }
@@ -72,12 +69,14 @@ export const updateSubscription = async (subscriptionId: string, subscriptionDat
         const effectiveStartDate = subscriptionData.startDate ? subscriptionData.startDate : existingSubscription.startDate;
         const effectiveEndDate = subscriptionData.endDate ? subscriptionData.endDate : existingSubscription.endDate;
 
+        
+
         subscriptionData.is_active =
             effectivePlan === PlanType.PREMIUM &&
             now >= effectiveStartDate &&
             now <= effectiveEndDate;
 
-        subscriptionData.updatedAt = now;
+
 
         return await subscriptionRepository.update(subscriptionId, subscriptionData);
     } catch (error) {
@@ -98,6 +97,17 @@ export const getSubscriptionById = async (subscriptionId: string): Promise<Subsc
  */
 export const getActiveSubscriptionByUserId = async (userId: string): Promise<Subscription | null> => {
     return await subscriptionRepository.getActiveSubscriptionByUserId(userId);
+};
+
+
+export const incrementarSuscripcion = async (userId: string): Promise<void> => {
+    const suscripcion_usuario = await subscriptionRepository.getSuscriptionByUserId(userId)
+
+    if(suscripcion_usuario.plan === PlanType.PREMIUM){
+        throw new Error("El usuario ya tiene el plan Premium asignado")
+    }
+    
+    await subscriptionRepository.increaseSuscription(userId);
 };
 
 /**

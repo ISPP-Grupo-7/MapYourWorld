@@ -2,9 +2,11 @@ import { createUserAchievement, getAchievementsByUser, getUsersByAchievement } f
 import { UserAchievementRepository } from "../repositories/userAchievement.repository";
 import { Role } from "../../auth-service/src/models/user.model";
 import { PlanType } from "../../payment-service/models/subscription.model";
+import { Achievement } from "../models/achievement.model";
 
 jest.mock('../repositories/userAchievement.repository', () => {
     const mockRepo = {
+        create: jest.fn(),
         createUserAchievement:jest.fn(),
         getAchievementsByUserId: jest.fn(),
         getUsersByAchievementId:jest.fn()
@@ -30,9 +32,6 @@ describe("Pruebas de userAchiements", () => {
 
   describe("createUserAchievement", () => {
     it("debe crear un nuevo usuario-logro", async () => {
-
-
-
         const userData = {
             id: 'user1',  // Asegúrate de que el id esté presente
             email: 'newuser@example.com',
@@ -60,24 +59,38 @@ describe("Pruebas de userAchiements", () => {
             }
         } as any;
         userData.subscription.user = userData;
-
     
-    
-          const exampleAchievement = 
-            { id: "101", name: "Primer Logro", description: "Descripción del primer logro", points: 10, iconUrl: "http://example.com/icon1.png" }
-
-      const mockAchievementData = { user: userData, achievement: exampleAchievement, dateEarned: new Date() };
-      const mockCreatedAchievement = { ...mockAchievementData, id: "789" };
-
-      repoInstance.createUserAchievement = jest.fn().mockResolvedValue(mockCreatedAchievement);
+        const mockAchievement = new Achievement();
+        mockAchievement.id = "achievement1";
+        mockAchievement.name = "Primer Logro";
+        mockAchievement.description = "Descripción del primer logro";
+        mockAchievement.points = 10;
+        mockAchievement.iconUrl = "http://example.com/icon1.png";
       
-      const result = await createUserAchievement(mockAchievementData, "456");
+        const expectedUserAchievement = {
+            user: userData,
+            achievement: mockAchievement,
+            dateEarned: expect.any(Date)
+        };
+      
+        repoInstance.create.mockResolvedValue(expectedUserAchievement);
+      
+        const result = await createUserAchievement(userData, mockAchievement);
 
-      expect(repoInstance.createUserAchievement).toHaveBeenCalledWith(mockAchievementData, "456");
-      expect(result).toEqual(mockCreatedAchievement);
+        // Verificamos que se llamó al método create con un objeto que contiene el usuario y el logro correctos
+        expect(repoInstance.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                user: userData,
+                achievement: mockAchievement,
+                dateEarned: expect.any(Date)
+            })
+        );
+        
+        expect(result).toEqual(expect.objectContaining({
+            user: userData,
+            achievement: mockAchievement
+        }));
     });
-
-
   });
 
   describe("getAchievementsByUser", () => {

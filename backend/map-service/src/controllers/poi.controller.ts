@@ -8,6 +8,7 @@ import * as POIService from '../services/poi.service';
 import { AuthenticatedRequest } from '../../../../backend/api-gateway/src/types';
 import * as AuthService from '../../../auth-service/src/services/auth.service';
 
+
 /**
  * Crea un nuevo punto de interés
  */
@@ -42,6 +43,23 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
     });
   }
 };
+
+
+export const createPOIInAllMaps = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const {poiData, userId} = req.body;
+
+    // Obtener token desde los headers
+    const newPOI = await POIService.createPOIInAllMaps(poiData, userId);
+    res.status(201).json(newPOI);
+  } catch (error) {
+    console.error('Error al crear el punto de interés:', error);
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'Error al crear el punto de interés'
+    });
+  }
+};
+
 
 
 
@@ -186,6 +204,20 @@ export const getPOIsByMapId = async (req: Request, res: Response): Promise<void>
   } catch (error) {
     console.error('Error al obtener POIs por mapa:', error);
     res.status(500).json({ success: false, message: 'Error al obtener POIs por mapa' });
+  }
+};
+
+
+
+export const getUniquePointsOfInterestBusiness = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const pois = await POIService.getPointsBusinessAndUnique();
+    res.status(200).json({ success: true, pois });
+  } catch (error) {
+    console.error('Error al obtener todos los POIs:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Error al obtener los POIs' 
+    });
   }
 };
 

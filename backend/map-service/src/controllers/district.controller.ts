@@ -94,14 +94,15 @@ export const unlockDistrict = async (req: Request, res: Response): Promise<void>
   try {
     const districtId  = req.params.districtId;
     const userId  = req.params.userId;
-    const regionId = req.params.regionId
+    const regionId = req.params.regionId;
+    const { color } = req.body;
 
     if (!districtId || !userId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
       return;
     }
 
-    const result = await DistrictService.unlockDistrict(districtId, userId, regionId);
+    const result = await DistrictService.unlockDistrict(districtId, userId, regionId, color);
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });
       return;

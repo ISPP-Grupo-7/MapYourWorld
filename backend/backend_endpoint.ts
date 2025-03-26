@@ -11,14 +11,18 @@ import regionRoutes from './map-service/src/routes/region.routes';
 import friendRoutes from './social-service/src/routes/friend.routes';
 import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import paymentRoutes from './payment-service/src/routes/payment.routes';
+import photoRoutes from './social-service/src/routes/photo.routes'
 import { initializeDatabase } from './database/appDataSource';
-import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
+import { createUsers } from './map-service/src/mocks/district_create';
 import subscriptionRoutes from './payment-service/routes/subscription.routes';
 import { createAchievements } from './achievement-service/mocks/achievement_create';
+import StripeRoutes from "./payment-service/routes/stripe.routes"
 import userAchievementRoutes from './achievement-service/routes/userAchievement.routes';
 import achievementRoutes from './achievement-service/routes/achievement.routes';
 import https from 'https';
 import fs from 'fs';
+import emailRoutes from './auth-service/src/routes/email.routes';
+
 
 dotenv.config();
 
@@ -43,13 +47,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/poi', pointOfInterest);
 app.use('/api/friends', friendRoutes);
-app.use('/api/maps', mapRoutes)
-app.use('/api/collabMap', collabMapRoutes)
-app.use('/api/payment', paymentRoutes)
+app.use('/api/maps', mapRoutes);
+app.use('/api/collabMap', collabMapRoutes);
+app.use('/api/payment', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/stripe', StripeRoutes)
 app.use('/api/user-achievements', userAchievementRoutes);
 app.use('/api/achievements', achievementRoutes);
-
+app.use('/api/photos', photoRoutes);
+app.use('/api/email', emailRoutes);
 
 // Interfaz para los servicios
 interface Service {

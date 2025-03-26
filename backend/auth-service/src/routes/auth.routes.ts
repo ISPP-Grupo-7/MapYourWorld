@@ -19,10 +19,19 @@ router.post(
     body('email')
       .isEmail()
       .withMessage('Introduce un email válido')
+      .custom(value => {
+        if (/[A-Z]/.test(value)) {
+          throw new Error('El email no puede contener letras mayúsculas');
+        }
+        return true;
+      })
       .normalizeEmail(),
     body('password')
       .isLength({ min: 8 })
       .withMessage('La contraseña debe tener al menos 8 caracteres')
+      .matches(/\d/)
+      .isLength({ max: 255 })
+      .withMessage('La contraseña debe tener como máximo 255 caracteres')
       .matches(/\d/)
       .withMessage('La contraseña debe contener al menos un número')
       .matches(/[a-z]/)
@@ -86,7 +95,6 @@ router.post(
 // Ruta para cambiar contraseña (usuario autenticado)
 router.post(
   '/change-password',
-  authMiddleware(),
   [
     body('currentPassword').notEmpty().withMessage('La contraseña actual es obligatoria'),
     body('newPassword')

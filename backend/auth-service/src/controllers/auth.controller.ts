@@ -188,12 +188,12 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { userId, newPassword } = req.body;
+    const { userId, currentPass, newPass } = req.body;
 
     if (!userId) {
-      res.status(401).json({
+      res.status(400).json({
         success: false,
-        message: 'Usuario no encontrado'
+        message: 'Id de Usuario no indicado'
       });
       return;
     }
@@ -206,32 +206,13 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    if (!user.token_data) {
-      res.status(400).json({
-        success: false,
-        message: 'Token no proporcionado'
-      });
-      return;
-    }
-
-    const verifiedUser = await authService.verifyUserToken(user.token_data);
-    if (!verifiedUser) {
-      res.status(401).json({
-        success: false,
-        message: 'Usuario no autenticado'
-      });
-      return;
-    }
-
     const currentPassword = user.password;
 
-
-
     // Cambiar contraseña 
-    await authService.changePassword(verifiedUser.userId, currentPassword, newPassword);
+    await authService.changePassword(user.id, currentPassword, newPass);
 
     try {
-      await sendPasswordChangeNotification(verifiedUser.email, user.profile.username || '');
+      await sendPasswordChangeNotification(user.email, user.profile.username || '');
     } catch (emailError) {
       console.error('Error al enviar notificación de cambio de contraseña:', emailError);
     }

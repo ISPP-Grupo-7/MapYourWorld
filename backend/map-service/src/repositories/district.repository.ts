@@ -4,7 +4,7 @@ import { AppDataSource } from '../../../database/appDataSource'; // Importa la i
 import { Map } from '../models/map.model';
 import { Region } from '../models/region.model';
 import { User } from '../../../auth-service/src/models/user.model';
-import { Color, UserDistrict } from '../models/user-district.model';
+import { UserDistrict } from '../models/user-district.model';
 
 export default class DistrictRepository {
     private districtRepo: Repository<District>;
@@ -44,7 +44,7 @@ export default class DistrictRepository {
         return await this.districtRepo.save(district);
     }
 
-    async unlockDistrict(districtId: string, userId:string , regionId:string ): Promise<District> {
+    async unlockDistrict(districtId: string, userId:string , regionId:string, color: string ): Promise<District> {
         const district = await this.districtRepo.findOne({where:
             {   
                 id:districtId,
@@ -76,7 +76,7 @@ export default class DistrictRepository {
             const userDistrict = new UserDistrict();
             userDistrict.user = discoveredBy;
             userDistrict.district = district;
-            userDistrict.color = Color.AZUL; // Poner los colores definidos(Los colores definidos son los posibles valores del enum Color)
+            userDistrict.color = color; // Poner los colores definidos
             await this.userDistrictRepo.save(userDistrict);
         }
         return await this.districtRepo.save(district);
@@ -110,4 +110,36 @@ export default class DistrictRepository {
         console.log(`Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
         return districts;
     }
+
+
+
+    async getDistrictInMapByCoordinates(mapId: string, longitude: number, latitude: number): Promise<District | null> {
+        console.log(`Buscando distrito en el mapa ${mapId} que contenga las coordenadas [${longitude}, ${latitude}]`);
+        
+        // Utilizamos queryBuilder para combinar las condiciones del mapId y el punto geográfico
+        const district = await this.districtRepo.createQueryBuilder('district')
+            .innerJoinAndSelect('district.region_assignee', 'region')
+            .innerJoinAndSelect('region.map_assignee', 'map')
+            .where('map.id = :mapId', { mapId })
+            .andWhere('ST_Contains(district.boundaries, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))', 
+                     { longitude, latitude })
+            .getOne();
+        
+        if (district) {
+            console.log(`Se encontró un distrito (${district.name}) que contiene las coordenadas especificadas.`);
+        } else {
+            console.log(`No se encontró ningún distrito en el mapa ${mapId} que contenga las coordenadas especificadas.`);
+        }
+        
+        return district;
+    }
+
+    async getDistrictsContainingCoordinates(longitude: number, latitude: number): Promise<District[]> {
+        return await this.districtRepo.createQueryBuilder('district')
+          .where(
+            "ST_Contains(district.boundaries, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))",
+            { longitude, latitude }
+          )
+          .getMany();
+      }
 }

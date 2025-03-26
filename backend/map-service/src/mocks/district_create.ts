@@ -1,11 +1,10 @@
-import { createDistricts } from "../services/district.service";
+
 import { AppDataSource } from '../../../database/appDataSource';
 import { Geometry } from 'geojson';
 import * as fs from 'fs';
 import { District } from "../models/district.model";
 import {Role, User} from "../../../auth-service/src/models/user.model"
 import {registerUser} from "../../../auth-service/src/services/auth.service"
-import {createUserProfile} from "../../../user-service/src/services/profile.service"
 
 const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
@@ -25,54 +24,36 @@ const districtsData = geojsonData.features.map((feature: any, index: number) => 
     user: null
 }));
 
-const profile1 = {
-    id:"00000000-0000-0000-0000-000000000001",
-    username:"user1",
-    firstName:"user",
-    lastName:"1",
-    picture: ""
-}
+
 
 const user1 = {
     email:"user1@gmail.com" ,
     password:"user12345*",
-    role: Role.USER,
-    token_data: "",
-    profile: profile1.id
+    username:"user1",
+    firstName:"User",
+    lastName:"1"
 }
 
-const profile2 = {
-    id:"00000000-0000-0000-0000-000000000002",
-    username:"user2",
-    firstName:"user",
-    lastName:"2",
-    picture: ""
-}
 
 const user2 = {
     email:"user2@gmail.com" ,
     password:"user12345*",
-    role: Role.USER,
-    token_data: "",
-    profile: profile2.id
+    username:"user2",
+     firstName:"User",
+     lastName:"2"
 }
 
 
 
-const profileAdmin = {
-    id:"00000000-0000-0000-0000-000000000003",
-    username:"user",
-    firstName:"admin",
-    lastName:"3",
-    picture: ""
-}
+
 
 const userAdmin = {
     email:"userAdmin@gmail.com" ,
     password:"admin12345*",
     role: Role.ADMIN,
-    token_data: "",
-    profile: profileAdmin.id
+    username:"admin",
+    firstName:"admin",
+    lastName:"admin"
 }
 export async function createAllDistricts() {
     try {
@@ -116,15 +97,12 @@ export async function createUsers() {
         }
 
         //Creación usuario1
-        await createUserProfile(profile1)
         await registerUser(user1);
 
         //Creación usuario2
-        await createUserProfile(profile2)
         await registerUser(user2);
 
         //Creación usuario3
-        await createUserProfile(profileAdmin)
         await registerUser(userAdmin);
     
         
@@ -132,4 +110,3 @@ export async function createUsers() {
         console.error("❌ Error al crear los distritos:", error);
     }
 }
-

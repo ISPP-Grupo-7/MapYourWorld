@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, FlatList } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
 import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
-  "rgba(76, 175, 80, 0.5)",  // Verde
-  "rgba(255, 152, 0, 0.5)",  // Naranja
-  "rgba(255, 235, 59, 0.5)", // Amarillo
-  "rgba(33, 150, 243, 0.5)", // Azul
-  "rgba(156, 39, 176, 0.5)", // Púrpura
-  "rgba(244, 67, 54, 0.5)"   // Rojo
+  "#2196f399", 
+  "#4cb05099", 
+  "#fec10799", 
+  "#ff970099", 
+  "#ea1e6399", 
+  "#9c27b399", 
 ];
 
 // Tipos para distritos y POIs
@@ -25,6 +26,8 @@ interface Distrito {
   isUnlocked: boolean;
   unlockedByUserId?: string;
   colorIndex?: number;
+  regionId: string;
+  color: string;
 }
 
 interface DistritoBackend {
@@ -34,6 +37,18 @@ interface DistritoBackend {
   boundaries: any;
   isUnlocked: boolean;
   user?: { id: string };
+  region_assignee?: { 
+    id: string;
+    name: string;
+    description: string;
+    map_assignee: {
+      id: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      is_colaborative: boolean;
+    };
+  };
 }
 
 interface MapUser {
@@ -119,9 +134,23 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Nuevos estados para invitación de amigos
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-  const [friendEmail, setFriendEmail] = useState<string>('');
-  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
+  
+  
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
+  const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
+  
+  const { user } = useAuth();
+  useEffect(() => {
+      console.log("Usuario actual en Social:", user);
+    }, [user]);
+  
+    useEffect(() => {
+      if (user && user.id) {
+        console.log("Cargando amigos para el usuario:", user.id);
+        fetchFriends(user.id);
+        
+      }
+    }, [user]);
 
   // Función para verificar si un punto está dentro de un polígono (distrito)
   const isPointInPolygon = (
@@ -182,122 +211,70 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const fetchDistricts = async () => {
     try {
       setLoading(true);
-      // En lugar de obtener todos los distritos, obtenemos solo los del mapa colaborativo
       console.log(`Obteniendo distritos para el mapa colaborativo ${mapId}`);
+  
+      // Obtener los distritos del mapa colaborativo
       const response = await fetch(`${API_URL}/api/districts/map/${mapId}`);
       const data = await response.json();
       console.log("Respuesta de distritos:", data);
-
-      if (data.success && data.districts && data.districts.length > 0) {
-        const distritosMapeados = data.districts
-          .map((distrito: DistritoBackend) => {
-            try {
-              const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-              if (coordenadasTransformadas.length < 3) {
-                console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
-                return null;
-              }
-              
-              // Incluimos información sobre qué usuario ha desbloqueado el distrito
-              return {
-                id: distrito.id,
-                nombre: distrito.name,
-                coordenadas: coordenadasTransformadas,
-                isUnlocked: distrito.isUnlocked,
-                unlockedByUserId: distrito.user?.id,
-                colorIndex: distrito.user && mapUsers.length > 0 
-                  ? mapUsers.find((u: { id: string; username: string; colorIndex: number }) => u.id === distrito.user?.id)?.colorIndex 
-                  : undefined
-              };
-            } catch (error) {
-              console.error(`Error procesando distrito ${distrito.name}:`, error);
-              return null;
-            }
-          })
-          .filter((d: Distrito | null): d is Distrito => d !== null);
-        setDistritosBackend(distritosMapeados);
-      } else {
-        console.warn("No se pudieron cargar los distritos del mapa colaborativo o la lista está vacía");
-        // Intentar obtener los distritos del mapa individual como fallback
-        console.log("Intentando obtener distritos del mapa individual como fallback");
+  
+      if (!data.success || !data.districts || data.districts.length === 0) {
+        console.warn("No se pudieron cargar los distritos del mapa colaborativo");
+        setDistritosBackend([]);
+        return;
+      }
+  
+      // Obtener los colores de los usuarios que han desbloqueado distritos
+      const userColors = new Map();
+  
+      for (const user of mapUsers) {
         try {
-          const fallbackResponse = await fetch(`${API_URL}/api/districts`);
-          const fallbackData = await fallbackResponse.json();
+          const colorResponse = await fetch(`${API_URL}/api/districts/user-districts/${user.id}`);
+          const colorData = await colorResponse.json();
           
-          if (fallbackData.success && fallbackData.districts) {
-            console.log("Usando distritos del mapa individual como fallback");
-            const distritosMapeados = fallbackData.districts
-              .map((distrito: DistritoBackend) => {
-                try {
-                  const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-                  if (coordenadasTransformadas.length < 3) {
-                    return null;
-                  }
-                  return {
-                    id: distrito.id,
-                    nombre: distrito.name,
-                    coordenadas: coordenadasTransformadas,
-                    isUnlocked: false,
-                    unlockedByUserId: undefined,
-                    colorIndex: undefined
-                  };
-                } catch (error) {
-                  return null;
-                }
-              })
-              .filter((d: Distrito | null): d is Distrito => d !== null);
-            setDistritosBackend(distritosMapeados);
-          } else {
-            Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+          if (colorData.success && colorData.userDistricts) {
+            colorData.userDistricts.forEach((ud: any) => {
+              userColors.set(ud.districtId, ud.color);
+            });
           }
-        } catch (fallbackError) {
-          console.error("Error al obtener distritos de fallback:", fallbackError);
-          Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+        } catch (colorError) {
+          console.error(`Error al obtener colores del usuario ${user.id}:`, colorError);
         }
       }
+  
+      // Mapear los distritos con los colores correctos
+      const distritosMapeados = data.districts.map((distrito: DistritoBackend) => {
+        try {
+          const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
+          if (coordenadasTransformadas.length < 3) {
+            console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
+            return null;
+          }
+  
+          return {
+            id: distrito.id,
+            nombre: distrito.name,
+            coordenadas: coordenadasTransformadas,
+            isUnlocked: distrito.isUnlocked,
+            unlockedByUserId: distrito.user?.id,
+            color: userColors.get(distrito.id) || "rgba(128, 128, 128, 0.7)", // Color gris si no hay asignado
+            regionId: distrito.region_assignee ? distrito.region_assignee.id : null,
+          };
+        } catch (error) {
+          console.error(`Error procesando distrito ${distrito.name}:`, error);
+          return null;
+        }
+      }).filter((d: Distrito | null): d is Distrito => d !== null);
+  
+      setDistritosBackend(distritosMapeados);
     } catch (error) {
       console.error("Error al obtener los distritos del mapa colaborativo:", error);
-      // Intentar obtener los distritos del mapa individual como fallback
-      console.log("Error capturado: Intentando obtener distritos del mapa individual como fallback");
-      try {
-        const fallbackResponse = await fetch(`${API_URL}/api/districts`);
-        const fallbackData = await fallbackResponse.json();
-        
-        if (fallbackData.success && fallbackData.districts) {
-          console.log("Usando distritos del mapa individual como fallback después de error");
-          const distritosMapeados = fallbackData.districts
-            .map((distrito: DistritoBackend) => {
-              try {
-                const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-                if (coordenadasTransformadas.length < 3) {
-                  return null;
-                }
-                return {
-                  id: distrito.id,
-                  nombre: distrito.name,
-                  coordenadas: coordenadasTransformadas,
-                  isUnlocked: false,
-                  unlockedByUserId: undefined,
-                  colorIndex: undefined
-                };
-              } catch (error) {
-                return null;
-              }
-            })
-            .filter((d: Distrito | null): d is Distrito => d !== null);
-          setDistritosBackend(distritosMapeados);
-        } else {
-          Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
-        }
-      } catch (fallbackError) {
-        console.error("Error al obtener distritos de fallback:", fallbackError);
-        Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
-      }
+      Alert.alert("Error", "No se pudieron cargar los distritos");
     } finally {
       setLoading(false);
     }
   };
-
+  
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
@@ -335,63 +312,68 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.log(`Obteniendo usuarios para el mapa colaborativo ${mapId}`);
       const response = await fetch(`${API_URL}/api/maps/users/${mapId}`);
       const data = await response.json();
-      console.log("Respuesta de usuarios del mapa colaborativo:", data);
       
       if (data.success && data.users) {
-        // Asignar un color a cada usuario (máximo 6 colores)
-        const usersWithColors = data.users.map((user: { id: string; username: string }, index: number) => ({
-          id: user.id,
-          username: user.username || `Usuario ${index + 1}`,
-          colorIndex: index % USER_COLORS.length
-        }));
-        
+        // Obtener colores ya asignados para evitar duplicados
+        const assignedColors: { [key: string]: string } = {}; // idUsuario -> color
+
+        // Recorrer usuarios y asignar colores únicos
+        const usersWithColors = data.users.map((user: { id: string; username: string; color?: string }, index: number) => {
+          let color = user.color; // Intentamos recuperar su color de la BD
+          
+          if (!color) {
+            // Buscar el primer color disponible que no esté asignado aún
+            const availableColorIndex = USER_COLORS.findIndex((col) => !Object.values(assignedColors).includes(col));
+            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080"; // Gris si no hay colores disponibles
+            
+            // Guardamos la asignación en el objeto temporal
+            assignedColors[user.id] = color;
+          }
+
+          return {
+            id: user.id,
+            username: user.username || `Usuario ${index + 1}`,
+            color: color
+          };
+        });
+
         setMapUsers(usersWithColors);
-        
+
         // Encontrar el color del usuario actual
-        const currentUser = usersWithColors.find((user: { id: string; username: string; colorIndex: number }) => user.id === userId);
+        const currentUser = usersWithColors.find((user: MapUser) => user.id === userId);
         if (currentUser) {
-          setUserColorIndex(currentUser.colorIndex);
+          setUserColorIndex(USER_COLORS.indexOf(currentUser.color) || 0);
         } else {
-          // Si el usuario actual no está en la lista, le asignamos un color por defecto
-          console.log(`Usuario actual (${userId}) no encontrado en la lista, asignando color por defecto`);
           setUserColorIndex(0); // Verde por defecto
         }
       } else {
         console.warn("No se pudieron obtener los usuarios del mapa colaborativo");
-        // En caso de error, asignamos al menos un usuario (el actual) con un color
-        setMapUsers([{
-          id: userId,
-          username: "Tú",
-          colorIndex: 0 // Verde por defecto
-        }]);
-        setUserColorIndex(0);
       }
     } catch (error) {
       console.error("Error al obtener los usuarios del mapa colaborativo:", error);
-      // En caso de error, asignamos al menos un usuario (el actual) con un color
-      setMapUsers([{
-        id: userId,
-        username: "Tú",
-        colorIndex: 0 // Verde por defecto
-      }]);
-      setUserColorIndex(0);
     }
-  };
+};
 
   // Función para desbloquear un distrito en el mapa colaborativo
-  const desbloquearDistrito = async (districtId: string) => {
+  const desbloquearDistrito = async (districtId: string, regionId: string) => {
     try {
       console.log(`Desbloqueando distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
-      const response = await fetch(`${API_URL}/api/districts/unlock/collaborative/${districtId}/${userId}/${mapId}`, {
+      const userColor = USER_COLORS[userColorIndex]; // Obtener color asignado al usuario
+      
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ color: userColor }) // Enviamos el color
       });
+      
       const data = await response.json();
       console.log("Respuesta de desbloqueo:", data);
       
       if (data.success) {
         console.log(`Distrito ${districtId} desbloqueado en mapa colaborativo.`);
-        // Actualizamos el distrito en el estado local
+        console.log(`Color asignado: ${userColor}`);
+  
+        // Actualizar el distrito en el estado local con el color correcto
         setDistritosBackend((prev) =>
           prev.map((d) => 
             d.id === districtId 
@@ -399,7 +381,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                   ...d, 
                   isUnlocked: true, 
                   unlockedByUserId: userId,
-                  colorIndex: userColorIndex 
+                  color: userColor // Usamos el color asignado
                 } 
               : d
           )
@@ -411,6 +393,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.error("Error al desbloquear el distrito en el mapa colaborativo:", error);
     }
   };
+  
 
   // Función para inicializar el mapa colaborativo
   const initializeMap = async () => {
@@ -514,55 +497,24 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para invitar a un amigo al mapa colaborativo
-  const inviteFriend = async () => {
-    if (!friendEmail || friendEmail.trim() === '') {
-      Alert.alert("Error", "Por favor, introduce un email válido");
-      return;
-    }
-    
-    if (invitedFriends.length >= 5) { // Máximo 6 usuarios incluyendo el creador
-      Alert.alert("Límite alcanzado", "Solo puedes invitar a 5 amigos a un mapa colaborativo");
-      return;
-    }
-    
-    try {
-      // Obtener el userId actual del almacenamiento o usar el prop
-      const storedUserId = await AsyncStorage.getItem('userId');
-      const effectiveUserId = storedUserId || userId || 'user-456';
-      
-      // Llamar al endpoint para invitar al usuario
-      const response = await fetch(`${API_URL}/api/maps/invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mapId,
-          userEmail: friendEmail,
-          invitedByUserId: effectiveUserId
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al enviar la invitación');
+    const sendFriendRequest = async (friendId: string) => {
+      try {
+        console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
+        const response = await fetch(`${API_URL}/api/friends/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+        });
+        console.log("Respuesta del backend:", response);
+        const data = await response.json();
+        
+        if (data.success) {
+          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+        }
+      } catch (error) {
+        console.error("Error al enviar solicitud:", error);
       }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // Añadir el email a la lista de invitados para mostrarlo en la UI
-        setInvitedFriends([...invitedFriends, friendEmail]);
-        setFriendEmail('');
-        Alert.alert("Éxito", `Se ha enviado una invitación a ${friendEmail}`);
-      } else {
-        throw new Error(data.message || 'Error al procesar la invitación');
-      }
-    } catch (error) {
-      console.error("Error al invitar amigo:", error);
-      Alert.alert("Error", `No se pudo enviar la invitación: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-    }
-  };
+    };
 
   // Función para iniciar el seguimiento de ubicación
   const startLocationTracking = async () => {
@@ -628,7 +580,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       stopLocationTracking();
     };
   }, [mapId]);
-
+  
+  useEffect(() => {
+    if (mapUsers.length > 0) {
+      fetchDistricts();
+    }
+  }, [mapUsers]);
   // Verificar si el usuario se encuentra dentro de algún distrito y desbloquearlo si es necesario
   useEffect(() => {
     if (location && distritosBackend.length > 0 && userColorIndex >= 0) {
@@ -644,11 +601,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       }
       
       if (distritoEncontrado) {
-        const { id, nombre, isUnlocked, unlockedByUserId } = distritoEncontrado;
+        const { id, nombre, isUnlocked, unlockedByUserId, regionId } = distritoEncontrado;
         
         // Solo intentamos desbloquear si no está ya desbloqueado por otro usuario
         if (!isUnlocked) {
-          desbloquearDistrito(id);
+          desbloquearDistrito(id, regionId);
           if (!distritosVisitados.has(nombre)) {
             setDistritosVisitados(new Set(distritosVisitados).add(nombre));
             setDistritoActual(nombre);
@@ -664,82 +621,103 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     }
   }, [location, distritosBackend, userColorIndex]);
 
-  // Renderizar la información de los usuarios y sus colores
   const renderUserColorLegend = () => {
     return (
       <View style={styles.legendContainer}>
         <Text style={styles.legendTitle}>Usuarios</Text>
         <ScrollView style={{ maxHeight: 150 }}>
-          {mapUsers.map((user, index) => (
-            <View key={index} style={styles.legendItem}>
-              <View 
-                style={[
-                  styles.colorSquare, 
-                  { backgroundColor: USER_COLORS[user.colorIndex] }
-                ]} 
-              />
-              <Text style={styles.legendText}>
-                {user.username} {user.id === userId ? "(Tú)" : ""}
-              </Text>
-            </View>
-          ))}
+          {mapUsers.map((user, index) => {
+            // Usamos (user as any).color para acceder al valor asignado en fetchMapUsers
+            const assignedColor = (user as any).color || USER_COLORS[user.colorIndex] || "#000";
+            console.log(`Leyenda: Usuario ${user.username} tiene color ${assignedColor}`);
+            return (
+              <View key={index} style={styles.legendItem}>
+                <View 
+                  style={[
+                    styles.colorSquare, 
+                    { backgroundColor: assignedColor }
+                  ]} 
+                />
+                <Text style={styles.legendText}>
+                  {user.username} {user.id === userId ? "(Tú)" : ""}
+                </Text>
+              </View>
+            );
+          })}
         </ScrollView>
       </View>
     );
   };
+  
 
-  // Modal para invitar amigos
-  const renderInviteFriendsModal = () => {
-    return (
-      <Modal
-        visible={showInviteModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowInviteModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Invitar Amigos</Text>
-            <Text style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</Text>
-            
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Email del amigo"
-                value={friendEmail}
-                onChangeText={setFriendEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <TouchableOpacity style={styles.inviteButton} onPress={inviteFriend}>
-                <Text style={styles.inviteButtonText}>Invitar</Text>
-              </TouchableOpacity>
-            </View>
-            
-            {invitedFriends.length > 0 && (
-              <>
-                <Text style={styles.invitedTitle}>Amigos invitados:</Text>
-                {invitedFriends.map((email, index) => (
-                  <View key={index} style={styles.invitedItem}>
-                    <Text>{email}</Text>
-                    <TouchableOpacity onPress={() => {
-                      setInvitedFriends(invitedFriends.filter((_, i) => i !== index));
-                    }}>
-                      <Icon name="close" size={20} color="red" />
+    const fetchFriends = async (userId: string) => {
+      try {
+        console.log(`Solicitando amigos para el usuario: ${userId}`);
+        const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+        const data = await response.json();
+    
+        console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+    
+        if (Array.isArray(data)) {
+          // Si la respuesta es directamente un array de usuarios, lo asignamos
+          setFriends(data.map((user) => ({
+            id: user.id,
+            name: user.email, // Puedes usar otra propiedad si el backend la tiene
+          })));
+        } else {
+          console.warn("Formato inesperado en la respuesta de amigos:", data);
+        }
+      } catch (error) {
+        console.error("Error al obtener amigos:", error);
+      }
+    };
+
+    const renderInviteFriendsModal = () => {
+      return (
+        <Modal
+          visible={showInviteModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowInviteModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Invitar Amigos</Text>
+              <Text style={styles.modalSubtitle}>
+                Máximo 5 amigos (6 usuarios en total)
+              </Text>
+    
+              <FlatList
+                data={friends}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.invitedItem}>
+                    <Text style={styles.friendName}>{item.name}</Text>
+                    <TouchableOpacity 
+                      style={styles.inviteButton} 
+                      onPress={() => sendFriendRequest(item.id)}
+                    >
+                      <Text style={styles.inviteButtonText}>Invitar</Text>
                     </TouchableOpacity>
                   </View>
-                ))}
-              </>
-            )}
-            
-            <TouchableOpacity style={styles.closeButton} onPress={() => setShowInviteModal(false)}>
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
+                )}
+              />
+    
+              {/* Botón para cerrar el modal */}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowInviteModal(false)}
+              >
+                <Text style={styles.closeButtonText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    );
-  };
+        </Modal>
+      );
+    };
+    
+    
+  
 
   // Botón para recargar los datos
   const renderReloadButton = () => {
@@ -807,19 +785,22 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             }}
             showsUserLocation={true}
           >
-            {distritosBackend.map((distrito, index) => (
-              <Polygon
-                key={index}
-                coordinates={distrito.coordenadas}
-                strokeColor={"#808080"}
-                fillColor={
-                  distrito.isUnlocked && distrito.colorIndex !== undefined
-                    ? USER_COLORS[distrito.colorIndex]
-                    : "rgba(128, 128, 128, 0.7)"
-                }
-                strokeWidth={2}
-              />
-            ))}
+           {distritosBackend.map((distrito, index) => {
+  return (
+    <Polygon
+      key={index}
+      coordinates={distrito.coordenadas}
+      strokeColor={"#808080"}
+      fillColor={
+        distrito.isUnlocked && distrito.color
+          ? distrito.color
+          : "rgba(128, 128, 128, 0.7)"
+      }
+      strokeWidth={2}
+    />
+  );
+})}
+
             {pointsOfInterest.map((poi, index) => {
               // Convertir las coordenadas del POI (se asume que vienen en formato [lng, lat])
               const poiCoordinates = {
@@ -993,25 +974,29 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#0096C7", // Tono medio para el botón
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 15,
-    borderRadius: 5,
   },
   inviteButtonText: {
-    color: "white",
+    color: "#fff",
+    fontSize: 14,
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#f44336",
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
   },
   closeButtonText: {
-    color: "white",
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
   },
   invitedTitle: {
@@ -1026,6 +1011,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     paddingVertical: 8,
+  },
+  friendName: {
+    fontSize: 16,
+    color: "#023E8A",
+    flex: 1,
   },
   reloadButton: {
     position: "absolute",

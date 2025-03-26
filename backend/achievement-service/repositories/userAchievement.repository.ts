@@ -14,14 +14,21 @@ export class UserAchievementRepository {
         
     }
 
-    async createUserAchievement(userAchievementData: Omit<UserAchievement, 'id'>, achievementId:string): Promise<UserAchievement>{
-        const newUserAchievement = this.userAchievementRepo.create(userAchievementData)
+    //save UserAchievement
+    async create(userAchievementData: UserAchievement): Promise<UserAchievement> {
+        const userAchievement = this.userAchievementRepo.create(userAchievementData);
+        return await this.userAchievementRepo.save(userAchievement);
+
+    }    
+
+    
+    async createUserAchievement(userAchievementData: Omit<UserAchievement, 'id'>): Promise<UserAchievement>{
+        const newUserAchievement = this.userAchievementRepo.create()
         
-        
-        const logro = await this.achievementRepo.findOne({where: {id:achievementId}})
+        const logro = await this.achievementRepo.findOne({where: {id:userAchievementData.achievement.id}})
 
         if(!logro){
-            throw new Error(`El logro con id ${achievementId} no existe ` )
+            throw new Error(`El logro con id ${userAchievementData.achievement.id} no existe ` )
         }
 
         newUserAchievement.achievement = logro
@@ -31,18 +38,21 @@ export class UserAchievementRepository {
 
     }
 
-    async getAchievementsByUserId(userId: string): Promise<UserAchievement[]> {
+    async getAchievementsByUserId(userId: string): Promise<Achievement[]> {
         const logrosUsuario = await this.userAchievementRepo.find({
           where: { user: { id: userId } },
           relations: ["achievement"],
         });
-        return logrosUsuario;
+        return logrosUsuario.map(logrosUsuario => logrosUsuario.achievement);
       }
       
 
     async getUsersByAchievementId(achievementId:string): Promise<User[] | null>{
 
-        const usuariosConLogros = await this.userAchievementRepo.find({ where: { achievement: { id: achievementId } }})
+        const usuariosConLogros = await this.userAchievementRepo.find({
+            where: { achievement: { id: achievementId } },
+            relations: ["user"],
+          });
 
         return usuariosConLogros.map(userAchievement => userAchievement.user)
     }

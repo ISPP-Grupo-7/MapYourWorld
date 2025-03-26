@@ -85,6 +85,10 @@ export const sendEmail = async (options: EmailOptions): Promise<EmailResult> => 
   // 2. Enviar correo con las opciones proporcionadas
   // 3. Manejar errores y devolver resultado
   try {
+    // Validar campos obligatorios
+    if (!options.to || !options.subject || !options.html) {
+      throw new Error('Faltan campos obligatorios: to, subject y html son requeridos');
+    }
     const transporter = createTransporter();
     const mailOptions = {
       from: options.from || emailConfig.from,
@@ -96,6 +100,11 @@ export const sendEmail = async (options: EmailOptions): Promise<EmailResult> => 
       messageId: result.messageId
     };
   } catch (error) {
+    console.error('Error al enviar email:', error);
+    let errorMessage = 'Error desconocido al enviar el email';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     return {
       success: false,
       error: error as Error
@@ -126,7 +135,19 @@ export const sendVerificationEmail = async (
     <p>Gracias por registrarte en MapYourWorld. Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
     <p><a href="${verificationUrl}">Verificar cuenta</a></p>
   `;
-  const textContent = `Hola ${username},\n\nPor favor, verifica tu cuenta visitando el siguiente enlace:\n${verificationUrl}\n\nSi no solicitaste esta acción, ignora este correo.`;
+  const textContent = `
+    ¡Bienvenido a MapYourWorld!
+    
+    Hola ${username},
+    
+    Gracias por registrarte en MapYourWorld. Para completar tu registro y verificar tu cuenta, por favor visita el siguiente enlace:
+    
+    ${verificationUrl}
+    
+    Este enlace expirará en 24 horas.
+    
+    Si no has creado una cuenta en MapYourWorld, puedes ignorar este correo.
+  `;
   const mailOptions = {
     to: email,
     subject: 'Verifica tu cuenta en MapYourWorld',

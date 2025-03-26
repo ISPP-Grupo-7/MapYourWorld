@@ -10,6 +10,7 @@ import { API_URL } from '@constants/config';
 require ('@assets/styles/web.css')
 require ('@assets/styles/auth.css')
 import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
+import TermsAndConditions from '../UI/TermsAndConditions.web';
 
 
 const StyledView = styled(View);
@@ -40,6 +41,7 @@ const RegisterScreen = () => {
     firstName:'',
     picture:'',
     password: '',
+    acceptTerms: false,
   });
   const [errors, setErrors] = useState({
     email: '',
@@ -48,13 +50,16 @@ const RegisterScreen = () => {
     firstName:'',
     picture:'',
     password: '',
+    acceptTerms: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
+  const [termsAlreadyRead, setTermsAlreadyRead] = useState(false);
 
-  const handleChange = (field: keyof typeof formData, value: string) => {
+  const handleChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Limpiar error del campo cuando se modifica
-    if (errors[field]) {
+    if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
@@ -111,49 +116,74 @@ const RegisterScreen = () => {
       isValid = false;
     }
 
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = 'Debes leer y aceptar los términos y condiciones';
+    }
+
     setErrors(newErrors);
-    return isValid;
+    return { isValid, needsTermsAcceptance: !formData.acceptTerms && isValid };
   };
 
-    const { signUp } = useAuth();
-    const handleRegister = async () => {
-      if (!validateForm()) return;
+  const { signUp } = useAuth();
+  const handleRegister = async () => {
+    const { isValid, needsTermsAcceptance } = validateForm();
     
-      setIsLoading(true);
+    // Si todo está bien pero falta aceptar términos, mostramos el modal
+    if (needsTermsAcceptance) {
+      setTermsModalVisible(true);
+      return;
+    }
     
-      try {
-        const success = await signUp(formData);
-    
-        if (!success) {
-          throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
-        }
-    
-        // Registro exitoso
-        navigation.navigate('Map');
-      } catch (error: unknown) {
-        console.error('Error al registrarse:', error);
-    
-        // Si el error es una instancia de Error, usamos su mensaje
-        let errorMessage: string = 'Ocurrió un error inesperado';
-    
-        if (error instanceof Error) {
-          // Si el error es un objeto Error, usamos el mensaje directamente
-          errorMessage = error.message;
-        }
-    
-        // Mostrar el mensaje de error específico
-      } finally {
-        setIsLoading(false);
+    // Si no es válido, detenemos el proceso
+    if (!isValid) return;
+  
+    setIsLoading(true);
+  
+    try {
+      const success = await signUp(formData);
+  
+      if (!success) {
+        throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
       }
-    };
-    
-    
-    
+  
+      // Registro exitoso
+      navigation.navigate('Map');
+    } catch (error: unknown) {
+      console.error('Error al registrarse:', error);
+  
+      // Si el error es una instancia de Error, usamos su mensaje
+      let errorMessage: string = 'Ocurrió un error inesperado';
+  
+      if (error instanceof Error) {
+        // Si el error es un objeto Error, usamos el mensaje directamente
+        errorMessage = error.message;
+      }
+  
+      // Mostrar el mensaje de error específico
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   
-    const goToLogin = () => {
-      navigation.navigate('Login');
-    };
+  
+  const goToLogin = () => {
+    navigation.navigate('Login');
+  };
+
+  const openTermsModal = () => {
+    setTermsModalVisible(true);
+  };
+
+  const closeTermsModal = () => {
+    setTermsModalVisible(false);
+  };
+
+  const acceptTerms = () => {
+    handleChange('acceptTerms', true);
+    setTermsAlreadyRead(true);
+    closeTermsModal();
+  };
 
   // Estilos CSS personalizados para los campos de entrada
   const customInputStyles = `
@@ -179,6 +209,37 @@ const RegisterScreen = () => {
     button {
       box-sizing: border-box;
       height: 44px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .terms-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .terms-text {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .terms-link {
+      color: ${APP_TEAL};
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .error-text {
+      color: #e53e3e;
+      font-size: 14px;
+      margin-top: 5px;
     }
   `;
 
@@ -256,7 +317,7 @@ const RegisterScreen = () => {
                   {/* Apellidos */}
                   <div className="input-container" style={{ marginBottom: 20 }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Apellidos
+                      Apellido
                     </div>
                     <div style={{ position: 'relative' }}>
                       <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
@@ -267,7 +328,7 @@ const RegisterScreen = () => {
                       </div>
                       <input
                         type="text"
-                        placeholder="Apellidos"
+                        placeholder="Apellido"
                         value={formData.lastName}
                         onChange={(e) => handleChange('lastName', e.target.value)}
                         style={{ 
@@ -289,7 +350,7 @@ const RegisterScreen = () => {
                   {/* Nombre de usuario */}
                   <div className="input-container" style={{ marginBottom: 20 }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Nombre usuario
+                      Nombre de usuario
                     </div>
                     <div style={{ position: 'relative' }}>
                       <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
@@ -300,7 +361,7 @@ const RegisterScreen = () => {
                       </div>
                       <input
                         type="text"
-                        placeholder="Nombre usuario"
+                        placeholder="Nombre de usuario"
                         value={formData.username}
                         onChange={(e) => handleChange('username', e.target.value)}
                         style={{ 
@@ -319,16 +380,17 @@ const RegisterScreen = () => {
                     )}
                   </div>
 
-                  {/*URL de avatar */}
+                  {/* URL de imagen */}
                   <div className="input-container" style={{ marginBottom: 20 }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      URL de avatar
+                      URL de avatar (opcional)
                     </div>
                     <div style={{ position: 'relative' }}>
                       <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="12" cy="7" r="4"></circle>
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21 15 16 10 5 21"></polyline>
                         </svg>
                       </div>
                       <input
@@ -397,72 +459,84 @@ const RegisterScreen = () => {
                           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
                       </div>
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={formData.password}
-        onChange={(e) => handleChange('password', e.target.value)}
-        style={{ 
-          width: '100%',
-          paddingLeft: '35px',
-          paddingRight: '10px',
-          height: '44px',
-          borderColor: errors.password ? '#e53e3e' : undefined
-        }}
-      />
-    </div>
-    {errors.password && (
-      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-        {errors.password}
-      </div>
-    )}
-  </div>
-</div>
+                      <input
+                        type="password"
+                        placeholder="Contraseña"
+                        value={formData.password}
+                        onChange={(e) => handleChange('password', e.target.value)}
+                        style={{ 
+                          width: '100%',
+                          paddingLeft: '35px',
+                          paddingRight: '10px',
+                          height: '44px',
+                          borderColor: errors.password ? '#e53e3e' : undefined
+                        }}
+                      />
+                    </div>
+                    {errors.password && (
+                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                        {errors.password}
+                      </div>
+                    )}
+                  </div>
 
-            
-            <div style={{ width: '100%' }}>
-              <button 
-                onClick={handleRegister}
-                style={{
-                  width: '100%',
-                  backgroundColor: APP_TEAL,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px 0',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  marginBottom: '20px',
-                  height: '44px',
-                  transition: 'background-color 0.2s'
-                }}
-              >
-                {isLoading ? 'Cargando...' : 'Registrarse'}
-              </button>
-              
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 15 }}>
-                <div style={{ color: '#666', fontSize: '15px' }}>
-                  ¿Ya tienes una cuenta?{' '}
-                </div>
-                <a 
-                  onClick={goToLogin}
-                  style={{ 
-                    color: APP_TEAL, 
-                    marginLeft: '5px', 
-                    fontWeight: 'bold', 
-                    cursor: 'pointer',
-                    fontSize: '15px',
-                    textDecoration: 'none'
-                  }}
-                >
-                  Iniciar sesión
-                </a>
-              </div>
+                  {/* Términos y condiciones */}
+                  <div className="terms-container">
+                    <div className="terms-text">
+                      Para registrarte, debes leer y aceptar{' '}
+                      <span 
+                        className="terms-link"
+                        onClick={openTermsModal}
+                      >
+                        los términos y condiciones
+                      </span>
+                    </div>
+                  </div>
+                  {errors.acceptTerms && (
+                    <div className="error-text">{errors.acceptTerms}</div>
+                  )}
+
+                  <button 
+                    onClick={handleRegister}
+                    disabled={isLoading}
+                    style={{ 
+                      backgroundColor: APP_TEAL,
+                      color: 'white',
+                      padding: '10px 15px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      width: '100%',
+                      fontWeight: 'bold',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      marginBottom: '20px',
+                      marginTop: '10px'
+                    }}
+                  >
+                    {isLoading ? 'Registrando...' : 'Registrarse'}
+                  </button>
+
+                  <div style={{ textAlign: 'center', color: '#666', fontSize: '14px' }}>
+                    ¿Ya tienes una cuenta?{' '}
+                    <span 
+                      onClick={goToLogin}
+                      style={{ color: APP_TEAL, cursor: 'pointer', fontWeight: '500' }}
+                    >
+                      Inicia sesión
+                    </span>
+                  </div>
             </div>
           </div>
         </StyledView>
       </StyledScrollView>
+
+      {/* Modal de términos y condiciones */}
+      <TermsAndConditions 
+        isVisible={termsModalVisible}
+        onClose={closeTermsModal}
+        onAccept={acceptTerms}
+        alreadyRead={termsAlreadyRead}
+      />
     </ImageBackground>
   );
 };

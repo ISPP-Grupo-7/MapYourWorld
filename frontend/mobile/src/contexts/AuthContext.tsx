@@ -8,6 +8,7 @@ interface User {
   id: string;
   username: string;
   email?: string;
+  role: string;
 }
 
 interface AuthContextData {
@@ -185,7 +186,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const testUser = {
         id: 'user-456',
         username: 'Usuario de Prueba',
-        email: 'test@example.com'
+        email: 'test@example.com',
+        role: 'USER'
       };
       
       // Guardar en AsyncStorage

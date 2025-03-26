@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { Subscription } from "../models/subscription.model";
+import { PlanType, Subscription } from "../models/subscription.model";
 import { AppDataSource } from "../../database/appDataSource";
 
 export default class SubscriptionRepository {
@@ -33,6 +33,39 @@ export default class SubscriptionRepository {
         const subscription = await this.getById(subscriptionId);
         Object.assign(subscription, subscriptionData);
         return await this.subscriptionRepo.save(subscription);
+    }
+
+
+
+    async getSuscriptionByUserId(userId:string): Promise<Subscription>{
+
+        const suscription = await this.subscriptionRepo.findOne({where:{user:{id:userId}}, relations:['user']});
+    
+
+        if(!suscription){
+            throw new Error(`No se ha encontrado ninguna suscripción asociada al usuario con id: ${userId}`)
+        }
+
+        return suscription;
+    }
+
+
+    async increaseSuscription(userId:string): Promise<void>{
+        const suscripcion_usuario = await this.subscriptionRepo.findOne({where:{user:{id:userId}}, relations:['user']})
+
+
+        if(!suscripcion_usuario){
+            throw new Error(`No se ha encontrado ninguna suscripción asociada al usuario con id: ${userId}`)
+        }
+
+        const now = new Date();
+
+        suscripcion_usuario.startDate= new Date(now.getTime());
+        suscripcion_usuario.endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 días después
+        suscripcion_usuario.is_active = true
+        suscripcion_usuario.plan = PlanType.PREMIUM
+        
+        this.subscriptionRepo.save(suscripcion_usuario)
     }
 
     async delete(id: string): Promise<void> {

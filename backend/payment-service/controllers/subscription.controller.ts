@@ -54,3 +54,13 @@ export const deleteSubscription = async (req: Request, res: Response) => {
         res.status(400).json({ error: (error as Error).message });
     }
 };
+
+export const incrementarSuscripcion = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+        await subscriptionService.incrementarSuscripcion(userId);
+        res.status(200).json({ message: "Suscripción incrementada exitosamente" });
+    } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
+    }
+};

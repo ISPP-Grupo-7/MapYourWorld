@@ -1,15 +1,24 @@
 import { Request, Response, NextFunction} from 'express';
 import * as UserAchievementService from '../services/userAchievement.service';
-
+import * as AuthService from '../../auth-service/src/services/auth.service';
+import * as AchievementService from '../services/achievement.service'; 
 
 /**
  * Crea un nuevo usuario-logro (desbloquea un logro para un usuario)
- * POST /user-achievements
+ * POST /user-achievements/:userId/:achievementId
  */
-export const createAchievement = async (req: Request, res: Response, next: NextFunction) => {
+export const createUserAchievement = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const {userAchievementData, achievementId} = req.body;
-    const newAchievement = await UserAchievementService.createUserAchievement(userAchievementData, achievementId);
+    const {userId, achievementId} = req.params;
+    const user = await AuthService.getUserById(userId);
+    const achivement = await AchievementService.getAchievementById(achievementId);
+    if(!user){
+      throw new Error("Usuario no encontrado");
+    }
+    if(!achivement){
+      throw new Error("Logro no encontrado");
+    }
+    const newAchievement = await UserAchievementService.createUserAchievement(user, achivement);
     res.status(201).json(newAchievement);
   } catch (error) {
     next(error);

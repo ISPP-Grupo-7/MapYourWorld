@@ -4,7 +4,8 @@
         createSubscription,
         updateSubscription,
         getSubscriptionById,
-        deleteSubscription
+        deleteSubscription,
+        incrementarSuscripcion
     } from "../controllers/subscription.controller";
 
     const router = Router();
@@ -14,5 +15,6 @@
     router.put("/:id", updateSubscription);
     router.get("/:id", getSubscriptionById);
     router.delete("/:subscriptionId", deleteSubscription);
+    router.put("/upgrade/:userId", incrementarSuscripcion);
 
     export default router;

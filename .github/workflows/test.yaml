@@ -23,5 +23,8 @@ jobs:
     - name: Install dependencies
       run: npm install --legacy-peer-deps && npm install reflect-metadata --save
       
-    - name: Run tests
-      run: npm run test
+    - name: Run backend tests
+      run: npm test --workspace=backend
+      
+    - name: Run frontend tests
+      run: npm test --workspace=frontend

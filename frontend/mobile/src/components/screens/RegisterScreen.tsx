@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
@@ -8,7 +8,8 @@ import { styles as globalStyles } from '../../assets/styles/styles';
 import { API_URL } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
-
+import { Ionicons } from '@expo/vector-icons';
+import TermsAndConditions from '../UI/TermsAndConditions';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -30,6 +31,7 @@ const RegisterScreen = () => {
     firstName:'',
     picture:'',
     password: '',
+    acceptTerms: false,
   });
   const [errors, setErrors] = useState({
     email: '',
@@ -38,13 +40,16 @@ const RegisterScreen = () => {
     firstName:'',
     picture:'',
     password: '',
+    acceptTerms: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
+  const [termsAlreadyRead, setTermsAlreadyRead] = useState(false);
 
-  const handleChange = (field: keyof typeof formData, value: string) => {
+  const handleChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Limpiar error del campo cuando se modifica
-    if (errors[field]) {
+    if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
@@ -102,13 +107,26 @@ const RegisterScreen = () => {
       isValid = false;
     }
     
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = 'Debes leer y aceptar los términos y condiciones';
+    }
 
     setErrors(newErrors);
-    return isValid;
+    return { isValid, needsTermsAcceptance: !formData.acceptTerms && isValid };
   };
+
   const { signUp } = useAuth();
   const handleRegister = async () => {
-    if (!validateForm()) return;
+    const { isValid, needsTermsAcceptance } = validateForm();
+    
+    // Si todo está bien pero falta aceptar términos, mostramos el modal
+    if (needsTermsAcceptance) {
+      setTermsModalVisible(true);
+      return;
+    }
+    
+    // Si no es válido, detenemos el proceso
+    if (!isValid) return;
 
     setIsLoading(true);
 
@@ -140,13 +158,22 @@ const RegisterScreen = () => {
     }
   };
 
-
-
-
-
-
   const goToLogin = () => {
     navigation.navigate('Login');
+  };
+
+  const openTermsModal = () => {
+    setTermsModalVisible(true);
+  };
+
+  const closeTermsModal = () => {
+    setTermsModalVisible(false);
+  };
+
+  const acceptTerms = () => {
+    handleChange('acceptTerms', true);
+    setTermsAlreadyRead(true);
+    closeTermsModal();
   };
 
   return (
@@ -233,6 +260,21 @@ const RegisterScreen = () => {
               icon="lock"
             />
 
+            {/* Botón para términos y condiciones en lugar de checkbox */}
+            <View style={styles.termsContainer}>
+              <Text style={styles.termsText}>
+                Para registrarte, debes leer y aceptar{' '}
+              </Text>
+              <TouchableOpacity onPress={openTermsModal}>
+                <Text style={styles.termsLink}>
+                  los términos y condiciones
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {errors.acceptTerms ? (
+              <Text style={styles.errorText}>{errors.acceptTerms}</Text>
+            ) : null}
+
             <Button 
               title="Registrarse" 
               onPress={handleRegister}
@@ -255,6 +297,14 @@ const RegisterScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal de términos y condiciones */}
+      <TermsAndConditions 
+        isVisible={termsModalVisible}
+        onClose={closeTermsModal}
+        onAccept={acceptTerms}
+        alreadyRead={termsAlreadyRead}
+      />
     </ImageBackground>
   );
 };
@@ -316,6 +366,25 @@ const styles = StyleSheet.create({
     color: '#64748b',
     textAlign: 'center',
     marginBottom: 24,
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  termsText: {
+    color: '#64748b',
+  },
+  termsLink: {
+    color: '#14b8a6',
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#f43f5e',
+    fontSize: 12,
+    marginTop: 2,
   },
   loginPromptContainer: {
     flexDirection: 'row',

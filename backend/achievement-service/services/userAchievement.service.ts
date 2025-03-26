@@ -7,26 +7,30 @@
 import {UserAchievement} from '../models/userAchievement.model';
 import {UserAchievementRepository} from '../repositories/userAchievement.repository';
 import { User } from '../../auth-service/src/models/user.model';
+import { AuthRepository } from '../../auth-service/src/repositories/auth.repository';
+import { AchievementRepository } from '../repositories/achievement.repository';
+import { Achievement } from '../models/achievement.model';
 
 const repo = new UserAchievementRepository();
+const repoAuth = new AuthRepository();
+const repoAchievement = new AchievementRepository();
 
-/**
- * Crea un nuevo logro
- * @param UserAchievementData Datos de la entrada usuario-logro a crear
- */
 
-//crear logro
+
+//desbloquear logro para usuario
 export const createUserAchievement = async (
-  UserAchievementData: Omit<UserAchievement, 'id'>,
-  achievementId: string
+  user: User, achievement: Achievement
 ): Promise<UserAchievement> => {
   try {
-    if (!UserAchievementData.user || !UserAchievementData.achievement || !UserAchievementData.dateEarned) {
-      throw new Error("No pueden faltar datos de user-achievement.")
-    }
-    const newUserAchievement = repo.createUserAchievement(UserAchievementData, achievementId);
+    const newUserAchievement = new UserAchievement();
+    newUserAchievement.user = user;
+    newUserAchievement.achievement = achievement;
+    newUserAchievement.dateEarned = new Date();
 
-    console.log("uusario-logro creado correctamente:", newUserAchievement);
+    console.log("usario-logro creado correctamente:", newUserAchievement);
+    
+    repo.create(newUserAchievement)
+
     return newUserAchievement;
 
   } catch (error) {
@@ -37,7 +41,7 @@ export const createUserAchievement = async (
 
 //obtener todos los logros de un usuario
 
-export const getAchievementsByUser = async (userId: string): Promise<UserAchievement[]> => {
+export const getAchievementsByUser = async (userId: string): Promise<Achievement[]> => {
   try {
     const userAchievements = await repo.getAchievementsByUserId(userId)
     return userAchievements;

@@ -31,7 +31,7 @@ export const getAchievements = async (req: Request, res: Response, next: NextFun
 
 /**
  * Obtiene un logro por nombre
- * GET /achievements/name/:name
+ * GET /achievements/:achievementName
  */
 export const getAchievementByName = async (req: Request, res: Response, next: NextFunction) => {
   try {

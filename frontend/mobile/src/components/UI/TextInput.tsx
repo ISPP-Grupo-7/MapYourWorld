@@ -58,7 +58,7 @@ const TextInput = ({
         
         {secureTextEntry ? (
           <StyledTouchableOpacity onPress={togglePasswordVisibility} className="ml-2">
-            <Icon name={isPasswordVisible ? 'eye-off' : 'eye'} size={20} color="#9CA3AF" />
+            <Icon name={isPasswordVisible ? 'eye-off' : 'eye'} size={20} color={isPasswordVisible ? "#2bbbad" : "#9CA3AF"} />
           </StyledTouchableOpacity>
         ) : null}
       </StyledView>

@@ -6,21 +6,21 @@ const router: Router = Router();
 
 /**
  * Crea un nuevo usuario-logro (desbloquea un logro para un usuario)
- * POST /user-achievements
+ * POST /user-achievements/:userId/:achievementId
  */
-router.post('/user-achievements', userAchievementController.createAchievement);
+router.post('/:userId/:achievementId', userAchievementController.createUserAchievement);
 
 /**
- * Obtiene todos los logros (UserAchievement) obtenidos por un usuario.
+ * Obtiene todos los logros (Achievement) obtenidos por un usuario.
  * GET /user-achievements/user/:userId
  */
-router.get('/user-achievements/user/:userId', userAchievementController.getAchievementsByUser);
+router.get('/achievements/:userId', userAchievementController.getAchievementsByUser);
 
 /**
  * Obtiene todos los usuarios que han desbloqueado un logro específico.
  * GET /user-achievements/achievement/:achievementId
  */
-router.get('/user-achievements/achievement/:achievementId', userAchievementController.getUsersByAchievement);
+router.get('/users/:achievementId', userAchievementController.getUsersByAchievement);
 
 
 export default router;

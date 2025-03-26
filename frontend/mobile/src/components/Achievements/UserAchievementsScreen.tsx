@@ -58,7 +58,7 @@ const UserAchievementsScreen = () => {
           return;
         }
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/user-achievements/user-achievements/user/${user.id}`, {
+        const response = await fetch(`${API_URL}/api/user-achievements/user/${user.id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -125,7 +125,7 @@ const UserAchievementsScreen = () => {
         iconUrl: achievementIcon || iconPlaceholder,
         points: achievementPoints,
       };      
-      const response = await fetch(`${API_URL}/api/achievements/achievements`, {
+      const response = await fetch(`${API_URL}/api/achievements`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(achievementData),
