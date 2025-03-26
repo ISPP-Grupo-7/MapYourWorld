@@ -112,14 +112,19 @@ const SocialScreenWeb = () => {
   };
 
   const joinMap = async (friendId: string, status: 'ACCEPTED' | 'DELETED', mapId: string | null) => {
-    if (!userId || !mapId) return;
+    console.log(userId, friendId, mapId);
+    
     try {
       const response = await fetch(`${API_URL}/api/collabMap/join/${mapId}/${userId}`, {
         method: 'PUT',
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: JSON.stringify({ friendId }),
       });
       const data = await response.json();
       if (data.success) {
-        if (status === 'ACCEPTED') {
+        if (status === 'ACCEPTED' && user) {
           Alert.alert('Invitación Aceptada', 'Te has unido al mapa.');
         } else {
           Alert.alert('Invitación Rechazada', 'Has rechazado la invitación.');
