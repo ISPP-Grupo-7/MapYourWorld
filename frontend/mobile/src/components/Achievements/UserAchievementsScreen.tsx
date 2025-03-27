@@ -5,11 +5,12 @@ import { API_URL } from '@/constants/config';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { getCurrentUser } from '@/services/auth.service';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/navigation/types';
 
 interface Achievement {
   name: string;
   description: string;
-  dateEarned: string;
   points: number;
   iconUrl: string;
 }
@@ -26,11 +27,12 @@ const UserAchievementsScreen = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [achievementName, setAchievementName] = useState<string>("");
   const [achievementDescription, setAchievementDescription] = useState<string>("");
-  const [achievementDate, setAchievementDate] = useState<string>("");
   const [achievementPoints, setAchievementPoints] = useState<number>(0);
   const [achievementIcon, setAchievementIcon] = useState<string>(iconPlaceholder);
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -41,12 +43,12 @@ const UserAchievementsScreen = () => {
           headers: { "Content-Type": "application/json" },
         });
         if (!response.ok) {
-          throw new Error(`Error en la solicitud de subscripcion: ${response.statusText}`);
+          throw new Error(`Error en la solicitud de subscripción: ${response.statusText}`);
         }
         const data = await response.json();
         setSubscription(data);
       } catch (error) {
-        console.error("Error al obtener la subscripcion", error);
+        console.error("Error al obtener la subscripción", error);
       }
     };
 
@@ -58,7 +60,7 @@ const UserAchievementsScreen = () => {
           return;
         }
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/user-achievements/user/${user.id}`, {
+        const response = await fetch(`${API_URL}/api/user-achievements/achievements/${user.id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -66,12 +68,12 @@ const UserAchievementsScreen = () => {
           throw new Error(`Error en la solicitud: ${response.statusText}`);
         }
         const data = await response.json();
+        console.log(data);
         const transformed = data.map((item: any) => ({
-          name: item.achievement.name,
-          description: item.achievement.description,
-          dateEarned: item.dateEarned,
-          points: item.achievement.points,
-          iconUrl: item.achievement.iconUrl,
+          name: item.achievement ? item.achievement.name : item.name,
+          description: item.achievement ? item.achievement.description : item.description,
+          points: item.achievement ? item.achievement.points : item.points,
+          iconUrl: item.achievement ? item.achievement.iconUrl : item.iconUrl,
         }));
         setAchievements(transformed);
         setLoading(false);
@@ -86,22 +88,6 @@ const UserAchievementsScreen = () => {
     fetchAchievements();
   }, [user]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text>Cargando logros...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text>{error}</Text>
-      </View>
-    );
-  }
-
   const createAchievement = async () => {
     if (!achievementName.trim()) {
       Alert.alert("Error", "Por favor, ingresa un nombre para el logro");
@@ -112,7 +98,6 @@ const UserAchievementsScreen = () => {
       console.log("Creando logro:", {
         nombre: achievementName,
         descripción: achievementDescription,
-        fecha: achievementDate,
         iconUrl: achievementIcon,
       });
       if (subscription && subscription.plan !== "PREMIUM") {
@@ -121,10 +106,9 @@ const UserAchievementsScreen = () => {
       const achievementData = {
         name: achievementName,
         description: achievementDescription || "Logro desbloqueado",
-        achievementDate: achievementDate || new Date().toISOString(),
         iconUrl: achievementIcon || iconPlaceholder,
         points: achievementPoints,
-      };      
+      };
       const response = await fetch(`${API_URL}/api/achievements`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,15 +116,15 @@ const UserAchievementsScreen = () => {
       });
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("La respuesta del servidor no es válida (no es JSON)");
+        throw new Error("Error al crear el logro");
       }
       const data = await response.json();
       console.log("Respuesta del servidor:", data);
       if (data.success) {
         setAchievementName("");
         setAchievementDescription("");
-        setAchievementDate(new Date().toISOString());
         setAchievementIcon("default_icon.png");
+        setAchievementPoints(0);
         setShowCreateModal(false);
         Alert.alert("Éxito", "Logro creado correctamente");
       } else {
@@ -152,102 +136,107 @@ const UserAchievementsScreen = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
-  const renderCreateAchievementModal = () => (subscription && subscription.plan === "PREMIUM" ? (
-    <Modal
-      visible={showCreateModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowCreateModal(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Crear Logro</Text>
-          <Text style={styles.inputLabel}>Nombre del logro*</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: Explorador Maestro"
-            value={achievementName}
-            onChangeText={setAchievementName}
-            maxLength={30}
-          />
-          <Text style={styles.inputLabel}>Descripción</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Descripción del logro"
-            value={achievementDescription}
-            onChangeText={setAchievementDescription}
-            multiline={true}
-            maxLength={100}
-          />
-          <Text style={styles.inputLabel}>Fecha del logro</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="YYYY-MM-DD"
-            value={achievementDate}
-            onChangeText={setAchievementDate}
-          />
-          <Text style={styles.inputLabel}>Puntos</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Puntos del logro"
-            value={achievementPoints.toString()}
-            onChangeText={(text) => setAchievementPoints(Number(text))}
-            keyboardType="numeric"
-          />
-          <Text style={styles.inputLabel}>Ícono del logro</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="URL del icono"
-            value={achievementIcon}
-            onChangeText={setAchievementIcon}
-          />
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setShowCreateModal(false)}
-            >
-              <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.createButton]}
-              onPress={createAchievement}
-            >
-              <Text style={styles.buttonText}>Crear</Text>
-            </TouchableOpacity>
+  const renderCreateAchievementModal = () =>
+    subscription && subscription.plan === "PREMIUM" ? (
+      <Modal
+        visible={showCreateModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCreateModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Crear Logro</Text>
+            <Text style={styles.inputLabel}>Nombre del logro*</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: Explorador Maestro"
+              value={achievementName}
+              onChangeText={setAchievementName}
+              maxLength={30}
+            />
+            <Text style={styles.inputLabel}>Descripción</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Descripción del logro"
+              value={achievementDescription}
+              onChangeText={setAchievementDescription}
+              multiline={true}
+              maxLength={100}
+            />
+            <Text style={styles.inputLabel}>Puntos</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Puntos del logro"
+              value={achievementPoints.toString()}
+              onChangeText={(text) => setAchievementPoints(Number(text))}
+              keyboardType="numeric"
+            />
+            <Text style={styles.inputLabel}>Ícono del logro</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="URL del icono"
+              value={achievementIcon}
+              onChangeText={setAchievementIcon}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowCreateModal(false)}
+              >
+                <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.createButton]}
+                onPress={createAchievement}
+              >
+                <Text style={styles.buttonText}>Crear</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-  ) : (
-    <Modal
-      visible={showCreateModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowCreateModal(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Oops</Text>
-          <Text style={styles.inputLabel}>Tienes que ser usuario premium para desbloquear esta funcionalidad</Text>
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setShowCreateModal(false)}
-            >
-              <Text style={[styles.buttonText, { color: "#fff" }]}>Volver</Text>
-            </TouchableOpacity>
+      </Modal>
+    ) : (
+      <Modal
+        visible={showCreateModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCreateModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Oops</Text>
+            <Text style={styles.inputLabel}>
+              Tienes que ser usuario premium para desbloquear esta funcionalidad
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowCreateModal(false)}
+              >
+                <Text style={[styles.buttonText, { color: "#fff" }]}>Volver</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.createButton]}
+                onPress={() => {
+                  setShowCreateModal(false);
+                  navigation.navigate('Payment');
+                }}
+              >
+                <Text style={styles.buttonText}>Mejorar a Premium</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-  ));
+      </Modal>
+    );
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView style={styles.container}>
       <View>
-        <View style={styles.header} className="p-4">
+        <View style={styles.header}>
           <Text style={styles.headerTitle}>Logros</Text>
           <TouchableOpacity style={styles.createAchievementButton} onPress={() => setShowCreateModal(true)}>
             <Icon name="add" size={24} color="white" />
@@ -255,16 +244,15 @@ const UserAchievementsScreen = () => {
         </View>
         {achievements.map((ach, index) => (
           <TouchableOpacity key={index} onPress={() => { setSelectedAchievement(ach); setShowDetailModal(true); }}>
-            <View className="bg-white rounded-xl shadow-md p-5 mb-4 flex-row">
+            <View style={styles.achievementCard}>
               <Image
                 source={{ uri: ach.iconUrl }}
                 style={{ width: 50, height: 50, marginRight: 15 }}
               />
-              <View className="flex-1">
-                <Text className="text-xl font-bold text-teal-600">{ach.name}</Text>
-                <Text className="text-gray-600">{ach.description}</Text>
-                <Text className="text-sm text-gray-500">Obtenido el: {ach.dateEarned}</Text>
-                <Text className="text-sm text-gray-500">Puntos: {ach.points}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.achievementName}>{ach.name}</Text>
+                <Text style={styles.achievementDescription}>{ach.description}</Text>
+                <Text style={styles.achievementInfo}>Puntos: {ach.points}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -286,7 +274,6 @@ const UserAchievementsScreen = () => {
                 style={{ width: 100, height: 100, alignSelf: "center", marginBottom: 20 }}
               />
               <Text style={styles.inputLabel}>{selectedAchievement.description}</Text>
-              <Text style={styles.inputLabel}>Obtenido el: {selectedAchievement.dateEarned}</Text>
               <Text style={styles.inputLabel}>Puntos: {selectedAchievement.points}</Text>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -303,6 +290,10 @@ const UserAchievementsScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "rgb(249,250,251)",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -324,6 +315,29 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
+  },
+  achievementCard: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 3,
+    marginHorizontal: 10,
+  },
+  achievementName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0284C7",
+  },
+  achievementDescription: {
+    fontSize: 14,
+    color: "#555",
+  },
+  achievementInfo: {
+    fontSize: 12,
+    color: "#888",
   },
   modalContainer: {
     flex: 1,
