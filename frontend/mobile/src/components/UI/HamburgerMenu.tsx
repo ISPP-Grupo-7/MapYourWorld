@@ -43,12 +43,6 @@ const HamburgerMenu = () => {
             </TouchableOpacity>
 
           
-            <TouchableOpacity 
-              onPress={() => handleNavigate('UserAchievementsScreen')} 
-              style={styles.menuItem}
-            >
-              <Text style={styles.menuItemText}>Logros</Text>
-            </TouchableOpacity>
             
             <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Inicio</Text>
