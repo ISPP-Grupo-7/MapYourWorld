@@ -1,8 +1,7 @@
 version: 2
 updates:
-  # 📦 Actualizaciones de dependencias para el frontend móvil/web (React Native)
   - package-ecosystem: "npm"
-    directory: "/"  # tu package.json está en la raíz
+    directory: "/"  # raíz
     schedule:
       interval: "weekly"
     target-branch: "develop"
@@ -11,13 +10,38 @@ updates:
       - "dependencies"
       - "dependabot"
 
-  # ☕ Actualizaciones para el backend (Java / Maven)
-  - package-ecosystem: "maven"
-    directory: "/backend"  # ajustado a tu carpeta backend
+  - package-ecosystem: "npm"
+    directory: "/frontend/mobile"
     schedule:
       interval: "weekly"
     target-branch: "develop"
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "dependabot"
+
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    target-branch: "develop"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "npm"
+    directory: "/backend/api-gateway"
+    schedule:
+      interval: "weekly"
+    target-branch: "develop"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "npm"
+    directory: "/shared"
+    schedule:
+      interval: "weekly"
+    target-branch: "develop"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
