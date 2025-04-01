@@ -6,7 +6,11 @@
 import * as crypto from 'crypto';
 
 // Constantes para cifrado
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-secure-key-needs-32-characters';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
+if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length !== 32) {
+  throw new Error('ENCRYPTION_KEY must be exactly 32 characters');
+}
+
 const ALGORITHM = 'aes-256-cbc';
 
 /**
@@ -16,18 +20,15 @@ const ALGORITHM = 'aes-256-cbc';
  */
 export const encryptAES = (text: string): string => {
   try {
-    // Generar un IV aleatorio
-    const iv = crypto.randomBytes(16);
-    
-    // Usar crypto.createHash para crear una clave de 32 bytes a partir de la contraseña
-    const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
-    
-    // Crear cifrador y cifrar el texto
-    // @ts-expect-error - Ignoramos errores de tipos ya que la función es correcta
+    const iv = crypto.randomBytes(16); // IV aleatorio
+
+    // Derivar clave con PBKDF2 (más seguro que sha256)
+    const key = crypto.pbkdf2Sync(ENCRYPTION_KEY, 'some-salt', 100000, 32, 'sha256');
+
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     // Devolver IV y texto cifrado concatenados
     return `${iv.toString('hex')}:${encrypted}`;
   } catch (error) {
@@ -48,19 +49,16 @@ export const decryptAES = (encryptedText: string): string => {
     if (parts.length !== 2) {
       throw new Error('Formato de texto cifrado inválido');
     }
-    
+
     const iv = Buffer.from(parts[0], 'hex');
     const encrypted = parts[1];
-    
-    // Generar la misma clave a partir de la contraseña
-    const key = crypto.createHash('sha256').update(String(ENCRYPTION_KEY)).digest();
-    
-    // Crear descifrador y descifrar
-    // @ts-expect-error - Ignoramos errores de tipos ya que la función es correcta
+
+    const key = crypto.pbkdf2Sync(ENCRYPTION_KEY, 'some-salt', 100000, 32, 'sha256');
+
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   } catch (error) {
     console.error('Error al descifrar:', error);
@@ -95,10 +93,7 @@ export const generateSHA512 = (text: string): string => {
 export const hashPassword = (password: string, existingSalt?: string): { hash: string; salt: string } => {
   // Generar salt si no se proporcionó uno
   const salt = existingSalt || crypto.randomBytes(16).toString('hex');
-  
-  // Crear hash PBKDF2
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-  
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
   return { hash, salt };
 };
 
@@ -110,8 +105,8 @@ export const hashPassword = (password: string, existingSalt?: string): { hash: s
  * @returns true si la contraseña coincide
  */
 export const verifyPassword = (password: string, hash: string, salt: string): boolean => {
-  const hashVerify = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-  return hash === hashVerify;
+  const hashVerify = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(hashVerify, 'hex'));
 };
 
 /**
@@ -121,4 +116,4 @@ export const verifyPassword = (password: string, hash: string, salt: string): bo
  */
 export const generateSecureToken = (length = 48): string => {
   return crypto.randomBytes(length).toString('hex');
-}; 
+};
