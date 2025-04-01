@@ -183,7 +183,7 @@ export const unlockDistrict = async (
 
 };
 
-export const getUserUnlockedDistricts = async (): Promise<District[]> => {
+export const getUnlockedDistricts = async (): Promise<District[]> => {
   // TODO: Implementar la obtención de distritos desbloqueados por un usuario
   // 1. Consultar los registros de desbloqueo del usuario
   const districts = await repo.getDistrictsUnlocked();
@@ -195,7 +195,7 @@ export const getUserUnlockedDistricts = async (): Promise<District[]> => {
  * Obtiene los distritos asociados a un mapa específico
  * @param mapId ID del mapa
  */
-export const getDistrictsByMapId = async (mapId: string): Promise<any[]> => {
+export const getDistrictsByMapId = async (mapId: string): Promise<District[]> => {
   try {
     console.log(`Buscando distritos para el mapa ${mapId}`);
     const districts = await repo.getDistrictsByMapId(mapId);
@@ -214,18 +214,10 @@ export const getDistrictsByMapId = async (mapId: string): Promise<any[]> => {
  */
 export const getUserDistrictsWithColors = async (userId: string): Promise<UserDistrict[]> => {
   try {
-    console.log(`Buscando distritos con colores para el usuario ${userId}`);
-    const userDistrictRepository = AppDataSource.getRepository(UserDistrict);
 
     // Realizamos la consulta con relaciones y nos aseguramos de que no haya distritos nulos
-    const userDistricts = await userDistrictRepository
-      .createQueryBuilder("userDistrict")
-      .leftJoinAndSelect("userDistrict.district", "district")
-      .leftJoinAndSelect("userDistrict.user", "user")
-      .where("user.id = :userId", { userId })
-      .getMany();
+    const userDistricts = await repo.getUserDistrictsByUserId(userId);
 
-    console.log(`Se encontraron ${userDistricts.length} distritos para el usuario ${userId}`);
 
     // Filtramos los que puedan tener distrito nulo
     const validUserDistricts = userDistricts.filter(ud => ud.district !== null);

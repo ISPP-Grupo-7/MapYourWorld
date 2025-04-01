@@ -98,7 +98,7 @@ export const unlockDistrict = async (req: Request, res: Response): Promise<void>
 export const getUserUnlockedDistricts = async (req: Request, res: Response): Promise<void> => {
   try {
   
-    const districts = await DistrictService.getUserUnlockedDistricts();
+    const districts = await DistrictService.getUnlockedDistricts();
 
     res.status(200).json({ success: true, districts });
   } catch (error) {

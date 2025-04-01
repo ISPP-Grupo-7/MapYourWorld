@@ -41,7 +41,7 @@ export default class MapRepository {
         await this.mapRepo.save(map);
 
         
-        const lista_mapas_unidos = []
+        const lista_mapas_unidos = user.maps_joined || [];
         lista_mapas_unidos.push(map);
         user.maps_joined = lista_mapas_unidos;
         await this.userRepo.save(user);

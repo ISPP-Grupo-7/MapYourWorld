@@ -125,4 +125,21 @@ export default class DistrictRepository {
           )
           .getMany();
       }
+
+    async getUserDistrictsByUserId(userId:string): Promise<UserDistrict[]> {
+        const user = await this.userRepo.findOne({where: {id:userId}})
+        if(!user){
+            throw new Error(`El usuario con id ${userId}, no existe`)
+        }
+
+        const userDistricts = await this.userDistrictRepo
+        .createQueryBuilder("userDistrict")
+        .leftJoinAndSelect("userDistrict.district", "district")
+        .leftJoinAndSelect("userDistrict.user", "user")
+        .where("user.id = :userId", { userId })
+        .getMany();
+  
+
+        return userDistricts
+    }
 }
