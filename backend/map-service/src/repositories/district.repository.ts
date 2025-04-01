@@ -1,23 +1,17 @@
 import { Repository } from 'typeorm';
 import { District } from '../models/district.model'; // Importa tu entidad
 import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
-import { Map } from '../models/map.model';
-import { Region } from '../models/region.model';
 import { User } from '../../../auth-service/src/models/user.model';
 import { UserDistrict } from '../models/user-district.model';
 
 export default class DistrictRepository {
     private districtRepo: Repository<District>;
-    private regionRepo: Repository<Region>;
-    private mapRepo: Repository<Map>
     private userRepo: Repository<User>
     private userDistrictRepo: Repository<UserDistrict>
 
 
     constructor() {
         this.districtRepo = AppDataSource.getRepository(District);
-        this.regionRepo = AppDataSource.getRepository(Region);
-        this.mapRepo = AppDataSource.getRepository(Map)
         this.userRepo = AppDataSource.getRepository(User)
         this.userDistrictRepo = AppDataSource.getRepository(UserDistrict)
     }
@@ -84,17 +78,6 @@ export default class DistrictRepository {
 
     async getDistrictsUnlocked(): Promise<District[]> {
         return await this.districtRepo.find({ where: { isUnlocked: true } });
-    }
-
-    async findDistrictContainingLocation(latitude: number, longitude: number): Promise<District | null> {
-        const result = await this.districtRepo.query(`
-            SELECT * 
-            FROM district 
-            WHERE ST_Within(ST_SetSRID(ST_MakePoint($1, $2), 4326), boundaries)
-            LIMIT 1
-        `, [longitude, latitude]);
-
-        return result;
     }
 
     async getDistrictsByMapId(mapId: string): Promise<District[]> {

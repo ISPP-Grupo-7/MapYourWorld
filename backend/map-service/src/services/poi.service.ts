@@ -3,9 +3,7 @@
  * Gestiona la creación, consulta, actualización y eliminación de puntos de interés
  */
 
-import { AppDataSource } from '../../../database/appDataSource';
 import { PointOfInterest } from '../models/poi.model';
-import { Between, Repository, IsNull, Not } from 'typeorm';
 import { PointOfInterestRepository } from '../repositories/poi.repostory';
 import {AuthRepository} from '../../../auth-service/src/repositories/auth.repository';
 import { Role } from '../../../auth-service/src/models/user.model';
@@ -62,16 +60,6 @@ export const createPOIInAllMaps = async (
 
   await poiRepository.createPoiInAllMaps(poiData);
 };
-
-
-
-
-
-
-
-
-
-
 
 
 /**

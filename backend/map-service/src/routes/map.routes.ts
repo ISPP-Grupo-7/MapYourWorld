@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import { createMap, getMapById, updateMap, deleteMap, createMapColaborative, getUsersOnMapById, createOrGetCollaborativeMap, inviteUserToMap, getCollaborativeMapsForUser, getPrincipalMapForUser } from '../controllers/map.controller';
+import { getMapById, updateMap, deleteMap, createMapColaborative, getUsersOnMapById, createOrGetCollaborativeMap, inviteUserToMap, getCollaborativeMapsForUser, getPrincipalMapForUser } from '../controllers/map.controller';
 
 const router: Router = Router();
-
-router.post('/create', createMap);
 
 router.post('/createColaborative', createMapColaborative);
 

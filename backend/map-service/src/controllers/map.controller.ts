@@ -1,31 +1,5 @@
 import { Request, Response } from 'express';
 import * as MapService from '../services/map.service';
-import { User } from '../../../auth-service/src/models/user.model';
-
-/**
- * Crea un nuevo mapa
- */
-
-
-export const createMap = async (req: Request, res: Response): Promise<void> => {
-  try {
-
-    console.log("req.body", req.body); 
-    const {userId} = req.body;
-
-    if (!userId) {
-      res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
-      return;
-    }
-
-    const newMap = await MapService.createMap(userId);
-    res.status(201).json({ success: true, message: 'mapa creado correctamente', Map: newMap });
-  } catch (error) {
-    console.error('Error al crear mapa:', error);
-    res.status(500).json({ success: false, message: error instanceof Error ? error.message : 'Error al crear mapa' });
-  }
-};
-
 
 
 export const createMapColaborative = async (req: Request, res: Response): Promise<void> => {
