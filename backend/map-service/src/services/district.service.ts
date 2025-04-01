@@ -3,7 +3,6 @@
  * Gestiona la creación, consulta y desbloqueo de distritos del mapa
  */
 
-//import { publishEvent } from '@shared/libs/rabbitmq';
 import { District } from '../models/district.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import DistrictRepository from '../repositories/district.repository';
