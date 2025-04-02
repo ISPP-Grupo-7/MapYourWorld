@@ -15,7 +15,7 @@ import { createMap } from '../../../map-service/src/services/map.service';
 import { createDistricts } from '../../../map-service/src/services/district.service';
 import MapRepository from '../../../map-service/src/repositories/map.repository';
 import { PlanType, Subscription } from '../../../payment-service/models/subscription.model';
-import SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
+import { SubscriptionRepository} from '../../../payment-service/repositories/subscription.repository';
 import { createPOIsOnLagMaps } from '../../../map-service/src/services/poi.service';
 
 
@@ -43,8 +43,13 @@ export const registerUser = async (userData: any): Promise<User> => {
     // 2. Verificar que el email no existe en la base de datos
     const existingUser = await repo.findByEmail(userData.email);
     if (existingUser) {
-      throw new Error('El usuario ya existe con este email');
+      throw new Error('Ya existe un usuario con este email');
     }
+    const existingUsername = await repo.findByUsername(userData.username);
+    if (existingUsername) {
+      throw new Error('Ya existe un usuario con este nombre de usuario');
+    }
+
 
     // 3. Crear el perfil de usuario
     const newProfile = new UserProfile();
@@ -64,7 +69,20 @@ export const registerUser = async (userData: any): Promise<User> => {
     newUser.profile = savedProfile;
 
     // Guardar el usuario en la base de datos
-    const savedUser = await repo.save(newUser);
+    let savedUser = await repo.save(newUser);
+
+    // 4. Generar token JWT
+    const token = generateToken(
+      { sub: savedUser.id, email: savedUser.email },
+      process.env.JWT_SECRET || 'development-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    // 5. Guardar el token en el campo token_data
+    savedUser.token_data = token;
+    savedUser =await repo.save(savedUser);
+
+
 
     // 5. Crear mapa y distritos para el usuario
     try {

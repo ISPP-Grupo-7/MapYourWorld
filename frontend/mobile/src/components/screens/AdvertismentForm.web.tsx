@@ -9,11 +9,14 @@ import { API_URL } from "@/constants/config";
 type AdvertisementFormNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdvertisementForm'>;
 
 interface AdvertisementPoint {
-    email: string,
-    name: string,
-    description?: string,
-    longitude: string,
-    latitude: string,
+  email: string,
+  name: string,
+  description: string,
+  address: string,
+  city: string,
+  postalcode: string,
+  country: string,
+  comments: string
 }
 
 const MAIL_ADDRESS = 'mapyourworld.group7@gmail.com'
@@ -22,16 +25,22 @@ const AdvertisementForm = () => {
   const [ point, setPoint ] = useState<AdvertisementPoint>({
     email:'',
     name:'',
-    description:undefined,
-    longitude:'',
-    latitude:''
+    description:'',
+    address:'',
+    city: '',
+    postalcode: '',
+    country: '',
+    comments: ''
   })
   const [errors, setErrors] = useState({
     email: '',
     name:'',
     description:'',
-    longitude:'',
-    latitude:'',
+    address:'',
+    city: '',
+    postalcode: '',
+    country: '',
+    comments: ''
   });
   const [loading, setLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -57,32 +66,30 @@ const AdvertisementForm = () => {
         isValid = false;
     }
 
-    // validación de la longitud y la latitud
-    if (!point.longitude.trim()) {
-        newErrors.longitude = 'La longitud es obligatoria';
-        isValid = false;
-    } else if (/[a-zA-Z]/.test(point.longitude)) {
-        newErrors.longitude = 'La longitud debe ser un número'
-        isValid = false;
-    } else if (Math.abs(Number(point.longitude))>180) {
-        newErrors.longitude = 'La longitud debe estar entre -180º y 180º'
+    // validación de la dirección
+    if (!point.address.trim()) {
+        newErrors.address = 'La dirección es obligatoria';
         isValid = false;
     }
-
-    if (!point.latitude.trim()) {
-        newErrors.latitude = 'La latitud es obligatoria';
+    if (!point.city.trim()) {
+        newErrors.city = 'La ciudad es obligatoria';
         isValid = false;
-    } else if (/[a-zA-Z]/.test(point.latitude)) {
-        newErrors.latitude = 'La latitud debe ser un número'
+    }
+    if (!point.postalcode.trim()) {
+        newErrors.postalcode = 'El código postal es obligatorio';
         isValid = false;
-    } else if (Math.abs(Number(point.longitude))>90) {
-        newErrors.latitude = 'La latitud debe estar entre -90º y 90º'
+    } else if (!/\d/.test(point.postalcode)) {
+        newErrors.postalcode = 'Código postal no válido';
+        isValid = false;
+    }
+    if (!point.country.trim()) {
+        newErrors.country = 'El país es obligatorio';
         isValid = false;
     }
 
     setErrors(newErrors);
     return isValid;
-  }
+}
 
   const handleChange = (field: keyof typeof point, value: string) => {
     setPoint(prev => ({ ...prev, [field]: value }));
@@ -98,33 +105,33 @@ const AdvertisementForm = () => {
     setLoading(true);
 
     const subject = `Solicitud de punto publicitario: ${point.name}`
-    const body = `<p>Solicitud de punto publicitario con los siguientes datos:`
-      + `<br>Nombre del punto: ${point.name}`
-      + `${point.description ?? `<br>Descripción del punto: ${point.description}`}`
-      + `<br>Coordenadas del punto (longitud, latitud): ${point.longitude}, ${point.latitude}`
-      + `<br>Email de contacto: ${point.email}`
-      + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}</p>`;
+    const body = `<h3>Datos del punto</h3><p>Nombre: ${point.name}`
+        + `${point.description ? `<br>Descripción: ${point.description}` : ``}`
+        + `<br>Dirección: ${point.address}, ${point.city} ${point.postalcode}, ${point.country}</p>`
+        + `<h3>Datos de contacto</h3><p>Correo electrónico: ${point.email}`
+        + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}`
+        + `${point.comments ? `<br>Comentarios del solicitante: ${point.comments}</p>` : `</p>`}`;
 
     const response = await fetch(`${API_URL}/api/email/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: MAIL_ADDRESS,
-        to: MAIL_ADDRESS,
-        subject: subject,
-        html: body,
-      }),
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            from: MAIL_ADDRESS,
+            to: MAIL_ADDRESS,
+            subject: subject,
+            html: body,
+        }),
     });
 
     const data = await response.json();
     
     if (response.ok) {
-      setIsSent(true);
+        setIsSent(true);
     } else {
-      setLoading(false)
-      Alert.alert('Error', data.message || 'No se pudo procesar la solicitud.');
+        Alert.alert('Lo sentimos, no pudimos procesar la solicitud en estos momentos.');
+        setLoading(false);
     }
     
   };
@@ -234,10 +241,10 @@ const AdvertisementForm = () => {
                   )}
                 </div>
 
-                {/* Nombre */}
+                {/* Name */}
                 <div className="input-container" style={{ marginBottom: 20 }}>
                   <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                    Nombre
+                    Nombre del punto
                   </div>
                   <div style={{ position: 'relative' }}>
                     <input
@@ -261,7 +268,7 @@ const AdvertisementForm = () => {
                   )}
                 </div>
 
-                {/* Descripción */}
+                {/* Description */}
                 <div className="input-container" style={{ marginBottom: 20 }}>
                   <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
                     Descripción
@@ -288,63 +295,137 @@ const AdvertisementForm = () => {
                   )}
                 </div>
 
-                {/* Coordenadas */}
-                <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                    Coordenadas
+                {/* Address */}
+                <div className="input-container" style={{ marginBottom: 20 }}>
+                  <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                    Dirección
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      placeholder="Dirección"
+                      value={point.address}
+                      onChange={(e) => handleChange('address', e.target.value)}
+                      style={{ 
+                        width: '100%',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                        height: '44px',
+                        borderColor: errors.address ? '#e53e3e' : undefined
+                      }}
+                    />
+                  </div>
+                  {errors.address && (
+                    <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                      {errors.address}
+                    </div>
+                  )}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'row', gap: 5, marginBottom: 20 }}>
-                  {/* Longitud */}
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 5, }}>
+                  {/* City */}
                   <div className="input-container" style={{ width: '50%', }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Longitud
+                      Ciudad
                     </div>
                     <div style={{ position: 'relative' }}>
                       <input
-                        type="number"
-                        placeholder="Longitud"
-                        value={point.longitude}
-                        onChange={(e) => handleChange('longitude', e.target.value)}
+                        placeholder="Ciudad"
+                        value={point.city}
+                        onChange={(e) => handleChange('city', e.target.value)}
                         style={{ 
                           width: '100%',
                           paddingLeft: '10px',
                           paddingRight: '10px',
                           height: '44px',
-                          borderColor: errors.longitude ? '#e53e3e' : undefined
+                          borderColor: errors.city ? '#e53e3e' : undefined
                         }}
                       />
                     </div>
-                    {errors.longitude && (
+                    {errors.city && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.longitude}
+                        {errors.city}
                       </div>
                     )}
                   </div>
-                  {/* Latitude */}
+                  {/* Postal code */}
                   <div className="input-container" style={{ width: '50%', }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Latitud
+                      Código postal
                     </div>
                     <div style={{ position: 'relative' }}>
                       <input
                         type="number"
-                        placeholder="Latitud"
-                        value={point.latitude}
-                        onChange={(e) => handleChange('latitude', e.target.value)}
+                        placeholder="Código postal"
+                        value={point.postalcode}
+                        onChange={(e) => handleChange('postalcode', e.target.value)}
                         style={{ 
                           width: '100%',
                           paddingLeft: '10px',
                           paddingRight: '10px',
                           height: '44px',
-                          borderColor: errors.name ? '#e53e3e' : undefined
+                          borderColor: errors.postalcode ? '#e53e3e' : undefined
                         }}
                       />
                     </div>
-                    {errors.latitude && (
+                    {errors.postalcode && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.latitude}
+                        {errors.postalcode}
                       </div>
                     )}
                   </div>
+                </div>
+                {/* Country */}
+                <div className="input-container" style={{ marginBottom: 20 }}>
+                  <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                    País
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      placeholder="País"
+                      value={point.country}
+                      onChange={(e) => handleChange('country', e.target.value)}
+                      style={{ 
+                        width: '100%',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                        height: '44px',
+                        borderColor: errors.country ? '#e53e3e' : undefined
+                      }}
+                    />
+                  </div>
+                  {errors.country && (
+                    <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                      {errors.country}
+                    </div>
+                  )}
+                </div>
+
+                {/* Comments */}
+                <div className="input-container" style={{ marginBottom: 20 }}>
+                  <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                    Comentarios
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="textarea"
+                      placeholder="Comentarios"
+                      value={point.comments}
+                      onChange={(e) => handleChange('comments', e.target.value)}
+                      style={{ 
+                        width: '100%',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                        height: '44px',
+                        borderColor: errors.comments ? '#e53e3e' : undefined
+                      }}
+                    />
+                  </div>
+                  {errors.comments && (
+                    <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                      {errors.comments}
+                    </div>
+                  )}
                 </div>
 
                 {/* Botón */}

@@ -422,30 +422,42 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         </View>
       ) : (
         <>
+        
+       
           <Modal
             visible={showForm}
             transparent={true}
             onRequestClose={() => setShowForm(false)}
           >
-            <PuntoDeInteresForm
-              pointOfInterest={pointOfInterest}
-              setPointOfInterest={setPointOfInterest}
-              setShowForm={setShowForm}
-              onSave={(newPOI: any) => {
-                // Convertir el POI recién creado al formato esperado
-                const poiConverted = {
-                  ...newPOI,
-                  
-                  location: {
-                    type: "Point",
-                    coordinates: [newPOI.longitude, newPOI.latitude],
-                  },
-                };
-                setPointsOfInterest((prev) => [...prev, poiConverted]);
-              }}
-              showAlert={showAlert}
-            />
+             <AlertModal 
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        onClose={closeAlertModal}
+      />
+            {/* Capa de fondo con fondo oscuro */}
+            <View style={styles.modalOverlay}>
+              {/* Contenedor del formulario centrado */}
+                <PuntoDeInteresForm
+                  pointOfInterest={pointOfInterest}
+                  setPointOfInterest={setPointOfInterest}
+                  setShowForm={setShowForm}
+                  onSave={(newPOI: any) => {
+                    // Convertir el POI recién creado al formato esperado
+                    const poiConverted = {
+                      ...newPOI,
+                      location: {
+                        type: "Point",
+                        coordinates: [newPOI.longitude, newPOI.latitude],
+                      },
+                    };
+                    setPointsOfInterest((prev) => [...prev, poiConverted]);
+                  }}
+                  showAlert={showAlert}
+                />
+            </View>
           </Modal>
+
           <MapView
             style={styles.map}
             initialRegion={{
@@ -572,10 +584,14 @@ const styles = StyleSheet.create({
   },
   // Estilos para el modal de alerta
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0, 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro
+    justifyContent: 'center', // Centrado verticalmente
+    alignItems: 'center', // Centrado horizontalmente
   },
   modalContainer: {
     width: '85%',
@@ -584,6 +600,8 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     elevation: 5,
+    maxHeight: '80%', // Limitar el tamaño del modal para evitar que sea demasiado grande
+    overflow: 'scroll',
   },
   modalContent: {
     width: '100%',

@@ -1176,10 +1176,11 @@ const MapScreen = () => {
             ` }} />
 
             <h1 style={{
-              fontSize: '22px',
+              fontSize: 24,
               fontWeight: 'bold',
               textAlign: 'center',
-              marginBottom: '16px'
+              marginBottom: 8,
+              color: '#1e293b',
             }}>
               Registrar Punto de Interés
             </h1>

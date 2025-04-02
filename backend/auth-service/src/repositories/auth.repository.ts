@@ -31,6 +31,18 @@ export class AuthRepository {
     return this.repository.findOneBy({ email });
   }
 
+    /**
+   * Encuentra un usuario por su email
+   * @param username Email del usuario
+   */
+    async findByUsername(username: string): Promise<User | null> {
+      return this.repository.findOne({
+        where: { profile: { username: username } },
+        relations: ['profile'], 
+      });
+    }
+    
+
   /**
    * Busca un usuario con su contraseña (para login)
    * @param email Email del usuario

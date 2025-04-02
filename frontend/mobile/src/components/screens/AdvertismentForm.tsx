@@ -13,8 +13,11 @@ interface AdvertisementPoint {
     email: string,
     name: string,
     description: string,
-    longitude: string,
-    latitude: string,
+    address: string,
+    city: string,
+    postalcode: string,
+    country: string,
+    comments: string
 }
 
 const MAIL_ADDRESS = 'mapyourworld.group7@gmail.com'
@@ -24,15 +27,21 @@ const AdvertisementForm = () => {
         email:'',
         name:'',
         description:'',
-        longitude:'',
-        latitude:''
+        address:'',
+        city: '',
+        postalcode: '',
+        country: '',
+        comments: ''
         })
     const [errors, setErrors] = useState({
         email: '',
         name:'',
         description:'',
-        longitude:'',
-        latitude:'',
+        address:'',
+        city: '',
+        postalcode: '',
+        country: '',
+        comments: ''
         });
     const [loading, setLoading] = useState(false);
     const [isSent, setIsSent] = useState(false);
@@ -58,26 +67,24 @@ const AdvertisementForm = () => {
             isValid = false;
         }
 
-        // validación de la longitud y la latitud
-        if (!point.longitude.trim()) {
-            newErrors.longitude = 'La longitud es obligatoria';
-            isValid = false;
-        } else if (/[a-zA-Z]/.test(point.longitude)) {
-            newErrors.longitude = 'La longitud debe ser un número'
-            isValid = false;
-        } else if (Math.abs(Number(point.longitude))>180) {
-            newErrors.longitude = 'La longitud debe estar entre -180º y 180º'
+        // validación de la dirección
+        if (!point.address.trim()) {
+            newErrors.address = 'La dirección es obligatoria';
             isValid = false;
         }
-
-        if (!point.latitude.trim()) {
-            newErrors.latitude = 'La latitud es obligatoria';
+        if (!point.city.trim()) {
+            newErrors.city = 'La ciudad es obligatoria';
             isValid = false;
-        } else if (/[a-zA-Z]/.test(point.latitude)) {
-            newErrors.latitude = 'La latitud debe ser un número'
+        }
+        if (!point.postalcode.trim()) {
+            newErrors.postalcode = 'El código postal es obligatorio';
             isValid = false;
-        } else if (Math.abs(Number(point.longitude))>90) {
-            newErrors.latitude = 'La latitud debe estar entre -90º y 90º'
+        } else if (!/\d/.test(point.postalcode)) {
+            newErrors.postalcode = 'Código postal no válido';
+            isValid = false;
+        }
+        if (!point.country.trim()) {
+            newErrors.country = 'El país es obligatorio';
             isValid = false;
         }
 
@@ -91,12 +98,12 @@ const AdvertisementForm = () => {
         setLoading(true);
 
         const subject = `Solicitud de punto publicitario: ${point.name}`
-        const body = `<p>Solicitud de punto publicitario con los siguientes datos:`
-            + `<br>Nombre del punto: ${point.name}`
-            + `${point.description ?? `<br>Descripción del punto: ${point.description}`}`
-            + `<br>Coordenadas del punto (longitud, latitud): ${point.longitude}, ${point.latitude}`
-            + `<br>Email de contacto: ${point.email}`
-            + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}</p>`;
+        const body = `<h3>Datos del punto</h3><p>Nombre: ${point.name}`
+        + `${point.description ? `<br>Descripción: ${point.description}` : ``}`
+        + `<br>Dirección: ${point.address}, ${point.city} ${point.postalcode}, ${point.country}</p>`
+        + `<h3>Datos de contacto</h3><p>Correo electrónico: ${point.email}`
+        + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}`
+        + `${point.comments ? `<br>Comentarios: ${point.comments}</p>` : `</p>`}`;
 
         const response = await fetch(`${API_URL}/api/email/send`, {
             method: 'POST',
@@ -116,7 +123,7 @@ const AdvertisementForm = () => {
         if (response.ok) {
             setIsSent(true);
         } else {
-            Alert.alert('Error', data.message || 'Lo sentimos, no pudimos procesar la solicitud en estos momentos.');
+            Alert.alert('Lo sentimos, no pudimos procesar la solicitud en estos momentos.');
             setLoading(false);
         }
         
@@ -163,7 +170,7 @@ const AdvertisementForm = () => {
                     
                     {/* Form */}
                     <View>
-                        <Text>Email</Text>
+                        <Text>Correo electrónico</Text>
                         <TextInput
                         placeholder="Email de contacto"
                         value={point.email}
@@ -174,7 +181,7 @@ const AdvertisementForm = () => {
                         />
                     </View>
                     <View>
-                        <Text>Nombre</Text>
+                        <Text>Nombre del punto</Text>
                         <TextInput
                         placeholder="Nombre"
                         value={point.name}
@@ -195,32 +202,64 @@ const AdvertisementForm = () => {
                         }
                         />
                     </View>
-                    <Text>Coordenadas</Text>
-                    <View style={styles.coordinatesInput}>
-                        <View style={styles.coordinateInput}>
-                            <Text style={styles.secondaryText}>Longitud</Text>
+                    <View>
+                        <Text>Dirección</Text>
+                        <TextInput
+                        placeholder="Dirección"
+                        value={point.address}
+                        error={errors.address}
+                        onChangeText={(text) =>
+                            setPoint({ ...point, address: text })
+                        }
+                        />
+                    </View>
+                    <View style={styles.cityInputs}>
+                        <View style={styles.cityInput}>
+                            <Text>Ciudad</Text>
                             <TextInput
-                            placeholder="Longitud"
-                            keyboardType = 'numeric'
-                            value={point.longitude}
-                            error={errors.longitude}
+                            placeholder="Ciudad"
+                            value={point.city}
+                            error={errors.city}
                             onChangeText={(text) =>
-                                setPoint({ ...point, longitude: text })
+                                setPoint({ ...point, city: text })
                             }
                             />
                         </View>
-                        <View style={styles.coordinateInput}>
-                            <Text style={styles.secondaryText}>Latitud</Text>
+                        <View style={styles.cityInput}>
+                            <Text>Código postal</Text>
                             <TextInput
-                            placeholder="Latitud"
+                            placeholder="Código postal"
                             keyboardType = 'numeric'
-                            value={point.latitude}
-                            error={errors.latitude}
+                            value={point.postalcode}
+                            error={errors.postalcode}
                             onChangeText={(text) =>
-                                setPoint({ ...point, latitude: text })
+                                setPoint({ ...point, postalcode: text })
                             }
                             />
                         </View>
+                    </View>
+                    <View>
+                        <Text>País</Text>
+                        <TextInput
+                        placeholder="País"
+                        value={point.country}
+                        error={errors.country}
+                        onChangeText={(text) =>
+                            setPoint({ ...point, country: text })
+                        }
+                        />
+                    </View>
+
+                    <View>
+                        <Text>Comentarios</Text>
+                        <TextInput
+                        placeholder="Comentarios"
+                        value={point.comments}
+                        error={errors.comments}
+                        onChangeText={(text) =>
+                            setPoint({ ...point, comments: text })
+                        }
+                        />
                     </View>
 
                     {/* Submit button */}
@@ -300,16 +339,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  coordinatesInput: {
+  cityInputs: {
     flexDirection: 'row',
     gap: 5,
   },
-  coordinateInput: {
+  cityInput: {
     width: '50%',
   },
   secondaryText: {
     color: '#64748b',
   },
+  noBottomMargin: {
+    marginBottom: 0,
+  }
 });
 
 export default AdvertisementForm; 

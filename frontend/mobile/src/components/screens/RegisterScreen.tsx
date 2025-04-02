@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
 import { Ionicons } from '@expo/vector-icons';
 import TermsAndConditions from '../UI/TermsAndConditions';
+import * as ImagePicker from 'expo-image-picker';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -26,19 +27,18 @@ const RegisterScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [formData, setFormData] = useState({
     email: '',
-    username:'',
-    lastName:'',
-    firstName:'',
-    picture:'',
+    username: '',
+    lastName: '',
+    firstName: '',
+    picture: '', // Solo para mostrar la imagen seleccionada localmente
     password: '',
     acceptTerms: false,
   });
   const [errors, setErrors] = useState({
     email: '',
-    username:'',
-    lastName:'',
-    firstName:'',
-    picture:'',
+    username: '',
+    lastName: '',
+    firstName: '',
     password: '',
     acceptTerms: '',
   });
@@ -47,10 +47,9 @@ const RegisterScreen = () => {
   const [termsAlreadyRead, setTermsAlreadyRead] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Limpiar error del campo cuando se modifica
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -70,8 +69,6 @@ const RegisterScreen = () => {
       newErrors.lastName = 'El apellido es obligatorio';
       isValid = false;
     }
-
-
     if (!formData.email.trim()) {
       newErrors.email = 'El correo electrónico es obligatorio';
       isValid = false;
@@ -79,34 +76,25 @@ const RegisterScreen = () => {
       newErrors.email = 'Introduce un correo electrónico válido';
       isValid = false;
     }
-
     if (!formData.password) {
       newErrors.password = 'La contraseña es obligatoria';
       isValid = false;
     } else if (formData.password.length < 8) {
       newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
       isValid = false;
-    } else if (!/[A-Z]/.test(formData.password)) { // Al menos 1 letra mayúscula
+    } else if (!/[A-Z]/.test(formData.password)) {
       newErrors.password = 'La contraseña debe contener al menos una letra mayúscula';
       isValid = false;
-    } else if (!/[a-z]/.test(formData.password)) { // Al menos 1 letra minúscula
+    } else if (!/[a-z]/.test(formData.password)) {
       newErrors.password = 'La contraseña debe contener al menos una letra minúscula';
       isValid = false;
-    } else if (!/[0-9]/.test(formData.password)) { // Al menos 1 número
+    } else if (!/[0-9]/.test(formData.password)) {
       newErrors.password = 'La contraseña debe contener al menos un número';
       isValid = false;
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) { // Al menos 1 carácter especial
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
       newErrors.password = 'La contraseña debe contener al menos un carácter especial';
       isValid = false;
     }
-
-    const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-
-    if (formData.picture && !urlRegex.test(formData.picture.trim())) {
-      newErrors.picture = 'Debe ser una URL válida';
-      isValid = false;
-    }
-    
     if (!formData.acceptTerms) {
       newErrors.acceptTerms = 'Debes leer y aceptar los términos y condiciones';
     }
@@ -118,43 +106,52 @@ const RegisterScreen = () => {
   const { signUp } = useAuth();
   const handleRegister = async () => {
     const { isValid, needsTermsAcceptance } = validateForm();
-    
-    // Si todo está bien pero falta aceptar términos, mostramos el modal
+
     if (needsTermsAcceptance) {
       setTermsModalVisible(true);
       return;
     }
-    
-    // Si no es válido, detenemos el proceso
+
     if (!isValid) return;
 
     setIsLoading(true);
 
     try {
-      // Llamada al método signUp del AuthContext
-      // signUp solo recibe (username, email, password) según tu implementación,
-      // por lo que se ignoran los demás campos o podrías modificar signUp para incluirlos.
-      const success = await signUp(formData);
-      
+      // Excluir el campo `picture` antes de enviar los datos
+      const { picture, ...formDataWithoutPicture } = formData;
+
+      const success = await signUp(formDataWithoutPicture);
+
       if (!success) {
         throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
       }
-      
-      // Registro exitoso, navegamos a la pantalla principal
+
       navigation.navigate('Map');
     } catch (error: unknown) {
       console.error('Error al registrarse:', error);
-
-      let errorMessage: string = 'Ocurrió un error inesperado';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = (error as { message: string }).message;
-      }
-
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImagePick = async () => {
+    // Solicitar permisos para acceder a la galería
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert('Permiso denegado', 'Se requiere acceso a tus archivos para seleccionar una imagen.');
+      return;
+    }
+
+    // Abrir el selector de imágenes
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      handleChange('picture', result.assets[0].uri); // Guardar la URI de la imagen seleccionada
     }
   };
 
@@ -185,20 +182,14 @@ const RegisterScreen = () => {
       <View style={globalStyles.semi_transparent_overlay} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.container}>
-          {/* Formulario */}
           <View style={styles.formContainer}>
             <View style={styles.logoContainer}>
               <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
               <Text style={styles.appName}>MapYourWorld</Text>
             </View>
-            
-            <Text style={styles.title}>
-              Crea tu cuenta
-            </Text>
-            <Text style={styles.subtitle}>
-              Comienza a documentar tus aventuras hoy mismo
-            </Text>
 
+            <Text style={styles.title}>Crea tu cuenta</Text>
+            <Text style={styles.subtitle}>Comienza a documentar tus aventuras hoy mismo</Text>
 
             <TextInput
               label="Nombre"
@@ -218,7 +209,6 @@ const RegisterScreen = () => {
               error={errors.lastName}
               icon="user"
             />
-
             <TextInput
               label="Nombre usuario"
               placeholder="Nombre usuario"
@@ -229,16 +219,22 @@ const RegisterScreen = () => {
               icon="user"
             />
 
-            <TextInput
-              label="URL avatar"
-              placeholder="URL avatar"
-              value={formData.picture}
-              onChangeText={(text) => handleChange('picture', text)}
-              autoCapitalize="words"
-              error={errors.picture}
-              icon="user"
-            />
-            
+            {/* Selección de imagen */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Avatar (opcional)</Text>
+              <View style={styles.imagePickerContainer}>
+                {formData.picture ? (
+                  <Image source={{ uri: formData.picture }} style={styles.avatarPreview} />
+                ) : (
+                  <View style={styles.avatarPlaceholder} />
+                )}
+                <TouchableOpacity onPress={handleImagePick} style={styles.imagePickerButton}>
+                  <Text style={styles.imagePickerButtonText}>
+                    {formData.picture ? 'Cambiar imagen' : 'Seleccionar imagen'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
 
             <TextInput
               label="Correo electrónico"
@@ -249,7 +245,6 @@ const RegisterScreen = () => {
               error={errors.email}
               icon="mail"
             />
-
             <TextInput
               label="Contraseña"
               placeholder="Contraseña"
@@ -260,23 +255,16 @@ const RegisterScreen = () => {
               icon="lock"
             />
 
-            {/* Botón para términos y condiciones en lugar de checkbox */}
             <View style={styles.termsContainer}>
-              <Text style={styles.termsText}>
-                Para registrarte, debes leer y aceptar{' '}
-              </Text>
+              <Text style={styles.termsText}>Para registrarte, debes leer y aceptar{' '}</Text>
               <TouchableOpacity onPress={openTermsModal}>
-                <Text style={styles.termsLink}>
-                  los términos y condiciones
-                </Text>
+                <Text style={styles.termsLink}>los términos y condiciones</Text>
               </TouchableOpacity>
             </View>
-            {errors.acceptTerms ? (
-              <Text style={styles.errorText}>{errors.acceptTerms}</Text>
-            ) : null}
+            {errors.acceptTerms ? <Text style={styles.errorText}>{errors.acceptTerms}</Text> : null}
 
-            <Button 
-              title="Registrarse" 
+            <Button
+              title="Registrarse"
               onPress={handleRegister}
               isLoading={isLoading}
               fullWidth
@@ -284,13 +272,8 @@ const RegisterScreen = () => {
             />
 
             <View style={styles.loginPromptContainer}>
-              <Text style={styles.loginPromptText}>
-                ¿Ya tienes una cuenta?{' '}
-              </Text>
-              <Text 
-                style={styles.loginLink}
-                onPress={goToLogin}
-              >
+              <Text style={styles.loginPromptText}>¿Ya tienes una cuenta?{' '}</Text>
+              <Text style={styles.loginLink} onPress={goToLogin}>
                 Inicia sesión
               </Text>
             </View>
@@ -298,8 +281,7 @@ const RegisterScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Modal de términos y condiciones */}
-      <TermsAndConditions 
+      <TermsAndConditions
         isVisible={termsModalVisible}
         onClose={closeTermsModal}
         onAccept={acceptTerms}
@@ -398,6 +380,42 @@ const styles = StyleSheet.create({
     color: '#14b8a6',
     fontWeight: '500',
   },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  imagePickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarPreview: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 16,
+  },
+  avatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#e2e8f0',
+    marginRight: 16,
+  },
+  imagePickerButton: {
+    backgroundColor: '#14b8a6',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  imagePickerButtonText: {
+    color: 'white',
+    fontWeight: '500',
+  },
 });
 
-export default RegisterScreen; 
+export default RegisterScreen;

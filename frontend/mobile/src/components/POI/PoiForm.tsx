@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   Platform,
+  StyleSheet,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { API_URL } from '../../constants/config';
@@ -47,7 +48,9 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
 
   // Función para mostrar alertas según la plataforma
   const mostrarAlerta = (titulo: string, mensaje: string) => {
+    console.log(`Alerta: ${titulo} - ${mensaje}`);
     if (showAlert) {
+      console.log('Usando showAlert personalizado');
       // Usamos el modal de alerta personalizado si está disponible
       showAlert(titulo, mensaje);
     } else {
@@ -226,7 +229,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
     <View className={`${isWeb ? '' : 'w-80 bg-white rounded-lg p-5 shadow-lg self-center'}`}>
       <ScrollView>
         {!isWeb && (
-          <Text className="text-center text-xl font-semibold mb-4">
+          <Text style={styles.title}>
             Registrar Punto de Interés
           </Text>
         )}
@@ -325,23 +328,138 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
           )}
         </View>
         <TouchableOpacity
-          className={`${isWeb ? 'btn-primary' : 'bg-blue-600 py-3 rounded-lg items-center mt-2'}`}
-          onPress={handleSubmit}
-        >
-          <Text className="text-white text-base font-semibold">Registrar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className={`${isWeb ? 'btn-danger' : 'bg-red-600 py-3 rounded-lg items-center mt-2'}`}
-          onPress={() => {
-            setPointOfInterest(initialPoint);
-            setShowForm(false);
-          }}
-        >
-          <Text className="text-white text-base font-semibold">Cancelar</Text>
-        </TouchableOpacity>
+  style={{
+    backgroundColor: '#2bbbad',
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: isWeb ? '100%' : 'auto', // 100% de ancho en web, ajustable en móvil
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  }}
+  onPress={handleSubmit}
+>
+  <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', textAlign: 'center' }}>
+    Registrar
+  </Text>
+</TouchableOpacity>
+
+<TouchableOpacity
+  style={{
+    backgroundColor: '#2bbbad',
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: isWeb ? '100%' : 'auto', // 100% de ancho en web, ajustable en móvil
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  }}
+  onPress={() => {
+    setPointOfInterest(initialPoint);
+    setShowForm(false);
+  }}
+>
+  <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', textAlign: 'center' }}>
+    Cancelar
+  </Text>
+</TouchableOpacity>
+
+
       </ScrollView>
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    minHeight: '100%',
+  },
+  container: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  logo: {
+    width: 35, 
+    height: 35,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 8,
+    color: '#1e293b',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#1e293b',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  termsText: {
+    color: '#64748b',
+  },
+  termsLink: {
+    color: '#14b8a6',
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#f43f5e',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  loginPromptContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  loginPromptText: {
+    color: '#64748b',
+  },
+  loginLink: {
+    color: '#14b8a6',
+    fontWeight: '500',
+  },
+});
 export default PuntoDeInteresForm;

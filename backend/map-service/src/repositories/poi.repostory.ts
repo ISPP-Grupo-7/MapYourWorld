@@ -17,6 +17,21 @@ export class PointOfInterestRepository {
         this.districtRepo = AppDataSource.getRepository(District)
     }
 
+    async getPOIsByUserIdAndDistrict(userId: string, districtId: string): Promise<PointOfInterest[]> {
+        if (!userId || !districtId) {
+            throw new Error('El userId y el districtId son obligatorios');
+        }
+
+        const pois = await this.poiRepo.find({
+            where: {
+                user: { id: userId },
+                district: { id: districtId }
+            },
+        });
+
+        return pois;
+    }
+
 
     async getPoiByNameAndLocation(poiData: Omit<PointOfInterest, 'id'>): Promise<PointOfInterest | null> {
         
