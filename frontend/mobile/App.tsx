@@ -15,6 +15,7 @@ import RegisterScreen from './src/components/screens/RegisterScreen';
 import MapScreen from './src/components/Map/MapScreen';
 import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
 import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
+import CollaborativeMapListScreenWeb from './src/components/Map/CollaborativeMapListScreen.web';
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
@@ -142,6 +143,21 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   }
 };
 
+const CollaborativeMapScreenListWithParams = (props: any) => {
+  if (Platform.OS === 'web') {
+    const CollaborativeMapListScreenWeb = require('@/components/Map/CollaborativeMapListScreen.web').default;
+    return <CollaborativeMapListScreenWeb {...props} />;
+  } try {
+    const CollaborativeMapListScreen = require('@/components/Map/CollaborativeMapListScreen').default;
+    return (
+        <CollaborativeMapListScreen {...props} />
+    );
+  } catch (error) {
+    console.error("Error cargando CollaborativeMapListScreen:", error);
+    return null;
+}
+};
+
 const SocialScreenWrapper= (props: any) => {
   if (Platform.OS === 'web') {
     const SocialScreenWeb = require('@/components/screens/SocialScreen.web').default;
@@ -236,7 +252,7 @@ const AppContent = () => {
         />
         <Stack.Screen 
           name="CollaborativeMapListScreen" 
-          component={CollaborativeMapListScreen}
+          component={CollaborativeMapScreenListWithParams}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>

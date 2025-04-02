@@ -56,7 +56,8 @@ export const createMap = async (
     return createdMap;
 
   } catch (error) {
-    throw new Error("Error al crear el mapa");
+    // Re-lanzamos el error original para preservar el mensaje específico.
+    throw error;
   }
 
 };
@@ -166,7 +167,7 @@ export const updateMap = async (
  * Elimina un mapa existente
  * @param MapId ID del mapa a eliminar
  */
-export const deleteMap = async (MapId: string): Promise<{ success: boolean; message?: string }> => {
+export const deleteMap = async (MapId: string, userId: string): Promise<{ success: boolean; message?: string }> => {
   try {
     // 1. Verificar que el mapa existe
     const map = await repo.getMapById(MapId);
@@ -177,7 +178,7 @@ export const deleteMap = async (MapId: string): Promise<{ success: boolean; mess
     // 2. Comprobar que el usuario tiene permisos para eliminar el mapa (opcional, según tu lógica de negocio)
 
     // 3. Eliminar el mapa de la base de datos
-    await repo.deleteMap(MapId);
+    await repo.deleteMap(MapId, userId);
 
     // 4. Publicar evento de mapa eliminado (opcional, según tu lógica de negocio)
 

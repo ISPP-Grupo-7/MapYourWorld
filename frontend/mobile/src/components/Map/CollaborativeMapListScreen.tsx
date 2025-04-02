@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  FlatList, 
-  Modal, 
-  TextInput, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Modal,
+  TextInput,
   Alert,
   ActivityIndicator,
   Pressable,
@@ -40,19 +40,22 @@ const CollaborativeMapListScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
-  
+
   // Estado para el modal de creación de mapa
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [mapName, setMapName] = useState<string>("");
   const [mapDescription, setMapDescription] = useState<string>("");
   const [maxUsers, setMaxUsers] = useState<number>(6);
-  
+  const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
+
+
   // Estado para el modal de invitación
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [selectedMapId, setSelectedMapId] = useState<string>("");
   const [inviteInput, setInviteInput] = useState<string>("");
   const [inviteType, setInviteType] = useState<"email" | "username">("email");
-  
+  const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
+
   // Estado para la confirmación de eliminación
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [mapToDelete, setMapToDelete] = useState<string>("");
@@ -73,20 +76,20 @@ const CollaborativeMapListScreen: React.FC = () => {
       try {
         // Intentar obtener el ID del usuario del AsyncStorage
         const storedUserId = await AsyncStorage.getItem("userId");
-        
+
         if (storedUserId) {
           console.log("Usuario encontrado en AsyncStorage:", storedUserId);
           setUserId(storedUserId);
         } else {
           console.log("No se encontró usuario en AsyncStorage, usando ID temporal para pruebas");
-          
+
           // ID de usuario temporal para pruebas
           const temporalUserId = "user-456";
-          
+
           // Guardamos el ID temporal en AsyncStorage para futuras consultas
           await AsyncStorage.setItem("userId", temporalUserId);
           setUserId(temporalUserId);
-          
+
           // Informamos al usuario que estamos usando un modo de prueba
           Alert.alert(
             "Modo de Prueba",
@@ -96,7 +99,7 @@ const CollaborativeMapListScreen: React.FC = () => {
         }
       } catch (error) {
         console.error("Error al obtener el ID del usuario:", error);
-        
+
         // En caso de error, usar un ID temporal
         const fallbackId = "user-456";
         setUserId(fallbackId);
@@ -118,27 +121,27 @@ const CollaborativeMapListScreen: React.FC = () => {
     try {
       setLoading(true);
       console.log(`Obteniendo mapas colaborativos para el usuario: ${userId}`);
-      
+
       const response = await fetch(`${API_URL}/api/maps/collaborative/user/${userId}`);
-      
+
       if (!response.ok) {
         console.warn(`Error en la petición: ${response.status}`);
         // Si hay un error, seguimos adelante para mostrar los datos de ejemplo
       }
-      
+
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         console.warn("La respuesta no es JSON válido");
         // En lugar de abandonar, mostramos el mensaje pero seguimos adelante
       }
-      
+
       try {
         const data = await response.json();
         console.log("Respuesta de mapas colaborativos:", data);
-        
+
         if (data.success && data.maps && data.maps.length > 0) {
           setMaps(data.maps);
-          
+
           // Si son datos de ejemplo, mostramos una notificación sutil
           if (data.isExample) {
             console.log("Mostrando datos de ejemplo");
@@ -190,20 +193,20 @@ const CollaborativeMapListScreen: React.FC = () => {
   // Función para crear un nuevo mapa colaborativo
   const createCollaborativeMap = async () => {
     if (!mapName.trim()) {
-      Alert.alert("Error", "Por favor, ingresa un nombre para el mapa");
+      setErrors({ mapName: "El nombre es obligatorio" });
       return;
     }
 
     try {
       setLoading(true); // Mostrar cargando mientras se crea el mapa
-      
+
       console.log("Creando mapa colaborativo:", {
         nombre: mapName,
         descripción: mapDescription,
         máxUsuarios: maxUsers,
         usuarioId: userId
       });
-      
+
       // Crear el objeto con los datos del mapa
       const mapData = {
         name: mapName,
@@ -212,7 +215,7 @@ const CollaborativeMapListScreen: React.FC = () => {
         max_users: maxUsers,
         createdAt: new Date().toISOString()
       };
-      
+
       const response = await fetch(`${API_URL}/api/maps/createColaborative`, {
         method: "POST",
         headers: {
@@ -239,7 +242,7 @@ const CollaborativeMapListScreen: React.FC = () => {
         setMapDescription("");
         setMaxUsers(6);
         setShowCreateModal(false);
-        
+
         // Añadir el nuevo mapa a la lista si viene en la respuesta
         if (data.map) {
           setMaps(prevMaps => [data.map, ...prevMaps]);
@@ -247,7 +250,7 @@ const CollaborativeMapListScreen: React.FC = () => {
           // Si no hay mapa en la respuesta, recargar todos los mapas
           await fetchCollaborativeMaps();
         }
-        
+
         Alert.alert("Éxito", "Mapa colaborativo creado correctamente");
       } else {
         throw new Error(data.message || "Error al crear el mapa colaborativo");
@@ -265,115 +268,144 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Función para eliminar un mapa colaborativo
   const deleteCollaborativeMap = async () => {
-    if (!mapToDelete) return;
+    // Asegúrate de tener definidos tanto mapToDelete como userId (por ejemplo, obtenido del contexto o estado de autenticación)
+    if (!mapToDelete || !userId) return;
 
     try {
-      setLoading(true); // Mostrar indicador de carga
-      
-      // Simulamos la eliminación aunque el backend falle
-      console.log(`Intentando eliminar mapa con ID: ${mapToDelete}`);
-      
-      try {
-        const response = await fetch(`${API_URL}/api/maps/${mapToDelete}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      setLoading(true);
+      console.log(`Intentando eliminar mapa con ID: ${mapToDelete} para el usuario: ${userId}`);
 
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          console.log("Respuesta del servidor:", data);
-        }
-      } catch (deleteError) {
-        console.log("Error en la petición de eliminación, continuando localmente:", deleteError);
+      // Se arma la URL incluyendo ambos parámetros según la ruta: '/delete/:mapId/:userId'
+      const response = await fetch(`${API_URL}/api/maps/delete/${mapToDelete}/${userId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      // Se verifica si la respuesta es en formato JSON y se procesa
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Respuesta del servidor:", data);
       }
-      
-      // Actualizamos la UI independientemente de la respuesta del servidor
+
+      // Actualización de la lista de mapas en el estado
       setMaps(maps.filter(map => map.id !== mapToDelete));
       setShowDeleteConfirm(false);
       setMapToDelete("");
-      
       Alert.alert("Éxito", "Mapa colaborativo eliminado correctamente");
+
     } catch (error) {
       console.error("Error al eliminar mapa colaborativo:", error);
-      
-      // Aún si hay error, eliminamos de la UI para mejorar experiencia
+      // Aunque ocurra error, se actualiza la UI para reflejar que el mapa ha sido eliminado localmente
       setMaps(maps.filter(map => map.id !== mapToDelete));
       setShowDeleteConfirm(false);
       setMapToDelete("");
-      
       Alert.alert(
         "Información",
         "El mapa ha sido eliminado de tu lista, pero puede haber un problema con el servidor."
       );
+
     } finally {
       setLoading(false);
     }
   };
-
-  // Función para invitar a un usuario al mapa colaborativo
-  const inviteUserToMap = async () => {
-    if (!inviteInput.trim() || !selectedMapId) {
-      Alert.alert("Error", "Por favor, completa todos los campos");
-      return;
-    }
-
+  const fetchFriends = async (userId: string) => {
     try {
-      setLoading(true); // Mostrar indicador de carga
-      
-      console.log(`Invitando a ${inviteInput} al mapa ${selectedMapId}`);
-      
-      try {
-        const response = await fetch(`${API_URL}/api/maps/invite`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mapId: selectedMapId,
-            [inviteType === "email" ? "userEmail" : "username"]: inviteInput,
-            invitedByUserId: userId,
-          }),
-        });
+      console.log(`Solicitando amigos para el usuario: ${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+      const data = await response.json();
 
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          console.log("Respuesta de invitación:", data);
-        }
-      } catch (inviteError) {
-        console.log("Error en la petición de invitación, continuando con simulación:", inviteError);
+      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+
+      if (Array.isArray(data)) {
+        // Si la respuesta es directamente un array de usuarios, lo asignamos
+        setFriends(data.map((user) => ({
+          id: user.id,
+          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+        })));
+      } else {
+        console.warn("Formato inesperado en la respuesta de amigos:", data);
       }
-      
-      // Limpiar campos y cerrar modal independientemente de la respuesta del servidor
-      setInviteInput("");
-      setShowInviteModal(false);
-      
-      Alert.alert("Éxito", `Invitación enviada correctamente a ${inviteInput}`);
     } catch (error) {
-      console.error("Error al invitar usuario:", error);
-      
-      // Limpiar campos y cerrar modal
-      setInviteInput("");
-      setShowInviteModal(false);
-      
-      Alert.alert(
-        "Información",
-        `Se ha registrado la invitación a ${inviteInput}, pero puede haber un problema con el servidor.`
-      );
-    } finally {
-      setLoading(false);
+      console.error("Error al obtener amigos:", error);
     }
+  };
+  useEffect(() => {
+    if (showInviteModal && userId) {
+      console.log("Modal abierto, cargando amigos para el usuario:", userId);
+      fetchFriends(userId);
+    }
+  }, [showInviteModal, userId]);
+
+  const sendFriendRequest = async (friendId: string) => {
+    try {
+      console.log(`mapa colaborativo ${selectedMapId} para ${friendId} enviada por ${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requesterId: userId, receiverId: friendId, mapId: selectedMapId }),
+      });
+      console.log("Respuesta del backend:", response);
+      const data = await response.json();
+
+      if (data.success) {
+        Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+      }
+    } catch (error) {
+      console.error("Error al enviar solicitud:", error);
+    }
+  };
+
+  const renderInviteFriendsModal = () => {
+    return (
+      <Modal
+        visible={showInviteModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowInviteModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invitar Amigos</Text>
+            <Text style={styles.modalSubtitle}>
+              Máximo 5 amigos (6 usuarios en total)
+            </Text>
+
+            <FlatList
+              data={friends}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.invitedItem}>
+                  <Text style={styles.friendName}>{item.name}</Text>
+                  <TouchableOpacity
+                    style={styles.inviteButton}
+                    onPress={() => sendFriendRequest(item.id)}
+                  >
+                    <Text style={styles.inviteButtonText}>Invitar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+
+            {/* Botón para cerrar el modal */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowInviteModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   // Renderizado de cada elemento de la lista de mapas
   const renderMapItem = ({ item }: { item: CollaborativeMap }) => {
     // Encontrar si el usuario actual es el creador del mapa
-    const isCreator = item.users_joined && item.users_joined.length > 0 && 
-                      item.users_joined[0]?.id === userId;
-    
+    const isCreator = item.users_joined && item.users_joined.length > 0 &&
+      item.users_joined[0]?.id === userId;
+
     return (
       <TouchableOpacity
         style={styles.mapItem}
@@ -394,7 +426,7 @@ const CollaborativeMapListScreen: React.FC = () => {
             {item.users_joined?.length || 1} / {maxUsers} usuarios
           </Text>
         </View>
-        
+
         <View style={styles.mapActions}>
           <TouchableOpacity
             style={styles.actionButton}
@@ -406,7 +438,7 @@ const CollaborativeMapListScreen: React.FC = () => {
           >
             <Icon name="person-add" size={20} color="#2196F3" />
           </TouchableOpacity>
-          
+
           {isCreator && (
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton]}
@@ -434,186 +466,108 @@ const CollaborativeMapListScreen: React.FC = () => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Pressable  onPress={Keyboard.dismiss}>
-          <Text style={styles.modalTitle}>Crear Mapa Colaborativo</Text>
-          
-          <Text style={styles.inputLabel}>Nombre del mapa*</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: Exploración de Sevilla"
-            value={mapName}
-            onChangeText={setMapName}
-            maxLength={30}
-          />
-          
-          <Text style={styles.inputLabel}>Descripción</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Descripción del mapa colaborativo"
-            value={mapDescription}
-            onChangeText={setMapDescription}
-            multiline={true}
-            maxLength={100}
-          />
-          
-          <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
-          <View style={styles.pickerContainer}>
-            {[2, 3, 4, 5, 6].map((num) => {
-              // Determinar qué colores mostrar según el número seleccionado
-              const isSelected = maxUsers === num;
-              const buttonStyle = isSelected 
-                ? styles.pickerItemSelected 
-                : styles.pickerItem;
-              
-              // Determinar el color de fondo según el índice si está seleccionado o no
-              const backgroundColor = isSelected
-                ? playerColors[0] // Color del propietario siempre es el primero
-                : (num <= maxUsers ? playerColors[num-1] : "#f0f0f0");
-                
-              return (
-                <TouchableOpacity
-                  key={num}
-                  style={[
-                    styles.pickerItem,
-                    { backgroundColor: isSelected ? playerColors[0] : "#f0f0f0" }
-                  ]}
-                  onPress={() => setMaxUsers(num)}
-                >
-                  <Text
+          <Pressable onPress={Keyboard.dismiss}>
+            <Text style={styles.modalTitle}>Crear Mapa Colaborativo</Text>
+
+            <Text style={styles.inputLabel}>Nombre del mapa*</Text>
+            <TextInput
+              style={[styles.input, errors.mapName ? { borderColor: "#e53e3e" } : {}]}
+              placeholder="Ej: Exploración de Sevilla"
+              value={mapName}
+              onChangeText={(text) => {
+                setMapName(text);
+                if (errors.mapName) setErrors({ mapName: "" });
+              }}
+              maxLength={30}
+            />
+            {errors.mapName ? (
+              <Text style={{ color: "#e53e3e", marginBottom: 8, fontSize: 14 }}>
+                {errors.mapName}
+              </Text>
+            ) : null}
+
+            <Text style={styles.inputLabel}>Descripción</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Descripción del mapa colaborativo"
+              value={mapDescription}
+              onChangeText={setMapDescription}
+              multiline={true}
+              maxLength={100}
+            />
+
+            <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+            <View style={styles.pickerContainer}>
+              {[2, 3, 4, 5, 6].map((num) => {
+                // Determinar qué colores mostrar según el número seleccionado
+                const isSelected = maxUsers === num;
+                const buttonStyle = isSelected
+                  ? styles.pickerItemSelected
+                  : styles.pickerItem;
+
+                // Determinar el color de fondo según el índice si está seleccionado o no
+                const backgroundColor = isSelected
+                  ? playerColors[0] // Color del propietario siempre es el primero
+                  : (num <= maxUsers ? playerColors[num - 1] : "#f0f0f0");
+
+                return (
+                  <TouchableOpacity
+                    key={num}
                     style={[
-                      styles.pickerText,
-                      isSelected && styles.pickerTextSelected,
+                      styles.pickerItem,
+                      { backgroundColor: isSelected ? playerColors[0] : "#f0f0f0" }
                     ]}
+                    onPress={() => setMaxUsers(num)}
                   >
-                    {num}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          
-          <View style={styles.playerPreview}>
-            {[...Array(maxUsers)].map((_, index) => (
-              <View 
-                key={index} 
-                style={[
-                  styles.playerColorCircle, 
-                  { backgroundColor: playerColors[index] }
-                ]} 
-              />
-            ))}
-          </View>
-          <Text style={styles.playerPreviewText}>
-            Vista previa de colores de jugadores
-          </Text>
-          
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => setShowCreateModal(false)}
-            >
-              <Text style={[styles.buttonText, {color: "#fff"}]}>Cancelar</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.modalButton, styles.createButton]}
-              onPress={createCollaborativeMap}
-            >
-              <Text style={styles.buttonText}>Crear</Text>
-            </TouchableOpacity>
-          </View>
+                    <Text
+                      style={[
+                        styles.pickerText,
+                        isSelected && styles.pickerTextSelected,
+                      ]}
+                    >
+                      {num}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <View style={styles.playerPreview}>
+              {[...Array(maxUsers)].map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.playerColorCircle,
+                    { backgroundColor: playerColors[index] }
+                  ]}
+                />
+              ))}
+            </View>
+            <Text style={styles.playerPreviewText}>
+              Vista previa de colores de jugadores
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowCreateModal(false)}
+              >
+                <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.createButton]}
+                onPress={createCollaborativeMap}
+              >
+                <Text style={styles.buttonText}>Crear</Text>
+              </TouchableOpacity>
+            </View>
           </Pressable>
         </View>
       </View>
     </Modal>
   );
 
-  // Modal para invitar a un usuario al mapa colaborativo
-  const renderInviteModal = () => (
-    <Modal
-      visible={showInviteModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowInviteModal(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Invitar Usuario</Text>
-          
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                inviteType === "email" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setInviteType("email")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  inviteType === "email" && styles.toggleTextActive,
-                ]}
-              >
-                Por Email
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                inviteType === "username" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setInviteType("username")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  inviteType === "username" && styles.toggleTextActive,
-                ]}
-              >
-                Por Nombre de Usuario
-              </Text>
-            </TouchableOpacity>
-          </View>
-          
-          <Text style={styles.inputLabel}>
-            {inviteType === "email" ? "Email del usuario" : "Nombre de usuario"}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder={
-              inviteType === "email"
-                ? "ejemplo@correo.com"
-                : "nombre_de_usuario"
-            }
-            value={inviteInput}
-            onChangeText={setInviteInput}
-            keyboardType={inviteType === "email" ? "email-address" : "default"}
-            autoCapitalize="none"
-          />
-          
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => {
-                setShowInviteModal(false);
-                setInviteInput("");
-              }}
-            >
-              <Text style={[styles.buttonText, {color: "#fff"}]}>Cancelar</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.modalButton, styles.createButton]}
-              onPress={inviteUserToMap}
-            >
-              <Text style={styles.buttonText}>Invitar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
 
   // Modal para confirmar la eliminación de un mapa
   const renderDeleteConfirmModal = () => (
@@ -626,20 +580,20 @@ const CollaborativeMapListScreen: React.FC = () => {
       <View style={styles.modalContainer}>
         <View style={[styles.modalContent, styles.confirmModal]}>
           <Icon name="warning" size={40} color="#f44336" style={styles.warningIcon} />
-          
+
           <Text style={styles.confirmTitle}>Eliminar Mapa</Text>
           <Text style={styles.confirmText}>
             ¿Estás seguro de que deseas eliminar este mapa colaborativo? Esta acción no se puede deshacer.
           </Text>
-          
+
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={[styles.modalButton, styles.cancelButton]}
               onPress={() => setShowDeleteConfirm(false)}
             >
-              <Text style={[styles.buttonText, {color: "#fff"}]}>Cancelar</Text>
+              <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.modalButton, styles.deleteConfirmButton]}
               onPress={deleteCollaborativeMap}
@@ -703,7 +657,7 @@ const CollaborativeMapListScreen: React.FC = () => {
 
       {/* Modales */}
       {renderCreateModal()}
-      {renderInviteModal()}
+      {renderInviteFriendsModal()}
       {renderDeleteConfirmModal()}
     </View>
   );
@@ -769,6 +723,12 @@ const styles = StyleSheet.create({
   },
   mapActions: {
     flexDirection: "row",
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 15,
+    textAlign: "center",
   },
   actionButton: {
     width: 36,
@@ -837,6 +797,45 @@ const styles = StyleSheet.create({
   },
   confirmModal: {
     alignItems: "center",
+  },
+  invitedItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingVertical: 8,
+  },
+  friendName: {
+    fontSize: 16,
+    color: "#023E8A",
+    flex: 1,
+  },
+  inviteButton: {
+    backgroundColor: "#0096C7", // Tono medio para el botón
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  inviteButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   modalTitle: {
     fontSize: 20,
