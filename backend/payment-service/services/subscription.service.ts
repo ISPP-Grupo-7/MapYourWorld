@@ -1,4 +1,4 @@
-import {SubscriptionRepository} from '../repositories/subscription.repository';
+import SubscriptionRepository from '../repositories/subscription.repository';
 import { Subscription, PlanType } from '../models/subscription.model';
 
 const subscriptionRepository = new SubscriptionRepository();

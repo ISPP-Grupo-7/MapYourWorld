@@ -8,14 +8,14 @@ import bcrypt from 'bcryptjs';
 import { Role, User } from '../models/user.model';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
 import { generateToken, verifyToken } from '../../../../shared/security/jwt';
-import { AuthRepository } from '../repositories/auth.repository';
+import AuthRepository  from '../repositories/auth.repository';
 import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 import { createMap } from '../../../map-service/src/services/map.service';
 import { createDistricts } from '../../../map-service/src/services/district.service';
 import MapRepository from '../../../map-service/src/repositories/map.repository';
 import { PlanType, Subscription } from '../../../payment-service/models/subscription.model';
-import { SubscriptionRepository} from '../../../payment-service/repositories/subscription.repository';
+import  SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
 import { createPOIsOnLagMaps } from '../../../map-service/src/services/poi.service';
 
 
