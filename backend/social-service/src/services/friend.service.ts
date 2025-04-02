@@ -2,7 +2,7 @@ import { Friend, FriendStatus, RequestType } from '../models/friend.model';
 import FriendRepository from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import  AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
 import MapRepository from '../../../map-service/src/repositories/map.repository';
 
 const repo = new FriendRepository();

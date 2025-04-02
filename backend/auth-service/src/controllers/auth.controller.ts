@@ -9,7 +9,6 @@ import { generateToken, verifyToken } from '../../../../shared/config/jwt.config
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
-import { AuthRepository } from '../repositories/auth.repository';
 
 /**
  * Registra un nuevo usuario
