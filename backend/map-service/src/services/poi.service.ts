@@ -4,7 +4,7 @@
  */
 
 import { PointOfInterest } from '../models/poi.model';
-import { PointOfInterestRepository } from '../repositories/poi.repostory';
+import PointOfInterestRepository  from '../repositories/poi.repostory';
 import {AuthRepository} from '../../../auth-service/src/repositories/auth.repository';
 import { Role } from '../../../auth-service/src/models/user.model';
 import { SubscriptionRepository } from '../../../payment-service/repositories/subscription.repository';

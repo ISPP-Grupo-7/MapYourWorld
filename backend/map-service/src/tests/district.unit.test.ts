@@ -1,5 +1,3 @@
-
-
 //Mocks de districts
 const mockedCreate = jest.fn();
 const mockedUpdate = jest.fn();
@@ -82,9 +80,6 @@ import {
 
   } from '../services/district.service';
 
-import  {
-    getMapById
-} from '../services/map.service'
 import { MultiPolygon } from 'typeorm';
 
 
