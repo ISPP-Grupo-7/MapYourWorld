@@ -12,13 +12,13 @@ router.post('/invite', inviteUserToMap);
 router.get('/principalMap/user/:userId', getPrincipalMapForUser);
 
 // Ruta para obtener los mapas colaborativos de un usuario
+router.get('/users/:mapId?', getUsersOnMapById );
+
 router.get('/collaborative/user/:userId', getCollaborativeMapsForUser);
 
 router.get('/:MapId', getMapById);
 
 router.put('/update/:mapId', updateMap );
-
-router.get('/users/:mapId', getUsersOnMapById );
 
 router.delete('/delete/:mapId/:userId', deleteMap );
 
