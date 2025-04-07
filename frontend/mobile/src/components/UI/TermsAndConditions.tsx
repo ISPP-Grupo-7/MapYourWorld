@@ -136,10 +136,10 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
           >
             <Text style={styles.sectionTitle}>Acuerdo de uso</Text>
             <Text style={styles.text}>
-              Por favor, lee estos términos de uso antes de hacer uso de nuestra aplicación. Al acceder y usar el servicio admites haber leído, entendido y aceptado estos términos. Si no aceptas estas condiciones, no podrás acceder al servicio.
+              Por favor, lee estos términos de uso antes de hacer uso de nuestra aplicación. Al acceder y usar el servicio admites haber leído, entendido y aceptado estos términos ya que necesitarás dar tu consentimiento a estos. Si no aceptas estas condiciones, no podrás acceder al servicio.
             </Text>
             <Text style={styles.text}>
-              Estas condiciones de uso no son definitivas y pueden ser modificadas, en cuyo caso el uso continuado del servicio significará que has aceptado las nuevas condiciones de uso.
+              Estas condiciones de uso no son definitivas y pueden ser modificadas, en cuyo caso la aceptación de estos términos se pedirá nuevamente. El uso continuado del servicio significará que has aceptado las nuevas condiciones de uso.
             </Text>
             <Text style={styles.text}>
               Estos términos afectan al uso de toda versión e iteración de MapYourWorld, esto incluye tanto las versiones online accesibles desde www.mapyourworld.es o mapyourworld.netlify.app como versiones nativas para dispositivos Android e iOS.
@@ -152,7 +152,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Ver un mapa interactivo y personalizado que muestra tu progreso a tiempo real.</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real.</Text>
             <Text style={styles.listItem}>• Registro de los distritos descubiertos.</Text>
-            <Text style={styles.listItem}>• Descubrir puntos de interés cultural incluidos en el mapa.</Text>
             <Text style={styles.listItem}>• Crear tus propios puntos de interés.</Text>
             <Text style={styles.listItem}>• Conseguir logros definidos por la aplicación.</Text>
             <Text style={styles.listItem}>• Crear logros personalizados e individuales.</Text>
@@ -160,7 +159,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Crear mapas compartidos de hasta 6 jugadores en los que estos pueden descubrir distritos conjuntamente.</Text>
             <Text style={styles.listItem}>• Ser invitado a un mapa colaborativo de otro jugador.</Text>
             <Text style={styles.listItem}>• Visualizar tus estadísticas sobre distancia recorrida y mapa descubierto.</Text>
-            <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros jugadores.</Text>
             <Text style={styles.text}>
               Además, para empresas ajenas existe la posibilidad de promocionarse en nuestro mapa, creando un punto de interés visible a todos los usuarios.
             </Text>
@@ -171,7 +169,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             </Text>
             <Text style={styles.subSectionTitle}>Plan Básico (Gratis):</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real: Incluido</Text>
-            <Text style={styles.listItem}>• Descubrir puntos de interés incluidos en el mapa: Incluido</Text>
             <Text style={styles.listItem}>• Crear puntos de interés: Limitado a 1 por distrito</Text>
             <Text style={styles.listItem}>• Desbloquear logros predeterminados: Incluido</Text>
             <Text style={styles.listItem}>• Crear logros personalizados: No disponible</Text>
@@ -179,12 +176,10 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Crear mapas colaborativos con otros usuarios: No disponible</Text>
             <Text style={styles.listItem}>• Unirte a un mapa colaborativo: Limitado a 1 por usuario</Text>
             <Text style={styles.listItem}>• Ver tus estadísticas: No disponible</Text>
-            <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros usuarios: No disponible</Text>
             <Text style={styles.listItem}>• Interfaz sin anuncios estáticos: No incluido</Text>
 
             <Text style={styles.subSectionTitle}>Plan Premium (5.50 € / mes):</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real: Incluido</Text>
-            <Text style={styles.listItem}>• Descubrir puntos de interés incluidos en el mapa: Incluido</Text>
             <Text style={styles.listItem}>• Crear puntos de interés: Creación de puntos ilimitados</Text>
             <Text style={styles.listItem}>• Desbloquear logros predeterminados: Incluido</Text>
             <Text style={styles.listItem}>• Crear logros personalizados: Creación de logros ilimitados</Text>
@@ -192,7 +187,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Crear mapas colaborativos con otros usuarios: Creación de mapas ilimitados</Text>
             <Text style={styles.listItem}>• Unirte a un mapa colaborativo: No limitado</Text>
             <Text style={styles.listItem}>• Ver tus estadísticas: Incluido</Text>
-            <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros usuarios: Incluido</Text>
             <Text style={styles.listItem}>• Interfaz sin anuncios estáticos: Incluido</Text>
 
             <Text style={styles.text}>
@@ -247,7 +241,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
 
             <Text style={styles.sectionTitle}>4. Cuentas de usuario</Text>
             <Text style={styles.text}>
-              Existe la opción de usar MapYourWorld mediante una cuenta invitado que no necesitará de datos personales. Sin embargo esta opción estará muy limitada debido a la naturaleza del producto. Para poder disfrutar de todas las funcionalidades de la aplicación será necesario registrarse ofreciendo un correo electrónico válido.
+              Para poder disfrutar de todas las funcionalidades de la aplicación será necesario registrarse ofreciendo un correo electrónico válido.
             </Text>
 
             <Text style={styles.sectionTitle}>5. Política de privacidad</Text>
@@ -304,7 +298,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
 
             <Text style={styles.sectionTitle}>8. Terminación</Text>
             <Text style={styles.text}>
-              MapYourWorld se reserva la posibilidad de suspender o terminar la cuenta de cualquier usuario si se considera que se ha violado cuualquiera de los términos de este acuerdo. En función de la situación de la que se trate, especialmente si el usuario no ha puesto en peligro a ningún usuario ni a sus datos, se le dará al usuario una oportunidad para corregir su falta antes de la suspensión o terminación.
+              MapYourWorld se reserva la posibilidad de suspender o terminar la cuenta de cualquier usuario si se considera que se ha violado cuualquiera de los términos de este acuerdo, es decir, si este ha hecho algo ilegal o ha dañado a otro usuario de la aplicación. En función de la situación de la que se trate, especialmente si el usuario no ha puesto en peligro a ningún usuario ni a sus datos, se le dará al usuario una oportunidad para corregir su falta antes de la suspensión o terminación.
             </Text>
             <Text style={styles.text}>
               Todo usuario puede dejar de usar los servicios de MapYourWorld y terminar los términos de este acuerdo salvo aquellas cláusulas sin limitación, que incluye las cláusulas de Propiedad intelectual y Limitación de liabilidad.
