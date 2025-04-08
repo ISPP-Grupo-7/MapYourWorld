@@ -199,7 +199,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading }) => {
       }
     } catch (error) {
       console.error('Error al procesar el pago:', error);
-      alert('Hubo un error, por favor intenta nuevamente');
+    
+      showAlert(
+        'Servicio no disponible',
+        'Stripe está inactivo. Intenta de nuevo en unos minutos.',
+        () => setAlertVisible(false),
+        'Cerrar'
+      );
     }
 
     setLoading(false);

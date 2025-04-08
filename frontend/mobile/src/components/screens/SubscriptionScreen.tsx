@@ -45,13 +45,22 @@ const SubscriptionScreen = () => {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error en la respuesta del servidor:', errorData);
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+        Alert.alert(
+          'Error de conexión con Stripe',
+          errorData.error || 'No se pudo procesar el pago. Intenta más tarde.'
+        );
+        return null;
       }
+
       const { paymentIntent } = await response.json();
       return paymentIntent;
     } catch (error) {
       console.error('Error al obtener PaymentIntent:', error);
+      Alert.alert(
+        'Servicio de pagos no disponible',
+        'Stripe está teniendo problemas en este momento. Por favor, vuelve a intentarlo en unos minutos.'
+      );
+      return null;
     }
   };
 

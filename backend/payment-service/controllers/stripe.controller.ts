@@ -12,7 +12,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
     apiVersion: "2025-02-24.acacia",
   });
 
-export const createPaymentIntent = async (req: Request, res: Response) => {
+  export const createPaymentIntent = async (req: Request, res: Response) => {
     try {
       const { amount } = req.body; // Monto en centavos (€10.00 = 1000)
   
@@ -21,9 +21,15 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
         currency: "eur",
         automatic_payment_methods: { enabled: true },
       });
-      
+  
       res.json({ paymentIntent: paymentIntent.client_secret });
+  
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      console.error("❌ Error en Stripe:", error);
+  
+      res.status(503).json({
+        error: "Servicio de pagos temporalmente no disponible. Intenta más tarde.",
+        code: "stripe_unavailable"
+      });
     }
-};
+  };
