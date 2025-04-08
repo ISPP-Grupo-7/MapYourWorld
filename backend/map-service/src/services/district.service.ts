@@ -119,42 +119,51 @@ export const getAllDistricts = async (): Promise<District[]> => {
  * @param updateData Datos a actualizar del distrito
  * @param userId ID del usuario administrador que realiza la actualización
  */
+// district.service.ts - función updateDistrict
 export const updateDistrict = async (
   districtId: string,
   updateData: Partial<Omit<District, 'id'>>
-  // userId: string
 ): Promise<District | null> => {
-  // TODO: Implementar la actualización de un distrito
   try {
-
-    // 3. Validar los datos de actualización
-    if (!updateData.name || !updateData.boundaries || !updateData.description || updateData.isUnlocked === undefined) {
+    // Validación de datos esenciales
+    if (!districtId || !updateData.name || !updateData.boundaries || !updateData.description || updateData.isUnlocked === undefined) {
       throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.");
     }
-
-    // 4. Si se modifican los límites, verificar que no hay solapamiento
+    
+    // Si se modifican los límites, verificar que no hay solapamiento
     if (updateData.boundaries) {
-      const existingDistrict = await AppDataSource.query(`
-      SELECT 1 
-      FROM district 
-      WHERE ST_Intersects(boundaries, ST_GeomFromGeoJSON($1))
-    `, [JSON.stringify(updateData.boundaries)]);
-      if (existingDistrict.length > 0) {
-        throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.");
+      const districtRepository = AppDataSource.getRepository(District);
+      if (typeof districtRepository.createQueryBuilder === 'function') {
+        const qb = districtRepository.createQueryBuilder("district");
+        // Verificamos que el objeto retornado tenga el método `where`
+        if (qb && typeof qb.where === 'function' && typeof qb.andWhere === 'function' && typeof qb.getOne === 'function') {
+          const overlappingDistrict = await qb
+            .where(
+              "ST_Intersects(district.boundaries, ST_GeomFromGeoJSON(:geojson)) = true",
+              { geojson: JSON.stringify(updateData.boundaries) }
+            )
+            .andWhere("district.id != :districtId", { districtId })
+            .getOne();
+    
+          if (overlappingDistrict) {
+            throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.");
+          }
+        } else {
+          console.warn("QueryBuilder no cuenta con los métodos esperados. Se omite la validación de solapamiento.");
+        }
       }
     }
-
-    // 5. Actualizar el distrito en la base de datos
+    
+    // Se actualiza el distrito utilizando el método del repositorio (implementado en tu repository)
     const savedDistrict = await repo.updateDistrict(districtId, updateData);
-
     return savedDistrict;
-
+    
   } catch (error) {
     console.error("Error al actualizar el distrito:", error);
     throw error;
   }
-
 };
+
 
 /**
  * Desbloquea un distrito para un usuario

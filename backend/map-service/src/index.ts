@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import mapRouter from './routes/map.routes';
+import districtRouter from './routes/district.routes';
 import { initializeDatabase } from '../../database/appDataSource';
 
 
@@ -22,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rutas
 app.use('/api/maps', mapRouter);
-//app.use('/api/email', emailRouter);
+app.use('/api/districts', districtRouter);
 
 // Ruta de salud para verificar que el servicio está funcionando
 app.get('/health', (_req: Request, res: Response) => {
