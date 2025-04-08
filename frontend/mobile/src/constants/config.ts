@@ -28,16 +28,16 @@ const getBackendUrl = () => {
       if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
         // Usamos el mismo hostname que la aplicación web
         console.log(`Usando hostname del servidor: ${hostname}`);
-        return `https://${hostname}:3010`;
+        return `https://${hostname}:3020`;
       }
       
       // En desarrollo local web, usa localhost
       console.log("Desarrollo local web detectado, usando localhost:3000");
-      return 'https://localhost:3010'; // Cambia esto si tu servidor está en otro puerto
+      return 'https://localhost:3020'; // Cambia esto si tu servidor está en otro puerto
     } catch (error) {
       console.warn("Error al obtener la ubicación del navegador:", error);
       console.log("Usando fallback para web: localhost:3000");
-      return 'https://localhost:3010'; // Cambia esto si tu servidor está en otro puerto
+      return 'https://localhost:3020'; // Cambia esto si tu servidor está en otro puerto
     }
   }
 
@@ -50,7 +50,7 @@ const getBackendUrl = () => {
     console.warn("No se pudo obtener la IP de Expo.");
     // Como fallback, usamos una IP estática que el usuario puede cambiar según su red
     console.log("Usando IP estática como fallback: https://mapyourworld.es");
-    return "https://mapyourworld.es:3010";
+    return "https://mapyourworld.es:3020";
   }
 
   try {
@@ -61,21 +61,21 @@ const getBackendUrl = () => {
     if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
       console.warn("IP extraída no válida:", ip);
       console.log("Usando IP estática como fallback: https://mapyourworld.es");
-      return "https://mapyourworld.es:3010";
+      return "https://mapyourworld.es:3020";
     }
 
     console.log(`Usando IP de Expo: ${ip}:3000`);
-    return 'https://mapyourworld.es:3010';  // Cambia esto según tu entorno de Expo si es necesario
+    return 'https://mapyourworld.es:3020';  // Cambia esto según tu entorno de Expo si es necesario
   } catch (error) {
     console.error("Error al procesar la URL de Expo:", error);
     console.log("Usando IP estática como fallback: 1https://mapyourworld.es");
-    return "https://mapyourworld.es:3010";
+    return "https://mapyourworld.es:3020";
   }
 };
 
 
 //Configuración de API
-//export const API_URL = process.env.API_URL || `http://localhost:3010`;
+//export const API_URL = process.env.API_URL || `http://localhost:3020`;
 export const API_URL = getBackendUrl();
 console.log("API_URL configurada como:", API_URL);
 export const API_TIMEOUT = 30000; // 30 segundos

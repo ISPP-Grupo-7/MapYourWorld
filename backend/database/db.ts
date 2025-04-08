@@ -9,7 +9,7 @@ const db = pgPromise()({
   port: Number(process.env.DB_PORT) || 5432,     // Usar las variables de entorno
   user: process.env.DB_USER || 'postgres',     // Usar las variables de entorno
   password: process.env.DB_PASSWORD || 'mapyourworld13', // Usar las variables de entorno
-  database: process.env.DB_NAME || 'mapyourworlddb2', // Usar las variables de entorno
+  database: process.env.DB_NAME || 'mapyourworlddb3', // Usar las variables de entorno
   ssl: false,                    // Desactivar SSL si no es necesario
 });
 
