@@ -1,12 +1,12 @@
 import { Friend, FriendStatus, RequestType } from '../models/friend.model';
 import FriendRepository from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
-import { AppDataSource } from '../../../database/appDataSource';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
 import MapRepository from '../../../map-service/src/repositories/map.repository';
+import { AppDataSource } from '../../../database/appDataSource';
 
 const repo = new FriendRepository();
-const userRepo = new AuthRepository();
+const authRepo = new AuthRepository();
 const mapRepo = new MapRepository();
 
 /**
@@ -14,83 +14,96 @@ const mapRepo = new MapRepository();
  * Valida que los datos sean correctos y que no exista ya una solicitud activa.
  */
 export const sendRequestFriend = async (
-
-  requesterId:string,
-  recipientId:string,
-  mapId?:string
-
+  requesterId: string,
+  recipientId: string,
+  mapId?: string
 ): Promise<Friend | { success: boolean; message: string }> => {
   try {
-    var map: any = null;
+    // Validar datos requeridos
+    if (!requesterId || !recipientId) {
+      throw new Error("Los datos de receptor, solicitante y estado de la petición son necesarios.");
+    }
 
     if (requesterId === recipientId) {
       throw new Error("El receptor y el solicitante deben ser distintos.");
     }
     
-    if(mapId){
+    let map: any = null;
+    
+    // Buscar los usuarios antes de cualquier otra operación
+    const requester = await authRepo.findById(requesterId);
+    if (!requester) {
+      throw new Error(`Usuario solicitante con ID ${requesterId} no encontrado`);
+    }
+    
+    const recipient = await authRepo.findById(recipientId);
+    if (!recipient) {
+      throw new Error(`Usuario receptor con ID ${recipientId} no encontrado`);
+    }
+
+    // Verificar si hay un mapa asociado
+    if (mapId) {
       map = await mapRepo.getOnlyMapById(mapId);
-      if(!map){
+      if (!map) {
         throw new Error("El mapa no fue encontrado");
       }
-    }else{
+      
+      const usersMap = await mapRepo.getUsersOnMapById(map.id);
+      const usuariosMapId = usersMap.map(user => user.id);
+
+      if (usuariosMapId.some(userId => userId === recipient.id)) {
+        throw new Error("Está intentando invitar a un usuario que ya está dentro de la partida");
+      }
+
+      if (!usuariosMapId.includes(requester.id)) {
+        throw new Error("No puede invitar si no está unido al mapa");
+      }
+    } else {
+      // Verificar si ya existe una amistad
       const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
 
-    if (existingFriendship && existingFriendship.requestType === RequestType.FRIEND) {
-      if (existingFriendship.status === FriendStatus.PENDING) {
-        return { success: false, message: "Ya existe una solicitud de amistad pendiente." };
+      if (existingFriendship && existingFriendship.requestType === RequestType.FRIEND) {
+        if (existingFriendship.status === FriendStatus.PENDING) {
+          return { 
+            success: false, 
+            message: "Ya existe una solicitud de amistad pendiente entre estos usuarios."
+          };
+        }
+        if (existingFriendship.status === FriendStatus.ACCEPTED) {
+          return { 
+            success: false, 
+            message: "Estos usuarios ya son amigos."
+          };
+        }
+        if (existingFriendship.status === FriendStatus.BLOCKED) {
+          return { 
+            success: false, 
+            message: "No se puede enviar solicitud porque uno de los usuarios ha bloqueado la relación."
+          };
+        }
+        if (existingFriendship.status === FriendStatus.DELETED) {
+          // Reactivar la amistad en estado pendiente
+          return await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
+        }
       }
-      if (existingFriendship.status === FriendStatus.ACCEPTED) {
-        return { success: false, message: "Estos usuarios ya son amigos." };
-      }
-      if (existingFriendship.status === FriendStatus.BLOCKED) {
-        return { success: false, message: "No se puede enviar solicitud porque uno de los usuarios ha bloqueado la relación." };
-      }
-      if (existingFriendship.status === FriendStatus.DELETED) {
-        // Reactivar la amistad en estado pendiente
-        return await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
-      }
-    }
-    }
-
-
-    
-    const requester = await userRepo.findById(requesterId);
-    const recipient = await userRepo.findById(recipientId);
-
-
-
-    if (!requester || !recipient) {
-      throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
-    }
-    
-    if(map){
-    const usersMap = await mapRepo.getUsersOnMapById(map.id)
-    const usuariosMapId = usersMap.map(user => user.id)
-
-
-    if(usuariosMapId.some(userId => userId == recipient.id)){
-      throw new Error("Está intentando invitar a un usuario que ya está dentro de la partida")
-    }
-
-    if (!usuariosMapId.includes(requester.id)){
-      throw new Error("No puede invitar si no está unido al mapa")
-    }
-
     }
 
     // Crear la solicitud de amistad
     const newFriend = new Friend();
     newFriend.requester = requester;
     newFriend.recipient = recipient;
+    newFriend.status = FriendStatus.PENDING; // Asegurarse de establecer el status
     newFriend.createdAt = new Date();
     newFriend.updatedAt = new Date();
-    if(map){
+    
+    if (map) {
       newFriend.requestType = RequestType.MAP;
       newFriend.map = map;
+    } else {
+      newFriend.requestType = RequestType.FRIEND;
     }
 
     const savedFriend = await repo.createFriend(newFriend);
-
     console.log("Solicitud de amistad creada:", newFriend);
     return savedFriend;
 
@@ -99,7 +112,6 @@ export const sendRequestFriend = async (
     throw error;
   }
 };
-
 
 /**
  * Lista las solicitudes de amistad de un usuario según el estado indicado.

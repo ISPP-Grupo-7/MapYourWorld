@@ -6,9 +6,9 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Role, User } from '../models/user.model';
-import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
+import { sendPasswordResetEmail } from '../services/email.service';
 import { generateToken, verifyToken } from '../../../../shared/security/jwt';
-import { AuthRepository } from '../repositories/auth.repository';
+import AuthRepository  from '../repositories/auth.repository';
 import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 import { createMap } from '../../../map-service/src/services/map.service';
@@ -18,16 +18,16 @@ import { PlanType, Subscription } from '../../../payment-service/models/subscrip
 import SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
 import { createPOIsOnLagMaps } from '../../../map-service/src/services/poi.service';
 
-
-
 const repo = new AuthRepository();
 const profileRepo = new UserProfileRepository();
 const mapRepo = new MapRepository();
-const subscriptionsRepo = new SubscriptionRepository()
+const subscriptionsRepo = new SubscriptionRepository();
+const userRepo = new UserProfileRepository();
 
 export const getUserById = async (userId: string): Promise<User | null> => {
   return await repo.findById(userId);
 };
+
 
 /**
  * Registra un nuevo usuario en el sistema
@@ -43,8 +43,13 @@ export const registerUser = async (userData: any): Promise<User> => {
     // 2. Verificar que el email no existe en la base de datos
     const existingUser = await repo.findByEmail(userData.email);
     if (existingUser) {
-      throw new Error('El usuario ya existe con este email');
+      throw new Error('Ya existe un usuario con este email');
     }
+    const existingUsername = await userRepo.findByUsername(userData.username);
+    if (existingUsername) {
+      throw new Error('Ya existe un usuario con este nombre de usuario');
+    }
+
 
     // 3. Crear el perfil de usuario
     const newProfile = new UserProfile();
@@ -64,7 +69,20 @@ export const registerUser = async (userData: any): Promise<User> => {
     newUser.profile = savedProfile;
 
     // Guardar el usuario en la base de datos
-    const savedUser = await repo.save(newUser);
+    let savedUser = await repo.save(newUser);
+
+    // 4. Generar token JWT
+    const token = generateToken(
+      { sub: savedUser.id, email: savedUser.email },
+      process.env.JWT_SECRET || 'development-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    // 5. Guardar el token en el campo token_data
+    savedUser.token_data = token;
+    savedUser =await repo.save(savedUser);
+
+
 
     // 5. Crear mapa y distritos para el usuario
     try {
@@ -72,7 +90,7 @@ export const registerUser = async (userData: any): Promise<User> => {
       if (newMap) {
         const savedMap = await mapRepo.getMapById(newMap.id);
         await createDistricts(savedMap.id);
-        await createPOIsOnLagMaps(savedMap.id)
+        await createPOIsOnLagMaps(savedMap.id);
 
       }
     } catch (mapError) {
@@ -80,17 +98,16 @@ export const registerUser = async (userData: any): Promise<User> => {
       // No fallamos el registro si el mapa no se puede crear
     }
 
-    const suscriptionUserData = new Subscription()
+    const suscriptionUserData = new Subscription();
+    const now = new Date();
 
-    suscriptionUserData.plan = PlanType.FREE
-    suscriptionUserData.user = newUser
-    suscriptionUserData.is_active = true
+    suscriptionUserData.plan = PlanType.FREE;
+    suscriptionUserData.user = newUser;
+    suscriptionUserData.is_active = true;
+    suscriptionUserData.startDate = now;
+    suscriptionUserData.endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    await subscriptionsRepo.create(suscriptionUserData)
-
-
-
-
+    await subscriptionsRepo.create(suscriptionUserData);
 
     return savedUser;
   } catch (error) {
@@ -112,13 +129,13 @@ export const loginUser = async (email: string, password: string): Promise<{ user
     // 1. Buscar usuario por email
     const user = await repo.findWithPassword(email);
     if (!user) {
-      throw new Error('Usuario no encontrado');
+      throw new Error('Credenciales inválidas');
     }
 
     // 2. Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new Error('Credenciales incorrectas');
+      throw new Error('Credenciales inválidas');
     }
 
     // 3. Verificar que la cuenta esté activa
@@ -374,4 +391,8 @@ export const logout = async (userId: string, token?: string): Promise<boolean> =
     }
     throw new Error('Error al cerrar sesión');
   }
+};
+
+export const getUserProfileById = async (userId: string): Promise<UserProfile | null> => {
+  return await repo.findProfileByUserId(userId);
 };

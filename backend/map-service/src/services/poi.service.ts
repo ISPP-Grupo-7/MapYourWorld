@@ -6,13 +6,14 @@
 import { AppDataSource } from '../../../database/appDataSource';
 import { PointOfInterest } from '../models/poi.model';
 import { Between, Repository, IsNull, Not } from 'typeorm';
-import { PointOfInterestRepository } from '../repositories/poi.repostory';
-import {AuthRepository} from '../../../auth-service/src/repositories/auth.repository';
+import  PointOfInterestRepository  from '../repositories/poi.repostory';
+import AuthRepository from '../../../auth-service/src/repositories/auth.repository';
 import { Role } from '../../../auth-service/src/models/user.model';
-
+import  SubscriptionRepository  from '../../../payment-service/repositories/subscription.repository';
 // Initialize repository
 const poiRepository = new PointOfInterestRepository();
 const authRepository = new AuthRepository();
+const subscriptionRepository = new SubscriptionRepository();
 /**
  * Crea un nuevo punto de interés
  * @param poiData Datos del punto de interés a crear
@@ -39,9 +40,14 @@ export const createPOI = async (
     throw new Error('Ya existe un punto de interés similar en esta ubicación');
   }
   
-  // 4. Guardar el POI en la base de datos
+  const subscription = await subscriptionRepository.getActiveSubscriptionByUserId(userId);
 
-  
+  if (subscription?.plan === 'FREE') {
+    const userPOIsInDistrict = await poiRepository.getPOIsByUserIdAndDistrict(userId, poiData.district.id);
+    if (userPOIsInDistrict.length > 0) {
+      throw new Error('El usuario ya tiene un punto de interés en este distrito, para crear más puntos de interés, actualiza tu plan al plan PREMIUM');
+    }
+  }
   return await poiRepository.createPoi(poiData, userId);
 };
 
@@ -181,15 +187,13 @@ export const deletePOI = async (poiId: string, userId: string): Promise<void> =>
 
 };
 
+export const getPointsOfInterestByUserId = async (userId: string): Promise<PointOfInterest[]> => {
+  const pois = await poiRepository.getPointsOfInterestByUserId(userId)
+  return pois;
+}
 
 export const getPointsOfInterestByMapId = async (mapId:string): Promise<PointOfInterest[] | null> => {
-  // TODO: Implementar la obtención de un punto de interés por ID
-  // 1. Buscar el POI en la base de datos
-  // 2. Retornar null si no se encuentra
-  
-  // 1. Buscar el POI en la base de datos
   const pois = await poiRepository.getPointsOfInterestByMapId(mapId)
-  // 2. Retornar null si no se encuentra
   if (!pois) {
     return null;
   }

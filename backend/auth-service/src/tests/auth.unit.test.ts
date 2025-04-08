@@ -17,7 +17,7 @@ import {
   resetPassword, 
   logout 
 } from '../services/auth.service';
-import { AuthRepository } from '../repositories/auth.repository';
+import AuthRepository  from '../repositories/auth.repository';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
 
 // Añadir mock para UserProfileRepository
@@ -55,7 +55,32 @@ jest.mock('../../../map-service/src/repositories/map.repository', () => {
   };
 });
 
+// Add this with your other jest.mock calls at the top of the file
+jest.mock('../../../payment-service/repositories/subscription.repository', () => {
+  const mockSubscriptionRepo = {
+    create: jest.fn().mockResolvedValue(true),
+    findActiveByUserId: jest.fn(),
+    update: jest.fn()
+  };
+
+  return {
+    __esModule: true, // Asegura que las importaciones por default funcionen
+    default: jest.fn().mockImplementation(() => mockSubscriptionRepo),
+    _mockSubscriptionRepo: mockSubscriptionRepo // Opcional, por si necesitas acceder directamente al mock
+  };
+});
+
+
+// Also mock the POI service that's used in registerUser
+jest.mock('../../../map-service/src/services/poi.service', () => ({
+  createPOIsOnLagMaps: jest.fn().mockResolvedValue(true)
+}));
+
 // Simulamos el AuthRepository
+
+
+
+
 jest.mock('../repositories/auth.repository', () => {
   const mockRepo = {
     findByEmail: jest.fn(),
@@ -66,9 +91,11 @@ jest.mock('../repositories/auth.repository', () => {
     updatePassword: jest.fn(),
     create: jest.fn()
   };
-  
+
   return {
-    AuthRepository: jest.fn().mockImplementation(() => mockRepo)
+    __esModule: true, // <<--- clave para las importaciones por default
+    default: jest.fn().mockImplementation(() => mockRepo),
+    _mockRepo: mockRepo // opcional, por si lo necesitas en los tests
   };
 });
 
@@ -124,7 +151,8 @@ describe('Auth Service', () => {
         role: 'USER',
         username: 'newuser', 
         firstName: 'New',
-        lastName: 'User' 
+        lastName: 'User',
+        picture: '',
       };
   
       // Configurar mocks

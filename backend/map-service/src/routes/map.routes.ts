@@ -22,7 +22,7 @@ router.put('/update/:mapId', updateMap );
 
 router.get('/users/:mapId', getUsersOnMapById );
 
-router.delete('/delete/:mapId', deleteMap );
+router.delete('/delete/:mapId/:userId', deleteMap );
 
 
 export default router;

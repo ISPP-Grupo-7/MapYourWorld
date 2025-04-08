@@ -3,13 +3,12 @@
  */
 
 import { Request, Response } from 'express';
-import { User, Role } from '../models/user.model';
+import { Role } from '../models/user.model';
 import { validationResult } from 'express-validator';
-import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
+import { generateToken } from '../../../../shared/config/jwt.config';
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
-import { AuthRepository } from '../repositories/auth.repository';
 
 /**
  * Registra un nuevo usuario
@@ -23,7 +22,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password, username, firstName, lastName, picture } = req.body;
+    const { email, password, username, firstName, lastName, picture, acceptTerms} = req.body;
+    if (!acceptTerms) {
+      res.status(400).json({ error: "Debes aceptar los términos y condiciones" });
+      return;
+    }
     const user = await authService.registerUser({
       email,
       password,
@@ -387,6 +390,35 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
       res.status(404).json({
         success: false,
         message: 'Usuario no encontrado'
+      });
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener usuario por ID',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+
+export const getProfileByUserId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+
+    const userProfile = await authService.getUserProfileById(userId);
+
+    if (userProfile) {
+      res.status(200).json({
+        success: true,
+        message: 'Perfil de usuario encontrado',
+        profile: userProfile
+      });
+    }
+    else {
+      res.status(404).json({
+        success: false,
+        message: 'Perfil de usuario no encontrado'
       });
     }
   } catch (error) {

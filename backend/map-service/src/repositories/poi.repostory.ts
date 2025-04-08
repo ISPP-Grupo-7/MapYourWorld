@@ -6,7 +6,7 @@ import { District } from '../models/district.model';
 import DistrictRepository from '../repositories/district.repository';
 
 
-export class PointOfInterestRepository {
+export default class PointOfInterestRepository {
     private poiRepo: Repository<PointOfInterest>;
     private userRepo: Repository<User>
     private districtRepo: Repository<District>
@@ -15,6 +15,21 @@ export class PointOfInterestRepository {
         this.poiRepo = AppDataSource.getRepository(PointOfInterest);
         this.userRepo = AppDataSource.getRepository(User)
         this.districtRepo = AppDataSource.getRepository(District)
+    }
+
+    async getPOIsByUserIdAndDistrict(userId: string, districtId: string): Promise<PointOfInterest[]> {
+        if (!userId || !districtId) {
+            throw new Error('El userId y el districtId son obligatorios');
+        }
+
+        const pois = await this.poiRepo.find({
+            where: {
+                user: { id: userId },
+                district: { id: districtId }
+            },
+        });
+
+        return pois;
     }
 
 
@@ -117,13 +132,21 @@ export class PointOfInterestRepository {
             .innerJoin('poi.district', 'district')
             .innerJoin('district.region_assignee', 'region')
             .innerJoin('region.map_assignee', 'map')
+            .leftJoinAndSelect('poi.user', 'user') 
             .where('map.id = :mapId', { mapId })
             .getMany();
 
         return pois;
     };
 
-
+    
+// dado un id de usuario, quiero todos los puntos de interes de ese usuario.
+    async getPointsOfInterestByUserId(userId: string): Promise<PointOfInterest[]> {
+        const pois = await this.poiRepo.find({
+            where: { user: { id: userId } }
+        })
+        return pois;
+    }
 
 
      async createPoiInAllMaps(poiData: Omit<PointOfInterest, 'id'>): Promise<void> {

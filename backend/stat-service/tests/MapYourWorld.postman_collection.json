@@ -1,0 +1,542 @@
+{
+	"info": {
+		"_postman_id": "f6588121-3fe4-4444-8b22-25380ce7e301",
+		"name": "MapYourWorld",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43697984",
+		"_collection_link": "https://pabcabmar3.postman.co/workspace/pabcabmar3's-Workspace~357e32ba-cb76-4534-8314-bc305b69377b/collection/43697984-f6588121-3fe4-4444-8b22-25380ce7e301?action=share&source=collection_link&creator=43697984"
+	},
+	"item": [
+		{
+			"name": "postUser1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"test1@example.com\",\n  \"password\": \"Password1!\",\n  \"username\": \"testuser1\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "loginUser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"test1@example.com\",\n    \"password\": \"Password1!\"   \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postAchievement",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"First Explorer\",\n    \"description\": \"Discover your first district\",\n    \"points\": 50,\n    \"iconUrl\": \"https://example.com/icon.png\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/achievements",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"achievements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postUserAchievement",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/user-achievements/478b635b-cf4e-41e4-ad93-4ac8d1001959/6ad128b9-3d10-4d16-b1af-7f052a873880",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"user-achievements",
+						"478b635b-cf4e-41e4-ad93-4ac8d1001959",
+						"6ad128b9-3d10-4d16-b1af-7f052a873880"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postUser2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"friend@example.com\",\n  \"password\": \"Password1!\",\n  \"username\": \"frienduser\",\n  \"firstName\": \"Friend\",\n  \"lastName\": \"User\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postFriend",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"requesterId\": \"478b635b-cf4e-41e4-ad93-4ac8d1001959\",\n  \"receiverId\": \"f8e6c832-779f-4af2-adc3-02b2e822054c\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/friends/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"friends",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getFriend",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/friends/request/f8e6c832-779f-4af2-adc3-02b2e822054c",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"friends",
+						"request",
+						"f8e6c832-779f-4af2-adc3-02b2e822054c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acceptFriend",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/friends/update/9c6fa5e4-3fc2-465b-972f-babcb038ea58/ACCEPTED",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"friends",
+						"update",
+						"9c6fa5e4-3fc2-465b-972f-babcb038ea58",
+						"ACCEPTED"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postMap",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"478b635b-cf4e-41e4-ad93-4ac8d1001959\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/maps/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"maps",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postDistrict",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"mapId\": \"cff785e4-5e91-4eda-9bab-d2c0b54e356f\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/districts/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"districts",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getDistricts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/districts/map/cff785e4-5e91-4eda-9bab-d2c0b54e356f",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"districts",
+						"map",
+						"cff785e4-5e91-4eda-9bab-d2c0b54e356f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getDistrict",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/districts/e4b2b470-0923-460e-8899-f0d860097e73",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"districts",
+						"e4b2b470-0923-460e-8899-f0d860097e73"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "unlockDistrict",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"isUnlocked\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/districts/unlock/e4b2b470-0923-460e-8899-f0d860097e73/478b635b-cf4e-41e4-ad93-4ac8d1001959/14decc93-4701-4def-8740-6ab8c0954510",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"districts",
+						"unlock",
+						"e4b2b470-0923-460e-8899-f0d860097e73",
+						"478b635b-cf4e-41e4-ad93-4ac8d1001959",
+						"14decc93-4701-4def-8740-6ab8c0954510"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postPOI",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NzhiNjM1Yi1jZjRlLTQxZTQtYWQ5My00YWM4ZDEwMDE5NTkiLCJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQzNjI1NDQ3LCJleHAiOjE3NDM2MjkwNDd9.HQFKYR236uzsdMQ_TBIMqXw-CuZGM3tT60TnbchmpIo",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test POI\", \n  \"description\": \"This is a test point of interest\",\n  \"location\": {\n    \"type\": \"Point\",\n    \"coordinates\": [1, 1]\n  },\n  \"category\": \"PLAZAS\",\n  \"district\": {\n    \"id\": \"e4b2b470-0923-460e-8899-f0d860097e73\"\n  },\n  \"user\": {\n    \"id\": \"478b635b-cf4e-41e4-ad93-4ac8d1001959\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/poi",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"poi"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "postColabMap",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"478b635b-cf4e-41e4-ad93-4ac8d1001959\",\n  \"mapId\": \"cff785e4-5e91-4eda-9bab-d2c0b54e356f\",\n  \"name\": \"Test Collaborative Map\",\n  \"description\": \"A collaborative test map\",\n  \"is_collaborative\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/maps/createOrGetCollaborative",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"maps",
+						"createOrGetCollaborative"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "makeMapColab",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"updateData\": {\n    \"name\": \"Mapa personal\",\n    \"description\": \"Mapa para el usuario\",\n    \"is_colaborative\": true\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/maps/update/cff785e4-5e91-4eda-9bab-d2c0b54e356f",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"maps",
+						"update",
+						"cff785e4-5e91-4eda-9bab-d2c0b54e356f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "joinMap",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"friendId\": \"313a1892-7d9e-4814-a464-4ec44d192b8b\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/collabMap/join/099ee856-c099-4071-86d9-4c1d9cb89a27/478b635b-cf4e-41e4-ad93-4ac8d1001959",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"collabMap",
+						"join",
+						"099ee856-c099-4071-86d9-4c1d9cb89a27",
+						"478b635b-cf4e-41e4-ad93-4ac8d1001959"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getStats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/userStat/478b635b-cf4e-41e4-ad93-4ac8d1001959",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"userStat",
+						"478b635b-cf4e-41e4-ad93-4ac8d1001959"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getUser",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/auth/478b635b-cf4e-41e4-ad93-4ac8d1001959",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"478b635b-cf4e-41e4-ad93-4ac8d1001959"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -11,7 +11,7 @@ require ('@assets/styles/web.css')
 require ('@assets/styles/auth.css')
 import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
 import TermsAndConditions from '../UI/TermsAndConditions.web';
-
+import * as ImagePicker from 'expo-image-picker';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -111,10 +111,7 @@ const RegisterScreen = () => {
     
     const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
 
-    if (formData.picture && !urlRegex.test(formData.picture.trim())) {
-      newErrors.picture = 'Debe ser una URL válida';
-      isValid = false;
-    }
+    
 
     if (!formData.acceptTerms) {
       newErrors.acceptTerms = 'Debes leer y aceptar los términos y condiciones';
@@ -130,40 +127,41 @@ const RegisterScreen = () => {
     
     // Si todo está bien pero falta aceptar términos, mostramos el modal
     if (needsTermsAcceptance) {
-      setTermsModalVisible(true);
-      return;
+        setTermsModalVisible(true);
+        return;
     }
     
     // Si no es válido, detenemos el proceso
     if (!isValid) return;
-  
+
     setIsLoading(true);
-  
+
     try {
-      const success = await signUp(formData);
-  
-      if (!success) {
-        throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
-      }
-  
-      // Registro exitoso
-      navigation.navigate('Map');
+        // Crear una copia de formData sin el campo picture
+        const { picture, ...formDataWithoutPicture } = formData;
+
+        const success = await signUp(formDataWithoutPicture);
+
+        if (!success) {
+            throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
+        }
+
+        // Registro exitoso
+        navigation.navigate('Map');
     } catch (error: unknown) {
-      console.error('Error al registrarse:', error);
-  
-      // Si el error es una instancia de Error, usamos su mensaje
-      let errorMessage: string = 'Ocurrió un error inesperado';
-  
-      if (error instanceof Error) {
-        // Si el error es un objeto Error, usamos el mensaje directamente
-        errorMessage = error.message;
-      }
-  
-      // Mostrar el mensaje de error específico
+        console.error('Error al registrarse:', error);
+
+        let errorMessage: string = 'Ocurrió un error inesperado';
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+
+        // Mostrar el mensaje de error específico
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
   
   
   
@@ -183,6 +181,27 @@ const RegisterScreen = () => {
     handleChange('acceptTerms', true);
     setTermsAlreadyRead(true);
     closeTermsModal();
+  };
+
+  const handleImagePick = async () => {
+    // Solicitar permisos para acceder a los archivos
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  
+    if (!permissionResult.granted) {
+      Alert.alert('Permiso denegado', 'Se requiere acceso a tus archivos para seleccionar una imagen.');
+      return;
+    }
+  
+    // Abrir el selector de imágenes
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      handleChange('picture', result.assets[0].uri); // Guardar la URI de la imagen seleccionada
+    }
   };
 
   // Estilos CSS personalizados para los campos de entrada
@@ -380,32 +399,35 @@ const RegisterScreen = () => {
                     )}
                   </div>
 
-                  {/* URL de imagen */}
+                  {/* Selección de imagen */}
                   <div className="input-container" style={{ marginBottom: 20 }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      URL de avatar (opcional)
+                      Avatar (opcional)
                     </div>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                          <polyline points="21 15 16 10 5 21"></polyline>
-                        </svg>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="URL de avatar"
-                        value={formData.picture}
-                        onChange={(e) => handleChange('picture', e.target.value)}
-                        style={{ 
-                          width: '100%',
-                          paddingLeft: '35px',
-                          paddingRight: '10px',
-                          height: '44px',
-                          borderColor: errors.picture ? '#e53e3e' : undefined
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {formData.picture ? (
+                        <Image
+                          source={{ uri: formData.picture }}
+                          style={{ width: 50, height: 50, borderRadius: 25 }}
+                        />
+                      ) : (
+                        <div style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: '#e2e8f0' }} />
+                      )}
+                      <button
+                        onClick={handleImagePick}
+                        style={{
+                          backgroundColor: APP_TEAL,
+                          color: 'white',
+                          padding: '10px 15px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer',
                         }}
-                      />
+                      >
+                        {formData.picture ? 'Cambiar imagen' : 'Seleccionar imagen'}
+                      </button>
                     </div>
                     {errors.picture && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
@@ -541,4 +563,4 @@ const RegisterScreen = () => {
   );
 };
 
-export default RegisterScreen; 
+export default RegisterScreen;

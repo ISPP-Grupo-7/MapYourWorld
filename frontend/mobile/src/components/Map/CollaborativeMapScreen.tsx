@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, FlatList } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -10,12 +10,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
-  "#2196f399", 
-  "#4cb05099", 
-  "#fec10799", 
-  "#ff970099", 
-  "#ea1e6399", 
-  "#9c27b399", 
+  "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
+  "#9c27b399",
 ];
 
 // Tipos para distritos y POIs
@@ -37,7 +37,7 @@ interface DistritoBackend {
   boundaries: any;
   isUnlocked: boolean;
   user?: { id: string };
-  region_assignee?: { 
+  region_assignee?: {
     id: string;
     name: string;
     description: string;
@@ -71,6 +71,35 @@ interface CollaborativeMapScreenProps {
   mapId: string;
   userId: string;
 }
+
+const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
+  if (!visible) return null;
+
+  return (
+    <Modal
+      transparent={true}
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <Text style={styles.modalMessage}>{message}</Text>
+            <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+              <Text style={styles.modalButtonText}>Aceptar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+};
 
 // Componente para mostrar el logro al desbloquear un distrito
 const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: string }) => {
@@ -134,23 +163,43 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Nuevos estados para invitación de amigos
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-  
-  
+
+
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
-  
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const { user } = useAuth();
   useEffect(() => {
-      console.log("Usuario actual en Social:", user);
-    }, [user]);
-  
-    useEffect(() => {
-      if (user && user.id) {
-        console.log("Cargando amigos para el usuario:", user.id);
-        fetchFriends(user.id);
-        
-      }
-    }, [user]);
+    console.log("Usuario actual en Social:", user);
+  }, [user]);
+
+  useEffect(() => {
+    if (user && user.id) {
+      console.log("Cargando amigos para el usuario:", user.id);
+      fetchFriends(user.id);
+
+    }
+  }, [user]);
+  // Estado para el modal de alertas
+  const [alertModal, setAlertModal] = useState({
+    visible: false,
+    title: '',
+    message: ''
+  });
+
+  // Función para mostrar alertas de manera consistente con la versión web
+  const showAlert = useCallback((title: string, message: string) => {
+    setAlertModal({
+      visible: true,
+      title,
+      message
+    });
+  }, []);
+
+  // Función para cerrar el modal de alerta
+  const closeAlertModal = useCallback(() => {
+    setAlertModal(prev => ({ ...prev, visible: false }));
+  }, []);
 
   // Función para verificar si un punto está dentro de un polígono (distrito)
   const isPointInPolygon = (
@@ -167,9 +216,9 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       if (
         (vertex1.longitude > longitude) !== (vertex2.longitude > longitude) &&
         latitude <
-          ((vertex2.latitude - vertex1.latitude) * (longitude - vertex1.longitude)) /
-            (vertex2.longitude - vertex1.longitude) +
-            vertex1.latitude
+        ((vertex2.latitude - vertex1.latitude) * (longitude - vertex1.longitude)) /
+        (vertex2.longitude - vertex1.longitude) +
+        vertex1.latitude
       ) {
         inside = !inside;
       }
@@ -212,26 +261,26 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     try {
       setLoading(true);
       console.log(`Obteniendo distritos para el mapa colaborativo ${mapId}`);
-  
+
       // Obtener los distritos del mapa colaborativo
       const response = await fetch(`${API_URL}/api/districts/map/${mapId}`);
       const data = await response.json();
       console.log("Respuesta de distritos:", data);
-  
+
       if (!data.success || !data.districts || data.districts.length === 0) {
         console.warn("No se pudieron cargar los distritos del mapa colaborativo");
         setDistritosBackend([]);
         return;
       }
-  
+
       // Obtener los colores de los usuarios que han desbloqueado distritos
       const userColors = new Map();
-  
+
       for (const user of mapUsers) {
         try {
           const colorResponse = await fetch(`${API_URL}/api/districts/user-districts/${user.id}`);
           const colorData = await colorResponse.json();
-          
+
           if (colorData.success && colorData.userDistricts) {
             colorData.userDistricts.forEach((ud: any) => {
               userColors.set(ud.districtId, ud.color);
@@ -241,7 +290,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           console.error(`Error al obtener colores del usuario ${user.id}:`, colorError);
         }
       }
-  
+
       // Mapear los distritos con los colores correctos
       const distritosMapeados = data.districts.map((distrito: DistritoBackend) => {
         try {
@@ -250,7 +299,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
             return null;
           }
-  
+
           return {
             id: distrito.id,
             nombre: distrito.name,
@@ -265,7 +314,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           return null;
         }
       }).filter((d: Distrito | null): d is Distrito => d !== null);
-  
+
       setDistritosBackend(distritosMapeados);
     } catch (error) {
       console.error("Error al obtener los distritos del mapa colaborativo:", error);
@@ -274,13 +323,13 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       setLoading(false);
     }
   };
-  
+
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
       console.log(`Obteniendo POIs para el mapa colaborativo ${mapId}`);
       const response = await fetch(`${API_URL}/api/poi/map/${mapId}`);
-      
+
       // Verificar que la respuesta sea JSON válido
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
@@ -288,10 +337,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         setPointsOfInterest([]);
         return;
       }
-      
+
       const data = await response.json();
       console.log("Respuesta de POIs:", data);
-      
+
       if (data.success && data.pois) {
         setPointsOfInterest(data.pois);
       } else {
@@ -312,27 +361,22 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.log(`Obteniendo usuarios para el mapa colaborativo ${mapId}`);
       const response = await fetch(`${API_URL}/api/maps/users/${mapId}`);
       const data = await response.json();
-      
+
       if (data.success && data.users) {
         // Obtener colores ya asignados para evitar duplicados
         const assignedColors: { [key: string]: string } = {}; // idUsuario -> color
 
         // Recorrer usuarios y asignar colores únicos
-        const usersWithColors = data.users.map((user: { id: string; username: string; color?: string }, index: number) => {
-          let color = user.color; // Intentamos recuperar su color de la BD
-          
+        const usersWithColors = data.users.map((user: any, index: number) => {
+          let color = user.color;
           if (!color) {
-            // Buscar el primer color disponible que no esté asignado aún
             const availableColorIndex = USER_COLORS.findIndex((col) => !Object.values(assignedColors).includes(col));
-            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080"; // Gris si no hay colores disponibles
-            
-            // Guardamos la asignación en el objeto temporal
+            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080";
             assignedColors[user.id] = color;
           }
-
           return {
             id: user.id,
-            username: user.username || `Usuario ${index + 1}`,
+            username: user.profile?.username || `Usuario ${index + 1}`,
             color: color
           };
         });
@@ -352,37 +396,37 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     } catch (error) {
       console.error("Error al obtener los usuarios del mapa colaborativo:", error);
     }
-};
+  };
 
   // Función para desbloquear un distrito en el mapa colaborativo
   const desbloquearDistrito = async (districtId: string, regionId: string) => {
     try {
       console.log(`Desbloqueando distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
       const userColor = USER_COLORS[userColorIndex]; // Obtener color asignado al usuario
-      
+
       const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ color: userColor }) // Enviamos el color
       });
-      
+
       const data = await response.json();
       console.log("Respuesta de desbloqueo:", data);
-      
+
       if (data.success) {
         console.log(`Distrito ${districtId} desbloqueado en mapa colaborativo.`);
         console.log(`Color asignado: ${userColor}`);
-  
+
         // Actualizar el distrito en el estado local con el color correcto
         setDistritosBackend((prev) =>
-          prev.map((d) => 
-            d.id === districtId 
-              ? { 
-                  ...d, 
-                  isUnlocked: true, 
-                  unlockedByUserId: userId,
-                  color: userColor // Usamos el color asignado
-                } 
+          prev.map((d) =>
+            d.id === districtId
+              ? {
+                ...d,
+                isUnlocked: true,
+                unlockedByUserId: userId,
+                color: userColor // Usamos el color asignado
+              }
               : d
           )
         );
@@ -393,7 +437,30 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.error("Error al desbloquear el distrito en el mapa colaborativo:", error);
     }
   };
-  
+  const handleMapPress = (coordinate: { latitude: number; longitude: number }) => {
+    let poiDistrict: Distrito | null = null;
+    for (const d of distritosBackend) {
+      if (isPointInPolygon(coordinate, d.coordenadas)) {
+        poiDistrict = d;
+        break;
+      }
+    }
+    if (!poiDistrict) {
+      Alert.alert("Ubicación no válida", "No puedes crear un punto de interés fuera de un distrito.");
+      return;
+    }
+    if (!poiDistrict.isUnlocked) {
+      Alert.alert("Distrito bloqueado", `El distrito "${poiDistrict.nombre}" está bloqueado.`);
+      return;
+    }
+    setPointOfInterest({
+      ...pointOfInterest,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      district: poiDistrict,
+    });
+    setShowForm(true);
+  };
 
   // Función para inicializar el mapa colaborativo
   const initializeMap = async () => {
@@ -433,11 +500,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     try {
       setIsCreatingMap(true);
       console.log(`Verificando existencia del mapa colaborativo ${mapId}`);
-      
+
       // Obtener userId del almacenamiento local (o usar un valor por defecto para pruebas)
       const storedUserId = await AsyncStorage.getItem('userId');
       const effectiveUserId = storedUserId || userId || 'user-456';
-      
+
       try {
         // Llamar al endpoint para crear o obtener el mapa colaborativo
         const response = await fetch(`${API_URL}/api/maps/createOrGetCollaborative`, {
@@ -450,31 +517,31 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             userId: effectiveUserId
           }),
         });
-        
+
         // Validar la respuesta
         if (!response.ok) {
           console.error(`Error del servidor: ${response.status}`);
-          
+
           // Si hubo un error, mostrar mensaje pero seguir adelante
           console.log("Error en la petición pero continuamos con la inicialización del mapa");
           return null;
         }
-        
+
         try {
           const contentType = response.headers.get("content-type");
           if (!contentType || !contentType.includes("application/json")) {
             console.warn("La respuesta no es JSON válido, pero continuamos");
             return null;
           }
-          
+
           const data = await response.json();
           console.log("Respuesta de verificación de mapa colaborativo:", data);
-          
+
           if (!data.success) {
             console.warn(data.message || "Advertencia al verificar el mapa colaborativo, pero continuamos");
             return null;
           }
-          
+
           console.log(`Mapa colaborativo ${mapId} verificado/creado correctamente`);
           return data.map;
         } catch (jsonError) {
@@ -497,24 +564,27 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para invitar a un amigo al mapa colaborativo
-    const sendFriendRequest = async (friendId: string) => {
-      try {
-        console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
-        const response = await fetch(`${API_URL}/api/friends/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
-        });
-        console.log("Respuesta del backend:", response);
-        const data = await response.json();
-        
-        if (data.success) {
-          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
-        }
-      } catch (error) {
-        console.error("Error al enviar solicitud:", error);
+  const sendFriendRequest = async (friendId: string) => {
+    try {
+      console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
+      const response = await fetch(`${API_URL}/api/friends/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+      });
+      console.log("Respuesta del backend:", response);
+      const data = await response.json();
+      console.log("Respuesta invitacion:", data); // Verifica la estructura en consola
+
+      if (data.success) {
+        Alert.alert("Invitación enviada", `Has invitado a ` + data.friend.recipient.profile.username);
+      } else {
+        Alert.alert("No se pudo enviar la invitación", "El usuario ya tiene una invitación pendiente para este mapa.");
       }
-    };
+    } catch (error) {
+      console.error("Error al enviar solicitud:", error);
+    }
+  };
 
   // Función para iniciar el seguimiento de ubicación
   const startLocationTracking = async () => {
@@ -524,7 +594,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         Alert.alert("Permiso denegado", "Necesitamos acceso a tu ubicación para mostrar el mapa colaborativo.");
         return;
       }
-      
+
       const subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
@@ -538,13 +608,13 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           });
         }
       );
-      
+
       setLocationSubscription(subscription);
       console.log("Seguimiento de ubicación iniciado");
     } catch (locationError) {
       console.error("Error al iniciar el seguimiento de ubicación:", locationError);
       Alert.alert(
-        "Error de ubicación", 
+        "Error de ubicación",
         "No se pudo acceder a tu ubicación. Algunas funciones del mapa podrían no estar disponibles."
       );
     }
@@ -566,21 +636,21 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       Alert.alert("Error", "No se ha proporcionado un ID de mapa válido");
       return;
     }
-    
+
     setLoading(true);
-    
+
     // Usar la función initializeMap ya definida, que ahora asegura que el mapa colaborativo existe
     initializeMap().finally(() => setLoading(false));
 
     // Comenzar a seguir la ubicación del usuario
     startLocationTracking();
-    
+
     // Limpiar al desmontar el componente
     return () => {
       stopLocationTracking();
     };
   }, [mapId]);
-  
+
   useEffect(() => {
     if (mapUsers.length > 0) {
       fetchDistricts();
@@ -591,7 +661,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     if (location && distritosBackend.length > 0 && userColorIndex >= 0) {
       let dentroDeAlguno = false;
       let distritoEncontrado: Distrito | null = null;
-      
+
       for (const distrito of distritosBackend) {
         if (isPointInPolygon(location, distrito.coordenadas)) {
           dentroDeAlguno = true;
@@ -599,10 +669,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           break;
         }
       }
-      
+
       if (distritoEncontrado) {
         const { id, nombre, isUnlocked, unlockedByUserId, regionId } = distritoEncontrado;
-        
+
         // Solo intentamos desbloquear si no está ya desbloqueado por otro usuario
         if (!isUnlocked) {
           desbloquearDistrito(id, regionId);
@@ -632,11 +702,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             console.log(`Leyenda: Usuario ${user.username} tiene color ${assignedColor}`);
             return (
               <View key={index} style={styles.legendItem}>
-                <View 
+                <View
                   style={[
-                    styles.colorSquare, 
+                    styles.colorSquare,
                     { backgroundColor: assignedColor }
-                  ]} 
+                  ]}
                 />
                 <Text style={styles.legendText}>
                   {user.username} {user.id === userId ? "(Tú)" : ""}
@@ -648,53 +718,66 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       </View>
     );
   };
-  
 
-    const fetchFriends = async (userId: string) => {
-      try {
-        console.log(`Solicitando amigos para el usuario: ${userId}`);
-        const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
-        const data = await response.json();
-    
-        console.log("Respuesta del backend:", data); // Verifica la estructura en consola
-    
-        if (Array.isArray(data)) {
-          // Si la respuesta es directamente un array de usuarios, lo asignamos
-          setFriends(data.map((user) => ({
-            id: user.id,
-            name: user.email, // Puedes usar otra propiedad si el backend la tiene
-          })));
-        } else {
-          console.warn("Formato inesperado en la respuesta de amigos:", data);
-        }
-      } catch (error) {
-        console.error("Error al obtener amigos:", error);
+
+  const fetchFriends = async (userId: string) => {
+    try {
+      console.log(`Solicitando amigos para el usuario: ${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+      const data = await response.json();
+
+      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+
+      if (Array.isArray(data)) {
+        // Si la respuesta es directamente un array de usuarios, lo asignamos
+        setFriends(data.map((user) => ({
+          id: user.id,
+          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+        })));
+      } else {
+        console.warn("Formato inesperado en la respuesta de amigos:", data);
       }
-    };
+    } catch (error) {
+      console.error("Error al obtener amigos:", error);
+    }
+  };
+  const getAvailableFriends = () => {
+    return friends.filter(
+      (friend) =>
+        !invitedFriends.includes(friend.id) &&
+        !mapUsers.some((user) => user.id === friend.id)
+    );
+  };
 
-    const renderInviteFriendsModal = () => {
-      return (
-        <Modal
-          visible={showInviteModal}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowInviteModal(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Invitar Amigos</Text>
-              <Text style={styles.modalSubtitle}>
-                Máximo 5 amigos (6 usuarios en total)
+  const renderInviteFriendsModal = () => {
+    const availableFriends = getAvailableFriends();
+    return (
+      <Modal
+        visible={showInviteModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowInviteModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invitar Amigos</Text>
+            <Text style={styles.modalSubtitle}>
+              Máximo 5 amigos (6 usuarios en total)
+            </Text>
+
+            {availableFriends.length === 0 ? (
+              <Text style={styles.noFriendsText}>
+                Tus amigos ya se han unido a este mapa.
               </Text>
-    
+            ) : (
               <FlatList
-                data={friends}
+                data={availableFriends}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <View style={styles.invitedItem}>
                     <Text style={styles.friendName}>{item.name}</Text>
-                    <TouchableOpacity 
-                      style={styles.inviteButton} 
+                    <TouchableOpacity
+                      style={styles.inviteButton}
                       onPress={() => sendFriendRequest(item.id)}
                     >
                       <Text style={styles.inviteButtonText}>Invitar</Text>
@@ -702,27 +785,27 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                   </View>
                 )}
               />
-    
-              {/* Botón para cerrar el modal */}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowInviteModal(false)}
-              >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-              </TouchableOpacity>
-            </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowInviteModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      );
-    };
-    
-    
-  
+        </View>
+      </Modal>
+    );
+  };
+
+
+
 
   // Botón para recargar los datos
   const renderReloadButton = () => {
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.reloadButton}
         onPress={async () => {
           setLoading(true);
@@ -741,6 +824,13 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   return (
     <View style={styles.container}>
+
+      <AlertModal
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        onClose={closeAlertModal}
+      />
       {loading || isCreatingMap ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
@@ -751,12 +841,20 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       ) : (
         <>
           {renderInviteFriendsModal()}
-          
+
           <Modal
             visible={showForm}
             transparent={true}
             onRequestClose={() => setShowForm(false)}
           >
+            <AlertModal
+              visible={alertModal.visible}
+              title={alertModal.title}
+              message={alertModal.message}
+              onClose={closeAlertModal}
+            />
+          <View style={styles.modalOverlay}>
+            
             <PuntoDeInteresForm
               pointOfInterest={pointOfInterest}
               setPointOfInterest={setPointOfInterest}
@@ -772,9 +870,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                 };
                 setPointsOfInterest((prev) => [...prev, poiConverted]);
               }}
+              showAlert={showAlert}
             />
+          </View>
           </Modal>
-          
+
           <MapView
             style={styles.map}
             initialRegion={{
@@ -784,22 +884,26 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               longitudeDelta: 0.1,
             }}
             showsUserLocation={true}
+            onPress={(e) => {
+              const { latitude, longitude } = e.nativeEvent.coordinate;
+              handleMapPress({ latitude, longitude });
+            }}
           >
-           {distritosBackend.map((distrito, index) => {
-  return (
-    <Polygon
-      key={index}
-      coordinates={distrito.coordenadas}
-      strokeColor={"#808080"}
-      fillColor={
-        distrito.isUnlocked && distrito.color
-          ? distrito.color
-          : "rgba(128, 128, 128, 0.7)"
-      }
-      strokeWidth={2}
-    />
-  );
-})}
+            {distritosBackend.map((distrito, index) => {
+              return (
+                <Polygon
+                  key={index}
+                  coordinates={distrito.coordenadas}
+                  strokeColor={"#808080"}
+                  fillColor={
+                    distrito.isUnlocked && distrito.color
+                      ? distrito.color
+                      : "rgba(128, 128, 128, 0.7)"
+                  }
+                  strokeWidth={2}
+                />
+              );
+            })}
 
             {pointsOfInterest.map((poi, index) => {
               // Convertir las coordenadas del POI (se asume que vienen en formato [lng, lat])
@@ -807,7 +911,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                 latitude: poi.location.coordinates[1],
                 longitude: poi.location.coordinates[0],
               };
-              
+
               return (
                 <Marker
                   key={index}
@@ -818,19 +922,19 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               );
             })}
           </MapView>
-          
+
           {renderUserColorLegend()}
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.inviteFriendsButton}
             onPress={() => setShowInviteModal(true)}
           >
             <Icon name="people" size={24} color="white" />
             <Text style={styles.inviteFriendsText}>Invitar Amigos</Text>
           </TouchableOpacity>
-          
+
           {renderReloadButton()}
-          
+
           {distritoActual && <LogroComponent visible={mostrarLogro} distrito={distritoActual} />}
         </>
       )}
@@ -940,7 +1044,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "transparent",
   },
   modalContent: {
     width: "80%",
@@ -948,6 +1052,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     elevation: 5,
+  },
+  noFriendsText: {
+    textAlign: "center",
+    color: "#666",
+    marginVertical: 10,
+    fontSize: 16,
   },
   modalTitle: {
     fontSize: 20,
@@ -974,7 +1084,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#0096C7", // Tono medio para el botón
+    backgroundColor: "#14b8a6", // Tono medio para el botón
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -1033,6 +1143,34 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: 5,
     fontWeight: "bold",
+  },
+  modalButton: {
+    backgroundColor: '#3182ce',
+    borderRadius: 5,
+    padding: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#4a5568',
+  },
+  modalOverlay: {
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0, 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro
+    justifyContent: 'center', // Centrado verticalmente
+    alignItems: 'center', // Centrado horizontalmente
   },
 });
 
