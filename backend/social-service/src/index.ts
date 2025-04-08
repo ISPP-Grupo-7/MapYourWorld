@@ -7,15 +7,9 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-// import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';
-import socialRouter from './routes/social.routes';
 import photoRouter from './routes/photo.routes';
-
-// Dummy RabbitMQ connect function for development
-const connectRabbitMQ = async () => {
-  console.log('[DUMMY] Conectando a RabbitMQ de forma simulada...');
-  return true;
-};
+import friendRouter from './routes/friend.routes';
+import { initializeDatabase } from '../../database/appDataSource';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -31,8 +25,8 @@ app.use(express.json({ limit: '10mb' })); // Aumentar límite para subida de im�
 app.use(express.urlencoded({ extended: true }));
 
 // Rutas
-app.use('/api/social', socialRouter);
 app.use('/api/photos', photoRouter);
+app.use('/api/friends', friendRouter); // Añadir el router de amigos
 
 // Ruta de salud para verificar que el servicio está funcionando
 app.get('/health', (_req: Request, res: Response) => {
@@ -46,8 +40,8 @@ app.get('/health', (_req: Request, res: Response) => {
 // Iniciar el servidor
 const startServer = async () => {
   try {
-    // Conectar a RabbitMQ
-    await connectRabbitMQ();
+    // Conectar a la base de datos
+    await initializeDatabase();
     
     // Iniciar servidor
     app.listen(PORT, () => {
@@ -59,4 +53,10 @@ const startServer = async () => {
   }
 };
 
-startServer(); 
+// Solo iniciar el servidor si este archivo se ejecuta directamente
+if (require.main === module) {
+  startServer();
+}
+
+// Exportar la app para las pruebas
+export default app;

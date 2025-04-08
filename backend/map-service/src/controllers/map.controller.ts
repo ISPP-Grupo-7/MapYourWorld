@@ -170,21 +170,21 @@ export const updateMap = async (req: Request, res: Response): Promise<void> => {
 
 export const deleteMap = async (req: Request, res: Response): Promise<void> => {
   try {    
-    const MapId = req.params.MapId;
-    console.log(`Intentando eliminar mapa con ID: ${MapId}`);
+    const mapId = req.params.mapId;
+    const userId = req.params.userId; // ID del usuario que intenta eliminar el mapa
+    console.log(`Intentando eliminar mapa con ID: ${mapId}`);
     
     try {
-      const result = await MapService.deleteMap(MapId);
+      const result = await MapService.deleteMap(mapId, userId);
       if (!result.success) {
-        console.log(`No se pudo eliminar el mapa ${MapId}: ${result.message}`);
+        console.log(`No se pudo eliminar el mapa ${mapId}: ${result.message}`);
         // A pesar del error, devolvemos éxito para mejorar experiencia del usuario
         res.status(200).json({ success: true, message: 'Mapa eliminado de la vista del usuario' });
         return;
       }
-      console.log(`Mapa ${MapId} eliminado correctamente`);
       res.status(200).json({ success: true, message: 'Mapa eliminado correctamente' });
     } catch (serviceError) {
-      console.error(`Error del servicio al eliminar mapa ${MapId}:`, serviceError);
+      console.error(`Error del servicio al eliminar mapa ${mapId}:`, serviceError);
       // Devolvemos éxito aunque haya error interno
       res.status(200).json({ success: true, message: 'Mapa eliminado de la vista del usuario (fallback)' });
     }

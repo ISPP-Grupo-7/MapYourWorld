@@ -2,8 +2,6 @@
  * Servicio de Perfil de Usuario
  * Gestiona la información de perfil (UserProfile).
  */
-
-// import { publishEvent } from '@shared/libs/rabbitmq';
 import { UserProfileRepository } from '../repositories/userProfile.repository';
 import { UserProfile } from '../models/userProfile.model';
 
@@ -62,13 +60,6 @@ export const updateUserProfile = async (
       throw new Error('Error al actualizar el perfil');
     }
 
-
-    // await publishEvent('user.profile.updated', {
-    //   profileId,
-    //   updatedFields: Object.keys(profileData),
-    //   timestamp: new Date().toISOString(),
-    // });
-
     return updatedProfile;
   } catch (error) {
     console.error(`Error al actualizar perfil con ID ${profileId}:`, error);
@@ -114,13 +105,6 @@ export const updateUserPicture = async (
     if (!updatedProfile) {
       throw new Error('Error al actualizar la imagen');
     }
-
-
-    // await publishEvent('user.picture.updated', {
-    //   profileId,
-    //   pictureUrl,
-    //   timestamp: new Date().toISOString(),
-    // });
 
     return { success: true, pictureUrl };
   } catch (error) {

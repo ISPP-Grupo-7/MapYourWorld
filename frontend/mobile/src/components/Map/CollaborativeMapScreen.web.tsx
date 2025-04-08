@@ -62,6 +62,7 @@ interface POI {
     type: string;
     coordinates: number[]; // [longitude, latitude]
   };
+  category?: string;
 }
 
 interface CollaborativeMapScreenProps {
@@ -78,6 +79,74 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
       <h2 style={styles.logroTitle}>¡Logro Conseguido!</h2>
       <p style={styles.logroSubtitle}>Distrito desbloqueado en mapa colaborativo</p>
       <p style={styles.logroDistrito}>{distrito}</p>
+    </div>
+  );
+};
+
+const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
+  if (!visible) return null;
+  
+  return (
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1001 // Mayor que el formulario POI
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        style={{ 
+          backgroundColor: 'white',
+          borderRadius: '12px', 
+          padding: '20px',
+          maxWidth: '90%',
+          width: '350px',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <h2 style={{
+          fontSize: '20px',
+          fontWeight: 'bold',
+          marginBottom: '12px',
+          color: '#2d3748'
+        }}>
+          {title}
+        </h2>
+        <p style={{
+          fontSize: '16px',
+          color: '#4a5568',
+          marginBottom: '20px'
+        }}>
+          {message}
+        </p>
+        <button 
+          style={{
+            width: '100%',
+            padding: '10px',
+            borderRadius: '8px',
+            backgroundColor: '#3182ce',
+            color: 'white',
+            fontWeight: 600,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onClick={onClose}
+        >
+          Aceptar
+        </button>
+      </div>
     </div>
   );
 };
@@ -128,13 +197,64 @@ const LeafletMap = ({
     });
 
     // Agregar marcadores para cada punto de interés
+    const iconSize: [number, number] = [32, 32]; // Tamaño de los iconos en píxeles
+    const iconAnchor: [number, number] = [16, 32]; // Punto de anclaje del icono (centro inferior)
+    const popupAnchor: [number, number] = [0, -30]; // Punto de anclaje del popup (superior)
+
+    // Definir iconos personalizados para cada categoría
+    const categoryIcons: Record<string, any> = {
+      MONUMENTOS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/776/776557.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      ESTACIONES: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/2062/2062051.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      MERCADOS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/862/862819.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      PLAZAS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1282/1282259.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      OTROS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      })
+    };
+
+    // Icono por defecto para POIs sin categoría
+    const defaultIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+      iconSize: iconSize,
+      iconAnchor: iconAnchor,
+      popupAnchor: popupAnchor
+    });
+
+    // Modificar el bucle que recorre los POIs para usar iconos según categoría
     pointsOfInterest.forEach((poi) => {
       const coords: [number, number] = [
         poi.location.coordinates[1], // latitude
         poi.location.coordinates[0], // longitude
       ];
-      const marker = L.marker(coords).bindPopup(
-        `<h3>${poi.name}</h3><p>${poi.description}</p>`
+      
+      // Seleccionar el icono según la categoría del POI o usar el icono por defecto
+      const icon = poi.category ? categoryIcons[poi.category] || defaultIcon : defaultIcon;
+      
+      const marker = L.marker(coords, { icon: icon }).bindPopup(
+        `<h3>${poi.name}</h3><p>${poi.description}</p>${poi.category ? `<p><strong>Categoría:</strong> ${poi.category}</p>` : ''}`
       );
       marker.addTo(map);
     });
@@ -191,7 +311,62 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // Estado para llevar control de amigos ya invitados y modal de confirmación
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
+  const [inviteSent, setInviteSent] = useState<{ visible: boolean; friendName?: string }>({ visible: false });
+  const [alertModal, setAlertModal] = useState({
+    visible: false,
+    title: '',
+    message: ''
+  });
   const { user } = useAuth();
+  const showAlert = (title: string, message: string) => {
+    setAlertModal({
+      visible: true,
+      title,
+      message
+    });
+  };
+  const closeAlertModal = () => {
+    setAlertModal({
+      ...alertModal,
+      visible: false
+    });
+  };
+  // Componente para el botón de invitar con efecto visual al presionarse
+  const InviteButton: React.FC<{ friendId: string; onInvite: (id: string) => void }> = ({ friendId, onInvite }) => {
+    const [isPressed, setIsPressed] = useState(false);
+    return (
+      <button
+        style={{
+          ...styles.inviteButton,
+          transform: isPressed ? "scale(0.95)" : "scale(1)",
+          transition: "transform 0.1s",
+        }}
+        onMouseDown={() => setIsPressed(true)}
+        onMouseUp={() => setIsPressed(false)}
+        onMouseLeave={() => setIsPressed(false)}
+        onClick={() => onInvite(friendId)}
+      >
+        Invitar
+      </button>
+    );
+  };
+
+  // Función para mostrar el modal de confirmación de invitación
+  const renderInviteSentModal = () => {
+    if (!inviteSent.visible) return null;
+    return (
+      <div style={styles.modalOverlay}>
+        <div style={styles.modalContent}>
+          <h2 style={styles.modalTitle}>¡Invitación Enviada!</h2>
+          <p style={styles.modalSubtitle}>
+            Se ha enviado una solicitud de amistad a {inviteSent.friendName}.
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   // Cargar Leaflet dinámicamente y su CSS
   const [leafletReady, setLeafletReady] = useState(false);
@@ -368,7 +543,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
             color = availableColor;
             assignedColors[u.id] = color;
           }
-          return { id: u.id, username: u.username || `Usuario ${index + 1}`, color, colorIndex: USER_COLORS.indexOf(color) } as MapUser;
+          return { 
+            id: u.id, 
+            username: u.profile?.username || `Usuario ${index + 1}`, 
+            color, 
+            colorIndex: USER_COLORS.indexOf(color) 
+          } as MapUser;
         });
         setMapUsers(usersWithColors);
         const currentUser = usersWithColors.find((u) => u.id === userId);
@@ -408,39 +588,39 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
   }, [showInviteModal, user]);
   
 
-const desbloquearDistrito = async (districtId: string, regionId: string) => {
-  try {
-    // Buscar el distrito en el estado actual
-    const distritoActual = distritosBackend.find((d) => d.id === districtId);
-    // Suponiendo que "rgba(128, 128, 128, 0.7)" es el color por defecto de un distrito bloqueado
-    if (distritoActual && distritoActual.isUnlocked && distritoActual.color !== "rgba(128, 128, 128, 0.7)") {
-      // El distrito ya tiene asignado un color; no se procede a cambiarlo.
-      return;
-    }
-    
-    const userColor = USER_COLORS[userColorIndex];
-    const response = await fetch(
-      `${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ color: userColor }),
+  const desbloquearDistrito = async (districtId: string, regionId: string) => {
+    try {
+      // Buscar el distrito en el estado actual
+      const distritoActual = distritosBackend.find((d) => d.id === districtId);
+      // Suponiendo que "rgba(128, 128, 128, 0.7)" es el color por defecto de un distrito bloqueado
+      if (distritoActual && distritoActual.isUnlocked && distritoActual.color !== "rgba(128, 128, 128, 0.7)") {
+        // El distrito ya tiene asignado un color; no se procede a cambiarlo.
+        return;
       }
-    );
-    const data = await response.json();
-    if (data.success) {
-      setDistritosBackend((prev) =>
-        prev.map((d) =>
-          d.id === districtId
-            ? { ...d, isUnlocked: true, unlockedByUserId: userId, color: userColor }
-            : d
-        )
+      
+      const userColor = USER_COLORS[userColorIndex];
+      const response = await fetch(
+        `${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ color: userColor }),
+        }
       );
+      const data = await response.json();
+      if (data.success) {
+        setDistritosBackend((prev) =>
+          prev.map((d) =>
+            d.id === districtId
+              ? { ...d, isUnlocked: true, unlockedByUserId: userId, color: userColor }
+              : d
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error unlocking district:", error);
     }
-  } catch (error) {
-    console.error("Error unlocking district:", error);
-  }
-};
+  };
 
   // Asegurar que el mapa colaborativo existe (crear o recuperar)
   const ensureCollaborativeMapExists = async () => {
@@ -467,21 +647,32 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
     }
   };
 
+  // Función modificada para enviar solicitud de amistad con feedback visual y filtrado
   const sendFriendRequest = async (friendId: string) => {
     console.log("Enviando solicitud de amistad a:", friendId);
     console.log("Mapa actual:", mapId);
+    
+    
     try {
       const response = await fetch(`${API_URL}/api/friends/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId }),
       });
+  
       const data = await response.json();
+      console.log("Respuesta de la solicitud de amistad:", data);
+  
       if (data.success) {
-        alert(`Solicitud enviada a ${data.name}`);
+        window.alert("Invitación enviada");
+      }else {
+        window.alert("El usuario ya tiene otra invitación pendiente para unirse a este mapa.");  
       }
+  
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      console.error("Error al enviar la solicitud de amistad:");
+      
+      
     }
   };
 
@@ -581,11 +772,11 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
       }
     }
     if (!poiDistrict) {
-      alert("Ubicación no válida: No puedes crear un punto de interés fuera de un distrito.");
+      showAlert('Ubicación no válida', 'No puedes crear un punto de interés fuera de un distrito.');
       return;
     }
     if (!poiDistrict.isUnlocked) {
-      alert(`Distrito bloqueado: El distrito "${poiDistrict.nombre}" está bloqueado.`);
+      showAlert('Distrito bloqueado', `El distrito "${poiDistrict.nombre}" está bloqueado. Desbloquéalo primero para añadir puntos de interés.`);
       return;
     }
     setPointOfInterest({
@@ -596,10 +787,17 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
     });
     setShowForm(true);
   };
-
-  // Renderizado del modal para invitar amigos
+  const getAvailableFriends = () =>
+    friends.filter(
+      (friend) =>
+        !invitedFriends.includes(friend.id) &&
+        !mapUsers.some((user) => user.id === friend.id)
+    );
+  // Modal para invitar amigos con lista filtrada de quienes ya fueron invitados o están unidos
   const renderInviteFriendsModal = () => {
     if (!showInviteModal) return null;
+    const availableFriends = getAvailableFriends();
+  
     return (
       <div
         style={styles.modalOverlay}
@@ -611,15 +809,19 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
           <h2 style={styles.modalTitle}>Invitar Amigos</h2>
           <p style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
-            {friends.map((friend) => (
+          {availableFriends.length === 0 ? (
+            <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
+              Tus amigos ya se han unido a este mapa.
+            </p>
+          ) : (
+            availableFriends.map((friend) => (
               <div key={friend.id} style={styles.invitedItem}>
                 <span style={styles.friendName}>{friend.name}</span>
-                <button style={styles.inviteButton} onClick={() => sendFriendRequest(friend.id)}>
-                  Invitar
-                </button>
+                <InviteButton friendId={friend.id} onInvite={sendFriendRequest} />
               </div>
-            ))}
-          </div>
+            ))
+          )}
+        </div>
           <button style={styles.closeButton} onClick={() => setShowInviteModal(false)}>
             Cerrar
           </button>
@@ -676,8 +878,17 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
   }
 
   return (
+    
     <div style={styles.container}>
       {renderInviteFriendsModal()}
+      {renderInviteSentModal()}
+      <AlertModal 
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        onClose={closeAlertModal}
+      />
+
       {showForm && (
         <div
           style={styles.modalOverlay}
@@ -685,8 +896,93 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
             if (e.target === e.currentTarget) setShowForm(false);
           }}
         >
-          <div style={styles.formModalContent}>
-            <h1 style={styles.formTitle}>Registrar Punto de Interés</h1>
+          <div 
+            style={{ 
+          backgroundColor: 'white',
+              borderRadius: '12px', 
+          padding: '20px',
+              maxWidth: '90%',
+              width: '380px',
+              maxHeight: '90vh', 
+          overflow: 'auto',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {/* Estilo personalizado para el formulario web */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              .form-container input, .form-container textarea {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                margin-bottom: 10px;
+              }
+              
+              .form-container .dropdown {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                background-color: white;
+                cursor: pointer;
+                margin-bottom: 10px;
+              }
+              
+              .form-container .section-title {
+                font-size: 18px;
+                font-weight: 500;
+                margin-bottom: 8px;
+              }
+              
+              .form-container .add-photo-btn {
+                width: 64px;
+                height: 64px;
+                border-radius: 8px;
+                border: 1px solid #d1d5db;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+              }
+              
+              .form-container .btn-primary {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #2563eb;
+                color: white;
+                font-weight: 600;
+                text-align: center;
+                margin-bottom: 10px;
+                cursor: pointer;
+                border: none;
+              }
+              
+              .form-container .btn-danger {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #dc2626;
+                color: white;
+                font-weight: 600;
+                text-align: center;
+                cursor: pointer;
+                border: none;
+              }
+            ` }} />
+          <h1 style={{
+              fontSize: 24,
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: 8,
+              color: '#1e293b',
+            }}>
+              Registrar Punto de Interés
+            </h1>
+            <div className="form-container">
+
             <PuntoDeInteresForm
               pointOfInterest={pointOfInterest}
               setPointOfInterest={setPointOfInterest}
@@ -698,7 +994,9 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
                 };
                 setPointsOfInterest((prev) => [...prev, poiConverted]);
               }}
+              showAlert={showAlert}
             />
+            </div>
           </div>
         </div>
       )}
@@ -850,7 +1148,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 1001,
   },
   inviteButton: {
-    backgroundColor: "#0096C7",
+    backgroundColor: "#14b8a6",
     borderRadius: 8,
     padding: "10px 20px",
     border: "none",

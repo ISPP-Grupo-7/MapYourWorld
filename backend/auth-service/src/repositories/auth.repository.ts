@@ -1,8 +1,9 @@
 import { Repository } from 'typeorm';
 import { User, Role } from '../models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
+import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
-export class AuthRepository {
+export default class AuthRepository {
   private repository: Repository<User>;
 
   constructor() {
@@ -30,6 +31,18 @@ export class AuthRepository {
   async findByEmail(email: string): Promise<User | null> {
     return this.repository.findOneBy({ email });
   }
+
+    /**
+   * Encuentra un usuario por su email
+   * @param username Email del usuario
+   */
+    async findByUsername(username: string): Promise<User | null> {
+      return this.repository.findOne({
+        where: { profile: { username: username } },
+        relations: ['profile'], 
+      });
+    }
+    
 
   /**
    * Busca un usuario con su contraseña (para login)
@@ -97,5 +110,16 @@ export class AuthRepository {
   async delete(id: string): Promise<boolean> {
     const result = await this.repository.delete({ id });
     return result.affected !== undefined && result.affected !== null && result.affected > 0;
+  }
+
+  async findProfileByUserId(userId: string): Promise<UserProfile|null> {
+    const result = await this.repository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .where('user.id = :userId', { userId })
+      .getOne();
+    if (!result) {
+      throw new Error('User not found');
+    }
+    return result.profile;
   }
 }

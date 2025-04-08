@@ -25,7 +25,7 @@ export class District {
     @ManyToOne(() => Region, (region) => region.id, { onDelete:"CASCADE"})
     region_assignee!: Region;
 
-    @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.district)
+    @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.district, { onDelete:"CASCADE"})
     userDistrict!: UserDistrict[];
 }
 

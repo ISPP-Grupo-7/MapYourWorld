@@ -8,7 +8,6 @@
 // npm install --save-dev @types/nodemailer
 // import * as nodemailer from 'nodemailer';
 import { emailConfig } from '../config/email.config';
-import { text } from 'stream/consumers';
 
 // Define tipos manualmente para no depender de @types/nodemailer
 interface Transport {

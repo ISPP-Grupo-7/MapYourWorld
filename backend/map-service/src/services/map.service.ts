@@ -9,8 +9,8 @@ import { Map } from '../models/map.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import MapRepository from '../repositories/map.repository';
 import { User } from '../../../auth-service/src/models/user.model';
-import { UserDistrictRepository } from '../repositories/user-district.repository';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import UserDistrictRepository  from '../repositories/user-district.repository';
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
 import { UserDistrict } from '../models/user-district.model';
 import { createDistricts } from '../../../map-service/src/services/district.service';
 
@@ -56,7 +56,7 @@ export const createMap = async (
     return createdMap;
 
   } catch (error) {
-    throw new Error("Error al crear el mapa");
+    throw error;
   }
 
 };
@@ -166,7 +166,7 @@ export const updateMap = async (
  * Elimina un mapa existente
  * @param MapId ID del mapa a eliminar
  */
-export const deleteMap = async (MapId: string): Promise<{ success: boolean; message?: string }> => {
+export const deleteMap = async (MapId: string, userId: string): Promise<{ success: boolean; message?: string }> => {
   try {
     // 1. Verificar que el mapa existe
     const map = await repo.getMapById(MapId);
@@ -177,7 +177,7 @@ export const deleteMap = async (MapId: string): Promise<{ success: boolean; mess
     // 2. Comprobar que el usuario tiene permisos para eliminar el mapa (opcional, según tu lógica de negocio)
 
     // 3. Eliminar el mapa de la base de datos
-    await repo.deleteMap(MapId);
+    await repo.deleteMap(MapId, userId);
 
     // 4. Publicar evento de mapa eliminado (opcional, según tu lógica de negocio)
 

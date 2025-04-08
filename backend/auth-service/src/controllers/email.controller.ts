@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import { sendEmail, sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangeNotification, testEmailConnection } from '../services/email.service';
-import { text } from 'stream/consumers';
 
 /**
  * Enviar correo

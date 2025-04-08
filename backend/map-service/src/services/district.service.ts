@@ -11,7 +11,7 @@ import DistrictRepository from '../repositories/district.repository';
 import MapRepository from '../repositories/map.repository';
 import * as fs from 'fs';
 import { Geometry } from 'geojson';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
 import { UserDistrict } from '../models/user-district.model';
 import RegionRepository from '../repositories/region.repository';
 
@@ -239,7 +239,7 @@ export const unlockDistrict = async (
 export const getUserUnlockedDistricts = async (userId: string): Promise<District[]> => {
   // TODO: Implementar la obtención de distritos desbloqueados por un usuario
   // 1. Consultar los registros de desbloqueo del usuario
-  const districts = await repo.getDistrictsUnlocked();
+  const districts = await repo.getDistrictsUnlocked(userId);
   return districts;
 
 };
@@ -476,16 +476,9 @@ export const simulateUserPassingByDistrict = async (
 export const getUserDistrictsWithColors = async (userId: string): Promise<UserDistrict[]> => {
   try {
     console.log(`Buscando distritos con colores para el usuario ${userId}`);
-    const userDistrictRepository = AppDataSource.getRepository(UserDistrict);
 
     // Realizamos la consulta con relaciones y nos aseguramos de que no haya distritos nulos
-    const userDistricts = await userDistrictRepository
-      .createQueryBuilder("userDistrict")
-      .leftJoinAndSelect("userDistrict.district", "district")
-      .leftJoinAndSelect("userDistrict.user", "user")
-      .where("user.id = :userId", { userId })
-      .getMany();
-
+    const userDistricts = await repo.getUserDistrictsByUserId(userId);
     console.log(`Se encontraron ${userDistricts.length} distritos para el usuario ${userId}`);
 
     // Filtramos los que puedan tener distrito nulo

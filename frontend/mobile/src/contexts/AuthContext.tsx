@@ -122,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     lastName: string;
     picture?: string;
     password: string;
+    acceptTerms: boolean;
   }): Promise<boolean> {
     try {
       setIsLoading(true);

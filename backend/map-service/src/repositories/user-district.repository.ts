@@ -3,7 +3,7 @@ import { AppDataSource } from '../../../database/appDataSource';
 import { UserDistrict } from '../models/user-district.model';
 import { District } from '../models/district.model';
 
-export class UserDistrictRepository {
+export default class UserDistrictRepository {
     private repo: Repository<UserDistrict>;
 
     constructor() {

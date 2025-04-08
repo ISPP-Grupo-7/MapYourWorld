@@ -14,6 +14,7 @@ export type RootStackParamList = {
   Map: undefined;
   Profile: { userId: string };
   MapList: undefined;
+  UserStats: undefined;
   SocialScreen: undefined;
 
   // Pantallas de mapas

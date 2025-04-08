@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from '@backend/auth-service/src/types';
 import { Auth } from '@types';
-import { Role, User } from '../models/user.model';
+import { Role } from '../models/user.model';
 import * as authService from '../services/auth.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';

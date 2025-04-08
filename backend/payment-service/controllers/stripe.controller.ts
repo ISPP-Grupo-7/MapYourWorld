@@ -3,7 +3,6 @@ import Stripe from "stripe";
 import dotenv from "dotenv";
 import path from "path";
 
-import * as subscriptionService from "../services/subscription.service";
 
 // Configurar dotenv para que busque el archivo .env en la raíz del proyecto
 const rootDir = path.resolve(__dirname, '../../../');
@@ -15,7 +14,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 export const createPaymentIntent = async (req: Request, res: Response) => {
     try {
-      const userId = req.params.userId; 
       const { amount } = req.body; // Monto en centavos (€10.00 = 1000)
   
       const paymentIntent = await stripe.paymentIntents.create({
