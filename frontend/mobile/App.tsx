@@ -80,14 +80,34 @@ const ForgotPasswordScreenWrapper = (props: any) => {
 };
 
 const SubscriptionScreenWrapper = (props: any) => {
+  const authData = useAuth();
+  const user = authData?.user;
+  const updateSubscription = async () => {
+    if (!user) return;
+    try {
+      // Obtener la suscripción actualizada del servidor
+      const response = await fetch(`${API_URL}/api/subscriptions/active/${user.id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) throw new Error(response.statusText);
+      const data = await response.json();
+      
+      // Actualizar el estado en App.tsx usando el setSubscription que viene de props
+      props.setSubscription(data);
+    } catch (error) {
+      console.error('Error al obtener la subscripción', error);
+    }
+  };
+
   if (Platform.OS === 'web') {
     const SubscriptionScreenWeb = require('@/components/screens/SubscriptionScreen.web').default;
-    return <SubscriptionScreenWeb {...props} />;
+    return <SubscriptionScreenWeb {...props} updateSubscription={updateSubscription} />;
   } 
   try {
     const SubscriptionScreen = require('@/components/screens/SubscriptionScreen').default;
     return (
-      <SubscriptionScreen {...props} />
+      <SubscriptionScreen {...props} updateSubscription={updateSubscription} />
     );
   } catch (error) {
     console.error("Error cargando SubscriptionScreen:", error);
@@ -378,7 +398,7 @@ const AppContent = () => {
         />    
         <Stack.Screen 
           name="Payment" 
-          component={SubscriptionScreenWrapper}
+          component={() => <SubscriptionScreenWrapper setSubscription={setSubscription} />}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
