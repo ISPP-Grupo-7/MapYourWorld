@@ -31,8 +31,11 @@ jest.mock('@/components/screens/AdvertismentForm', () => {
                 <TextInput testID='email-input' error=''></TextInput>
                 <TextInput testID='name-input' error=''></TextInput>
                 <TextInput testID='description-input' error=''></TextInput>
-                <TextInput testID='longitude-input' error=''></TextInput>
-                <TextInput testID='latitude-input' error=''></TextInput>
+                <TextInput testID='address-input' error=''></TextInput>
+                <TextInput testID='city-input' error=''></TextInput>
+                <TextInput testID='postalcode-input' error=''></TextInput>
+                <TextInput testID='country-input' error=''></TextInput>
+                <TextInput testID='comments-input' error=''></TextInput>
                 <TouchableOpacity testID="submit-button">
                     <Text>Enviar</Text>
                 </TouchableOpacity>
@@ -66,8 +69,11 @@ describe('AdvertisementForm', () => {
     expect(getByTestId('email-input')).toBeTruthy();
     expect(getByTestId('name-input')).toBeTruthy();
     expect(getByTestId('description-input')).toBeTruthy();
-    expect(getByTestId('longitude-input')).toBeTruthy();
-    expect(getByTestId('latitude-input')).toBeTruthy();
+    expect(getByTestId('address-input')).toBeTruthy();
+    expect(getByTestId('city-input')).toBeTruthy();
+    expect(getByTestId('postalcode-input')).toBeTruthy();
+    expect(getByTestId('country-input')).toBeTruthy();
+    expect(getByTestId('comments-input')).toBeTruthy();
     expect(getByTestId('submit-button')).toBeTruthy();
   });
 
@@ -80,8 +86,10 @@ describe('AdvertisementForm', () => {
     await waitFor(() => {
       expect(findByText('El correo electrónico es obligatorio')).toBeTruthy();
       expect(findByText('El nombre es obligatorio')).toBeTruthy();
-      expect(findByText('La longitud es obligatoria')).toBeTruthy();
-      expect(findByText('La latitud es obligatoria')).toBeTruthy();
+      expect(findByText('La dirección es obligatoria')).toBeTruthy();
+      expect(findByText('La ciudad es obligatoria')).toBeTruthy();
+      expect(findByText('El código postal es obligatorio')).toBeTruthy();
+      expect(findByText('El país es obligatorio')).toBeTruthy();
     });
   });
 
@@ -91,36 +99,15 @@ describe('AdvertisementForm', () => {
     // ponemos valores no válidos
     const emailInput = getByTestId('email-input');
     fireEvent.changeText(emailInput, 'valor no valido');
-    const longitudeInput = getByTestId('longitude-input');
+    const longitudeInput = getByTestId('postalcode-input');
     fireEvent.changeText(longitudeInput, 'valor no valido');
-    const latitudeInput = getByTestId('latitude-input');
-    fireEvent.changeText(latitudeInput, 'valor no valido');
 
     const submitButton = getByTestId('submit-button');
     fireEvent.press(submitButton);
 
     await waitFor(() => {
       expect(findByText('Introduce un correo electrónico válido')).toBeTruthy();
-      expect(findByText('La longitud debe ser un número')).toBeTruthy();
-      expect(findByText('La latitud debe ser un número')).toBeTruthy();
-    });
-  });
-
-  test('muestra errores de validación de coordenadas no válidas', async () => {
-    const { findByText, getByTestId } = render(<AdvertisementForm />);
-
-    // ponemos valores no válidos
-    const longitudeInput = getByTestId('longitude-input');
-    fireEvent.changeText(longitudeInput, '200');
-    const latitudeInput = getByTestId('latitude-input');
-    fireEvent.changeText(latitudeInput, '200');
-
-    const submitButton = getByTestId('submit-button');
-    fireEvent.press(submitButton);
-
-    await waitFor(() => {
-      expect(findByText('La longitud debe estar entre -180º y 180º')).toBeTruthy();
-      expect(findByText('La latitud debe estar entre -90º y 90º')).toBeTruthy();
+      expect(findByText('Código postal no v´´alido')).toBeTruthy();
     });
   });
 });

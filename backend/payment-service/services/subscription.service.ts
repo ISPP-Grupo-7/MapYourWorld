@@ -101,7 +101,7 @@ export const getActiveSubscriptionByUserId = async (userId: string): Promise<Sub
 
 
 export const incrementarSuscripcion = async (userId: string): Promise<void> => {
-    const suscripcion_usuario = await subscriptionRepository.getSuscriptionByUserId(userId)
+    const suscripcion_usuario = await subscriptionRepository.getSubscriptionByUserId(userId)
 
     if(suscripcion_usuario.plan === PlanType.PREMIUM){
         throw new Error("El usuario ya tiene el plan Premium asignado")

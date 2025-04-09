@@ -7,7 +7,7 @@
 import {UserAchievement} from '../models/userAchievement.model';
 import {UserAchievementRepository} from '../repositories/userAchievement.repository';
 import { User } from '../../auth-service/src/models/user.model';
-import { AuthRepository } from '../../auth-service/src/repositories/auth.repository';
+import AuthRepository  from '../../auth-service/src/repositories/auth.repository';
 import { AchievementRepository } from '../repositories/achievement.repository';
 import { Achievement } from '../models/achievement.model';
 

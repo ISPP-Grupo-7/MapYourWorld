@@ -4,11 +4,8 @@
 
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { register, login, forgotPassword, resetPassword, verify, changePassword, logout, getUserById } from '../controllers/auth.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
-import { requireAdmin, isAuthenticated } from '../middleware/auth.middleware';
-import adminRoutes from './admin.routes';
-import { AuthenticatedRequest } from '../types';
+import { register, login, forgotPassword, resetPassword, verify, changePassword, logout, getUserById, getProfileByUserId } from '../controllers/auth.controller';
+
 const router: Router = Router();
 
 // Ruta para registrar un usuario
@@ -112,7 +109,7 @@ router.post(
   changePassword
 );
 // Ruta para obtener el perfil del usuario autenticado
-router.get('/profile', );
+router.get('/profile/:userId', getProfileByUserId);
 
 // Ruta para cerrar sesión (sin requerir middleware de autenticación)
 router.post(

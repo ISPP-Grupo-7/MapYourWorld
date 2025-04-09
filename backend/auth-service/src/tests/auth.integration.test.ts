@@ -47,7 +47,7 @@ jest.mock('bcryptjs', () => ({
 
 // Now import the auth service that was causing the circular reference
 import { logout } from '../../../auth-service/src/services/auth.service';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository'; 
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository'; 
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
 // Import app after all mocks are set up
@@ -154,7 +154,8 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: mockUser.password,
           username: mockUser.profile.username,
           firstName: mockUser.profile.firstName,
-          lastName: mockUser.profile.lastName
+          lastName: mockUser.profile.lastName,
+          acceptTerms: true
         });
 
       // Validar la respuesta
@@ -314,7 +315,8 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: 'Password1!',
           username: '{{7*7}}',
           firstName: 'Usuario',
-          lastName: 'Prueba'
+          lastName: 'Prueba',
+          acceptTerms: true
         });
 
 

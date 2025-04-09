@@ -5,8 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { API_URL } from '../../constants/config';
 import { useAuth } from '@/contexts/AuthContext';
-import PricingTable from '../UI/PricingTable';
-import styles from '../../assets/styles/pricingStyle'; // Importando los estilos
+import PricingTableWeb from '../UI/PricingTableWeb';
+import AlertModal from '../UI/Alert';
 
 const stripePromise = loadStripe('pk_test_51R4l53COc5nj88VcYd6SLzaAhHazLwG2eu4s7HcQOqYB7H1BolfivjPrFzeedbiZuJftKEZYdozfe6Dmo7wCP5lA00rN9xJSro');
 
@@ -45,14 +45,59 @@ const SubscriptionScreen: React.FC = () => {
 
   return (
     <Elements stripe={stripePromise}>
-      <div style={styles.screenContainer}>
+      <div
+        style={{
+          backgroundColor: '#f9fafb',
+          margin: '16px auto',
+          padding: '16px',
+          minWidth: '60%',
+          maxWidth: '800px',
+          boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '12px',
+          gap: '16px',
+        }}
+      >
         {subscriptionPlan === 'PREMIUM' ? (
-          <div style={styles.premiumContainer}>
-            <h2 style={styles.premiumTitle}>Enhorabuena, ya eres miembro Premium</h2>
-            <p style={styles.premiumDescription}>Ahora puedes disfrutar de todas las características exclusivas, incluyendo acceso ilimitado a mapas y estadísticas avanzadas. ¡Gracias por ser parte de nuestra comunidad Premium!
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '40px',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#0d9488',
+                marginBottom: '16px',
+              }}
+            >
+              Enhorabuena, ya eres miembro Premium
+            </h2>
+            <p
+              style={{
+                fontSize: '16px',
+                color: '#6b7280',
+                textAlign: 'center',
+                marginBottom: '24px',
+              }}
+            >
+              Ahora puedes disfrutar de todas las características exclusivas, incluyendo acceso ilimitado a mapas y estadísticas avanzadas. ¡Gracias por ser parte de nuestra comunidad Premium!
             </p>
             <button
-              style={styles.button}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '8px',
+                backgroundColor: '#14b8a6',
+                border: 'none',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              }}
               onClick={() => navigation.navigate('Map')}
             >
               Ir a mi mapa
@@ -60,8 +105,20 @@ const SubscriptionScreen: React.FC = () => {
           </div>
         ) : (
           <>
-            <PricingTable />
-            <h2 style={styles.title}>Suscríbete a Premium</h2>
+            <div style={{ marginBottom: '24px', gap: '16px' }}>
+              <PricingTableWeb />
+            </div>
+            <h2
+              style={{
+                fontSize: '32px',
+                fontWeight: 'bold',
+                color: '#0d9488',
+                marginBottom: '16px',
+                textAlign: 'center',
+              }}
+            >
+              Suscríbete a Premium (5,50€ al mes)
+            </h2>
             <CheckoutForm setLoading={setLoading} loading={loading} />
           </>
         )}
@@ -76,51 +133,68 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading }) => {
   const { user } = useAuth();
   const navigation = useNavigation<NavigationProp>();
 
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
+  const [alertTitle, setAlertTitle] = useState<string>('');
+  const [alertMessage, setAlertMessage] = useState<string>('');
+  const [alertActionText, setAlertActionText] = useState<string>('');
+  const [alertOnAction, setAlertOnAction] = useState<(() => void) | undefined>(undefined);
+
+  const showAlert = (
+    title: string,
+    message: string,
+    onAction?: () => void,
+    actionText?: string
+  ) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertActionText(actionText || '');
+    setAlertOnAction(() => onAction);
+    setAlertVisible(true);
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
 
     try {
-      // Hacer la solicitud al backend para crear el PaymentIntent
       const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 550 })  // Aquí defines el monto en centavos
+        body: JSON.stringify({ amount: 550 }),
       });
 
       if (!response.ok) throw new Error('Error al crear el PaymentIntent');
       const { paymentIntent } = await response.json();
 
-      // Si no hay stripe o elements, retornamos
       if (!stripe || !elements) return;
 
-      // Confirmar el pago con el PaymentIntent generado
       const result = await stripe.confirmCardPayment(paymentIntent, {
-        payment_method: { card: elements.getElement(CardElement)! }
+        payment_method: { card: elements.getElement(CardElement)! },
       });
 
-      // Si hay un error en la confirmación
       if (result.error) {
         console.error(result.error.message);
         alert('Hubo un error al procesar el pago');
       } else {
-        // Si el pago es exitoso, actualizamos la suscripción del usuario a "Premium"
         if (result.paymentIntent.status === 'succeeded') {
-          console.log('Pago exitoso!');
-
-          // Ahora actualiza la suscripción del usuario a "Premium"
-          const updateResponse = await fetch(`${API_URL}/api/subscriptions/upgrade/${user?.id}`, { 
+          const updateResponse = await fetch(`${API_URL}/api/subscriptions/upgrade/${user?.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
           });
-
           if (!updateResponse.ok) {
             console.error('Error al actualizar la suscripción');
             return;
           }
 
-          // Redirigir al mapa si todo ha ido bien
-          navigation.navigate('Map');
+          showAlert(
+            '¡Pago realizado con éxito!',
+            'Tu pago se ha procesado correctamente.',
+            () => {
+              setAlertVisible(false);
+              navigation.navigate('Map');
+            },
+            'Continuar'
+          );
         }
       }
     } catch (error) {
@@ -132,16 +206,76 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} >
-      <CardElement className="card-element" />
-      <button
-        type="submit"
-        style={styles.button}
-        disabled={!stripe || loading}
+    <>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          padding: '20px',
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          marginTop: '16px',
+        }}
       >
-        {loading ? 'Cargando...' : 'Pagar con Stripe'}
-      </button>
-    </form>
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div style={{ width: '60%' }}>
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    color: '#0d9488',
+                    fontSize: '16px',
+                    fontFamily: 'sans-serif',
+                    '::placeholder': {
+                      color: '#94a3b8',
+                    },
+                    iconColor: '#0d9488',
+                  },
+                  invalid: {
+                    color: '#dc2626',
+                    iconColor: '#dc2626',
+                  },
+                },
+                hidePostalCode: true,
+              }}
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          style={{
+            padding: '12px 24px',
+            borderRadius: '8px',
+            backgroundColor: '#14b8a6',
+            border: 'none',
+            color: 'white',
+            fontWeight: 'bold',
+            fontSize: '16px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            marginTop: '2em',
+            width: '50%',
+            alignSelf: 'center',
+          }}
+          disabled={!stripe || loading}
+        >
+          {loading ? 'Cargando...' : 'Pagar con Stripe'}
+        </button>
+      </form>
+
+      <AlertModal
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => {}}
+        onAction={alertOnAction}
+        actionText={alertActionText}
+        singleButton={true}
+      />
+    </>
   );
 };
 

@@ -1,0 +1,23 @@
+name: Daily Pull Request
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # runs every 1 day
+    - cron: '0 0 * * *'
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Create Pull Request
+        run: gh pr create -B deploy/v2.0 -H develop --title 'Automatic PR to deploy branch' --body 'Created by Github action'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

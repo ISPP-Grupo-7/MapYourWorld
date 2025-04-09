@@ -9,7 +9,7 @@ const photoRepo = new PhotoRepository();
  * @param poiId ID del Point of Interest al que asociar la foto
  */
 export const uploadPhotoToPoi = async (photoData: Omit<Photo, 'id'>, poiId: string): Promise<Photo> => {
-  return await photoRepo.createPhoto({ ...photoData}, poiId );
+  return photoRepo.createPhoto({ ...photoData}, poiId );
 };
 
 /**
@@ -17,14 +17,14 @@ export const uploadPhotoToPoi = async (photoData: Omit<Photo, 'id'>, poiId: stri
  * @param id ID de la foto
  */
 export const findPhotoById = async (id: string): Promise<Photo | null> => {
-  return await photoRepo.getById(id);
+  return photoRepo.getById(id);
 };
 
 /**
  * Obtiene todas las fotos
  */
 export const findAllPhotos = async (): Promise<Photo[]> => {
-  return await photoRepo.getAll();
+  return photoRepo.getAll();
 };
 
 /**
@@ -33,7 +33,7 @@ export const findAllPhotos = async (): Promise<Photo[]> => {
  * @param updateData Datos a actualizar de la foto
  */
 export const updatePhoto = async (id: string, updateData: Partial<Photo>): Promise<Photo | null> => {
-  return await photoRepo.updatePhoto(id, updateData);
+  return photoRepo.updatePhoto(id, updateData);
 };
 
 /**
@@ -41,7 +41,7 @@ export const updatePhoto = async (id: string, updateData: Partial<Photo>): Promi
  * @param id ID de la foto a eliminar
  */
 export const deletePhoto = async (id: string): Promise<boolean> => {
-  return await photoRepo.deletePhoto(id);
+  return photoRepo.deletePhoto(id);
 };
 
 /**
@@ -49,5 +49,5 @@ export const deletePhoto = async (id: string): Promise<boolean> => {
  * @param poiId ID del Point of Interest
  */
 export const getPhotosByPoiId = async (poiId: string): Promise<Photo[]> => {
-  return await photoRepo.getByPoiId(poiId);
+  return photoRepo.getByPoiId(poiId);
 };

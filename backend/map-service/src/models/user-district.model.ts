@@ -16,7 +16,7 @@ export class UserDistrict {
     @JoinColumn({ name: 'UsuarioColoreador' })
     user!: User;
 
-    @ManyToOne(() => District, (district) => district.userDistrict)
+    @ManyToOne(() => District, (district) => district.userDistrict, { onDelete: 'CASCADE', cascade: ['remove']})
     @JoinColumn({ name: 'DistritoColoreado' })
     district!: District;
 }

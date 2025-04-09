@@ -9,7 +9,7 @@ const mockedDelete = jest.fn();
 
 // Mockeamos el repositorio (esto se hace antes de importar el servicio)
 jest.mock('../repositories/subscription.repository', () => ({
-  __esModule: true,
+  __esModule: true, // Asegura que el módulo se maneje como un módulo ES6
   default: jest.fn().mockImplementation(() => ({
     create: mockedCreate,
     update: mockedUpdate,
@@ -18,6 +18,7 @@ jest.mock('../repositories/subscription.repository', () => ({
     delete: mockedDelete,
   })),
 }));
+
 
 // Ahora importamos los módulos que usan el repositorio mockeado
 import {
@@ -29,6 +30,7 @@ import {
 } from '../services/subscription.service';
 import { Subscription, PlanType } from '../models/subscription.model';
 import { User, Role } from '../../auth-service/src/models/user.model';
+import SubscriptionRepository  from '../repositories/subscription.repository';
 
 // Creamos un dummy completo de User para los tests
 const dummyUser: User = {
@@ -87,9 +89,6 @@ describe('Subscription Service', () => {
           startDate: subscription.startDate,
           endDate: subscription.endDate,
           is_active: subscription.is_active,
-          autoRenew: subscription.autoRenew,
-          createdAt: subscription.createdAt,
-          updatedAt: subscription.updatedAt,
           user: subscription.user,
         };
       });
@@ -101,9 +100,7 @@ describe('Subscription Service', () => {
       expect(result.startDate).toEqual(fixedDate);
       expect(result.endDate).toEqual(thirtyDaysLater);
       expect(result.is_active).toBe(false);
-      expect(result.autoRenew).toBe(false);
-      expect(result.createdAt).toEqual(fixedDate);
-      expect(result.updatedAt).toEqual(fixedDate);
+
 
       expect(mockedCreate).toHaveBeenCalledTimes(1);
       // Verificamos que se le haya pasado el usuario correcto al repositorio
@@ -139,9 +136,6 @@ describe('Subscription Service', () => {
           startDate: subscription.startDate,
           endDate: subscription.endDate,
           is_active: subscription.is_active,
-          autoRenew: subscription.autoRenew,
-          createdAt: subscription.createdAt,
-          updatedAt: subscription.updatedAt,
           user: subscription.user,
         };
       });
@@ -165,9 +159,6 @@ describe('Subscription Service', () => {
         startDate: fixedDate,
         endDate: thirtyDaysLater,
         is_active: false,
-        autoRenew: false,
-        createdAt: fixedDate,
-        updatedAt: fixedDate,
         user: dummyUser,
       };
 
@@ -179,9 +170,6 @@ describe('Subscription Service', () => {
           startDate: data.startDate || existingSubscription.startDate,
           endDate: data.endDate || existingSubscription.endDate,
           is_active: data.is_active !== undefined ? data.is_active : existingSubscription.is_active,
-          autoRenew: data.autoRenew !== undefined ? data.autoRenew : existingSubscription.autoRenew,
-          createdAt: existingSubscription.createdAt,
-          updatedAt: data.updatedAt || existingSubscription.updatedAt,
           user: existingSubscription.user,
         };
       });
@@ -197,7 +185,6 @@ describe('Subscription Service', () => {
       expect(mockedGetById).toHaveBeenCalledWith(subscriptionId);
       expect(mockedUpdate).toHaveBeenCalledTimes(1);
       expect(result.is_active).toBe(true);
-      expect(result.updatedAt).toEqual(fixedDate);
       expect(result.id).toBe(subscriptionId);
     });
 
@@ -211,9 +198,6 @@ describe('Subscription Service', () => {
         startDate: fixedDate,
         endDate: thirtyDaysLater,
         is_active: false,
-        autoRenew: false,
-        createdAt: fixedDate,
-        updatedAt: fixedDate,
         user: { ...dummyUser, id: 'otro-uuid' },
       };
 
@@ -237,9 +221,6 @@ describe('Subscription Service', () => {
         startDate: fixedDate,
         endDate: thirtyDaysLater,
         is_active: false,
-        autoRenew: false,
-        createdAt: fixedDate,
-        updatedAt: fixedDate,
         user: dummyUser,
       };
 
@@ -260,9 +241,7 @@ describe('Subscription Service', () => {
         startDate: fixedDate,
         endDate: thirtyDaysLater,
         is_active: true,
-        autoRenew: true,
-        createdAt: fixedDate,
-        updatedAt: fixedDate,
+
         user: dummyUser,
       };
 
@@ -293,9 +272,6 @@ describe('Subscription Service', () => {
         startDate: fixedDate,
         endDate: thirtyDaysLater,
         is_active: false,
-        autoRenew: false,
-        createdAt: fixedDate,
-        updatedAt: fixedDate,
         user: dummyUser,
       };
 
@@ -317,9 +293,6 @@ describe('Subscription Service', () => {
         startDate: fixedDate,
         endDate: thirtyDaysLater,
         is_active: false,
-        autoRenew: false,
-        createdAt: fixedDate,
-        updatedAt: fixedDate,
         user: { ...dummyUser, id: 'otro-uuid' },
       };
 

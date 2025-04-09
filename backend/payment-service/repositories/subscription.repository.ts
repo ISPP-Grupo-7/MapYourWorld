@@ -37,7 +37,7 @@ export default class SubscriptionRepository {
 
 
 
-    async getSuscriptionByUserId(userId:string): Promise<Subscription>{
+    async getSubscriptionByUserId(userId:string): Promise<Subscription>{
 
         const suscription = await this.subscriptionRepo.findOne({where:{user:{id:userId}}, relations:['user']});
     

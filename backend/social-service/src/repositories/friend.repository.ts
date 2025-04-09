@@ -1,10 +1,11 @@
-import { Repository } from 'typeorm';
+import { Repository, Like} from 'typeorm';
 import { Friend, FriendStatus, RequestType } from '../models/friend.model';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
 export default class FriendRepository {
+
   private friendRepo: Repository<Friend>;
   private userProfileRepo: Repository<UserProfile>;
   private userRepo: Repository<User>;
@@ -22,6 +23,8 @@ export default class FriendRepository {
       .andWhere('friend.status = :status', { status })
       .leftJoinAndSelect('friend.requester', 'requester')
       .leftJoinAndSelect('friend.recipient', 'recipient')
+      .leftJoinAndSelect('recipient.profile', 'profileRecipient')
+      .leftJoinAndSelect('requester.profile', 'profileRequester')
       .getMany();
   }
 
@@ -43,12 +46,12 @@ export default class FriendRepository {
     }
     return friend;
   }
-
   async findAllUsersByName(nameData: string): Promise<User[]> {
     const users = await this.userRepo.find({
-      where: { profile: { username:nameData} },
-      relations: ['profile']})
-
+      where: { profile: { username: Like(`${nameData}%`) } },
+      relations: ['profile']
+    });
+  
     if (!users) {
       throw new Error(`There is not any user with the name ${nameData}`);
     }
@@ -101,6 +104,7 @@ export default class FriendRepository {
       .where('friend.recipientId = :userId', { userId })
       .andWhere('friend.status = :status', { status: FriendStatus.PENDING })
       .leftJoinAndSelect('friend.requester', 'requester')
+      .leftJoinAndSelect('requester.profile', 'profile')
       .leftJoinAndSelect('friend.map', 'map')
       .getMany();
   }

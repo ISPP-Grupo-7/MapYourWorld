@@ -86,7 +86,6 @@ export const updatePhoto = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ success: false, message: 'Error al actualizar la foto', data: null });
   }
 };
-
 /**
  * Elimina una foto
  */
