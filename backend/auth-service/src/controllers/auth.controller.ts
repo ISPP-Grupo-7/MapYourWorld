@@ -401,3 +401,32 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
     });
   }
 };
+
+export const getProfileByUserId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+
+    const userProfile = await authService.getUserProfileById(userId);
+
+    if (userProfile) {
+      res.status(200).json({
+        success: true,
+        message: 'Perfil de usuario encontrado',
+        profile: userProfile
+      });
+    }
+    else {
+      res.status(404).json({
+        success: false,
+        message: 'Perfil de usuario no encontrado'
+      });
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener usuario por ID',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};

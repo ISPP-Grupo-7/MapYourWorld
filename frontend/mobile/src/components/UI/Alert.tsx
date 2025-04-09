@@ -9,9 +9,21 @@ interface AlertModalProps {
   message: string;
   onClose: () => void;
   onAction?: () => void;
+  actionText?: string;
+  closeText?: string;
+  singleButton?: boolean;
 }
 
-const AlertModal = ({ visible, title, message, onClose, onAction }: AlertModalProps) => {
+const AlertModal = ({
+  visible,
+  title,
+  message,
+  onClose,
+  onAction,
+  actionText,
+  closeText,
+  singleButton,
+}: AlertModalProps) => {
   return (
     <Modal
       visible={visible}
@@ -24,14 +36,28 @@ const AlertModal = ({ visible, title, message, onClose, onAction }: AlertModalPr
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <View style={styles.buttonContainer}>
-            {onAction && (
+            {singleButton ? (
               <TouchableOpacity style={styles.actionButton} onPress={onAction}>
-                <Text style={styles.actionButtonText}>Mejorar a Premium</Text>
+                <Text style={styles.actionButtonText}>
+                  {actionText || 'Continuar'}
+                </Text>
               </TouchableOpacity>
+            ) : (
+              <>
+                {onAction && (
+                  <TouchableOpacity style={styles.actionButton} onPress={onAction}>
+                    <Text style={styles.actionButtonText}>
+                      {actionText || 'Mejorar a Premium'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                  <Text style={styles.closeButtonText}>
+                    {closeText || 'Cerrar'}
+                  </Text>
+                </TouchableOpacity>
+              </>
             )}
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </View>

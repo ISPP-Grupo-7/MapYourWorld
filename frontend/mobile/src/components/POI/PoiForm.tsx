@@ -256,27 +256,30 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
             }
           />
         </View>
-        <View className="mb-4">
-          <Text className={`${isWeb ? 'section-title' : 'text-lg mb-1'}`}>Categoría</Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Categoría</Text>
           <TouchableOpacity
-            className={`${isWeb ? 'dropdown' : 'border border-gray-300 rounded-lg px-3 py-2'}`}
+            style={styles.dropdownButton}
             onPress={() => setDropdownVisible(!dropdownVisible)}
           >
-            <Text>
+            <Text style={styles.dropdownButtonText}>
               {pointOfInterest.category
                 ? categories.find((cat) => cat.value === pointOfInterest.category)?.label
                 : 'Seleccionar categoría'}
             </Text>
           </TouchableOpacity>
           {dropdownVisible && (
-            <View className="border border-gray-300 rounded-lg mt-1">
-              {categories.map((cat) => (
+            <View style={styles.dropdownContainer}>
+              {categories.map((cat, index) => (
                 <TouchableOpacity
                   key={cat.value}
-                  className="px-3 py-2 border-b last:border-b-0"
+                  style={[
+                    styles.dropdownItem,
+                    index === categories.length - 1 && styles.dropdownItemLast,
+                  ]}
                   onPress={() => handleSelectCategory(cat.value)}
                 >
-                  <Text>{cat.label}</Text>
+                  <Text style={styles.dropdownItemText}>{cat.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -369,6 +372,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
 
       </ScrollView>
     </View>
+  
   );
 };
 
@@ -461,5 +465,47 @@ const styles = StyleSheet.create({
     color: '#14b8a6',
     fontWeight: '500',
   },
+
+  dropdownButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  dropdownContainer: {
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dropdownItemLast: {
+    borderBottomWidth: 0,
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 6,
+    color: '#333',
+  },
+
 });
 export default PuntoDeInteresForm;

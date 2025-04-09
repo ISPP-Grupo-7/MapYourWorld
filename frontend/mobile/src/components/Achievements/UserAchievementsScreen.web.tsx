@@ -457,7 +457,7 @@ const UserAchievementsScreen = () => {
                 placeholder="Descripción del logro"
                 maxLength={100}
                 className="input-field"
-                style={{ minHeight: 80 }}
+                style={{ minHeight: 80, resize: 'none' }}
               />
             </div>
 

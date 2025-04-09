@@ -280,25 +280,25 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
       
       const categoryIcons: Record<string, any> = {
         MONUMENTOS: L.icon({
-          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3105/3105768.png',
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/776/776557.png',
           iconSize: iconSize,
           iconAnchor: iconAnchor,
           popupAnchor: popupAnchor
         }),
         ESTACIONES: L.icon({
-          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/2062/2062051.png',
           iconSize: iconSize,
           iconAnchor: iconAnchor,
           popupAnchor: popupAnchor
         }),
         MERCADOS: L.icon({
-          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3082/3082011.png',
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/862/862819.png',
           iconSize: iconSize,
           iconAnchor: iconAnchor,
           popupAnchor: popupAnchor
         }),
         PLAZAS: L.icon({
-          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3254/3254074.png',
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/1282/1282259.png',
           iconSize: iconSize,
           iconAnchor: iconAnchor,
           popupAnchor: popupAnchor

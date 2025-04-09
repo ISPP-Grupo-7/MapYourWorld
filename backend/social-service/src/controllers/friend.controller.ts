@@ -1,26 +1,19 @@
 import { Request, Response } from 'express';
 import * as FriendService from '../services/friend.service'; 
-import { FriendStatus } from '../models/friend.model';
+import { Friend, FriendStatus } from '../models/friend.model';
 
 /**
  * Controlador para crear una solicitud de amistad.
  */
 export const createFriendController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { requesterId, receiverId, mapId } = req.body;
-
-    const result = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
-
-    
-    if ("success" in result) {
-      res.status(400).json(result); // Código 400 si no se pudo crear la solicitud
+    const {requesterId, receiverId, mapId} = req.body; 
+    if (!requesterId || !receiverId) {
+      res.status(400).json({ message: 'Faltan parámetros requeridos.' });
       return;
     }
-    res.status(201).json({
-      success: true,
-      message: "Solicitud enviada correctamente",
-      friend: result, // Devuelve la solicitud creada
-    });
+    const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
+    res.status(201).json({success: true, message: "Amistad creada exitosamente", friend: newFriend});
   } catch (error) {
     res.status(500).json({
       success: false,

@@ -27,7 +27,6 @@ import app from '../index';
 import { Geometry, Point } from 'geojson';
 import { Region } from '@backend/map-service/src/models/region.model';
 import { UserDistrict } from '@backend/map-service/src/models/user-district.model';
-import { create } from 'domain';
 
 let server: Server;
 const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-token';

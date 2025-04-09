@@ -6,7 +6,7 @@ import { District } from '../models/district.model';
 import DistrictRepository from '../repositories/district.repository';
 
 
-export class PointOfInterestRepository {
+export default class PointOfInterestRepository {
     private poiRepo: Repository<PointOfInterest>;
     private userRepo: Repository<User>
     private districtRepo: Repository<District>

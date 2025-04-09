@@ -3,6 +3,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import styles from '../../assets/styles/pricingStyle'; 
+
 type Plan = {
   feature: string;
   free: boolean | string;
@@ -12,7 +13,7 @@ type Plan = {
 const PLANES: Plan[] = [
   { feature: 'Visualización de mapa personal', free: true, premium: true },
   { feature: 'Exploración de zonas no descubiertas', free: true, premium: true },
-  { feature: 'Registro de puntos de interés', free: 'Un solo punto por zona', premium: 'Ilimitados' },
+  { feature: 'Registro de puntos de interés', free: 'Un solo punto por zona', premium: 'Ilimitado' },
   { feature: 'Mapas colaborativos', free: 'Unión de mapas únicamente', premium: 'Creación y unión' },
   { feature: 'Sistema social', free: true, premium: true },
   { feature: 'Logros', free: 'Solo completitud', premium: 'Completitud y creación' },
@@ -30,18 +31,19 @@ const PricingTable = () => {
 
   return (
     <View style={styles.tableContainer}>
-      <Text style={styles.tableTitle}>Comparativa de Planes</Text>
+      <Text style={styles.tableTitle}>Planes</Text>
       <View style={styles.tableHeader}>
-        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Característica</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 1.5 }]}></Text>
         <Text style={[styles.cell, styles.headerCell]}>Gratuito</Text>
         <Text style={[styles.cell, styles.headerCell]}>Premium</Text>
       </View>
       <FlatList
         data={PLANES}
         keyExtractor={(item) => item.feature}
+        nestedScrollEnabled={true}
         renderItem={({ item }) => (
           <View style={styles.tableRow}>
-            <Text style={[styles.cell, { flex: 2 }]}>{item.feature}</Text>
+            <Text style={[styles.cell, { flex: 2, fontSize: 15 }]}>{item.feature}</Text>
             <View style={styles.cell}>{renderValue(item.free)}</View>
             <View style={styles.cell}>{renderValue(item.premium)}</View>
           </View>
@@ -50,6 +52,5 @@ const PricingTable = () => {
     </View>
   );
 };
-
 
 export default PricingTable;

@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { register, login, forgotPassword, resetPassword, verify, changePassword, logout, getUserById } from '../controllers/auth.controller';
+import { register, login, forgotPassword, resetPassword, verify, changePassword, logout, getUserById, getProfileByUserId } from '../controllers/auth.controller';
 
 const router: Router = Router();
 
@@ -109,7 +109,7 @@ router.post(
   changePassword
 );
 // Ruta para obtener el perfil del usuario autenticado
-router.get('/profile', );
+router.get('/profile/:userId', getProfileByUserId);
 
 // Ruta para cerrar sesión (sin requerir middleware de autenticación)
 router.post(

@@ -47,7 +47,7 @@ jest.mock('bcryptjs', () => ({
 
 // Now import the auth service that was causing the circular reference
 import { logout } from '../../../auth-service/src/services/auth.service';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository'; 
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository'; 
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
 // Import app after all mocks are set up

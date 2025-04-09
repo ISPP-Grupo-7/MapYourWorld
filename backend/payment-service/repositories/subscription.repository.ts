@@ -2,7 +2,7 @@ import { Repository } from "typeorm";
 import { PlanType, Subscription } from "../models/subscription.model";
 import { AppDataSource } from "../../database/appDataSource";
 
-export class SubscriptionRepository {
+export default class SubscriptionRepository {
 
     private subscriptionRepo: Repository<Subscription>;
 

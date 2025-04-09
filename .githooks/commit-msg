@@ -5,7 +5,7 @@ COMMIT_MSG_FILE=$1
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
 # Regex pattern to match allowed commit message prefixes
-PATTERN="^(feat|fix|chore|hotfix|build|doc)(\(.+\))?:"
+PATTERN="^(feat|fix|chore|hotfix|build|doc|test)(\(.+\))?:"
 
 # Check if commit message matches the pattern
 if ! [[ $COMMIT_MSG =~ $PATTERN ]]; then

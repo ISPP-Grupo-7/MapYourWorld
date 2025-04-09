@@ -261,7 +261,11 @@ function sincronizarDependencias() {
       'webpack': '^5.98.0',
       'webpack-cli': '^6.0.1',
       'webpack-dev-server': '5.2.0',
-      "supertest": "7.0.0"
+      "supertest": "7.0.0",
+      "eslint": "9.23.0",
+      "eslint-plugin-react": "7.37.4",
+      "eslint-plugin-react-hooks": "5.2.0",
+      "eslint-plugin-react-native": "5.0.0"
     };
     
     // Dependencias específicas para el backend

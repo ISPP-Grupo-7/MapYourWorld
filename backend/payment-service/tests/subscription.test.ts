@@ -9,8 +9,8 @@ const mockedDelete = jest.fn();
 
 // Mockeamos el repositorio (esto se hace antes de importar el servicio)
 jest.mock('../repositories/subscription.repository', () => ({
-  __esModule: true,
-  SubscriptionRepository: jest.fn().mockImplementation(() => ({
+  __esModule: true, // Asegura que el módulo se maneje como un módulo ES6
+  default: jest.fn().mockImplementation(() => ({
     create: mockedCreate,
     update: mockedUpdate,
     getById: mockedGetById,
@@ -18,6 +18,7 @@ jest.mock('../repositories/subscription.repository', () => ({
     delete: mockedDelete,
   })),
 }));
+
 
 // Ahora importamos los módulos que usan el repositorio mockeado
 import {
@@ -29,7 +30,7 @@ import {
 } from '../services/subscription.service';
 import { Subscription, PlanType } from '../models/subscription.model';
 import { User, Role } from '../../auth-service/src/models/user.model';
-import { SubscriptionRepository } from '../repositories/subscription.repository';
+import SubscriptionRepository  from '../repositories/subscription.repository';
 
 // Creamos un dummy completo de User para los tests
 const dummyUser: User = {
