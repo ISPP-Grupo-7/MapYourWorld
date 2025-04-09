@@ -56,6 +56,8 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
           boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)',
           borderRadius: '12px',
           gap: '16px',
+          maxHeight: '80vh', // Altura máxima relativa a la ventana
+          overflowY: 'auto', // Habilita el scroll vertical cuando es necesario
         }}
       >
         {subscriptionPlan === 'PREMIUM' ? (
