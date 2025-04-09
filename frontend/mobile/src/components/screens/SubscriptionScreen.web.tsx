@@ -21,9 +21,10 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Map'>;
 type CheckoutFormProps = {
   setLoading: (loading: boolean) => void;
   loading: boolean;
+  updateSubscription: () => Promise<void>;
 };
 
-const SubscriptionScreen: React.FC = () => {
+const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> = ({ updateSubscription }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>(null);
   const { user } = useAuth();
@@ -55,6 +56,8 @@ const SubscriptionScreen: React.FC = () => {
           boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)',
           borderRadius: '12px',
           gap: '16px',
+          maxHeight: '80vh', // Altura máxima relativa a la ventana
+          overflowY: 'auto', // Habilita el scroll vertical cuando es necesario
         }}
       >
         {subscriptionPlan === 'PREMIUM' ? (
@@ -119,7 +122,7 @@ const SubscriptionScreen: React.FC = () => {
             >
               Suscríbete a Premium (5,50€ al mes)
             </h2>
-            <CheckoutForm setLoading={setLoading} loading={loading} />
+            <CheckoutForm setLoading={setLoading} loading={loading} updateSubscription={updateSubscription} />
           </>
         )}
       </div>
@@ -127,7 +130,7 @@ const SubscriptionScreen: React.FC = () => {
   );
 };
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, updateSubscription }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { user } = useAuth();
@@ -185,6 +188,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading }) => {
             console.error('Error al actualizar la suscripción');
             return;
           }
+
+          // Llamar a updateSubscription para actualizar el estado en el componente padre
+          await updateSubscription();
 
           showAlert(
             '¡Pago realizado con éxito!',

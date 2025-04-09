@@ -11,6 +11,7 @@ require ('@assets/styles/web.css')
 require ('@assets/styles/auth.css')
 import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
 import TermsAndConditions from '../UI/TermsAndConditions.web';
+import StaticAd from '../Ads/StaticAd.web';
 import * as ImagePicker from 'expo-image-picker';
 
 const StyledView = styled(View);
@@ -55,6 +56,7 @@ const RegisterScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
   const [termsAlreadyRead, setTermsAlreadyRead] = useState(false);
+  const [showAd, setShowAd] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -137,6 +139,7 @@ const RegisterScreen = () => {
     setIsLoading(true);
 
     try {
+
         // Crear una copia de formData sin el campo picture
         const { picture, ...formDataWithoutPicture } = formData;
 
@@ -147,7 +150,7 @@ const RegisterScreen = () => {
         }
 
         // Registro exitoso
-        navigation.navigate('Map');
+        setShowAd(true);
     } catch (error: unknown) {
         console.error('Error al registrarse:', error);
 
@@ -183,6 +186,11 @@ const RegisterScreen = () => {
     closeTermsModal();
   };
 
+  // Función para cerrar el anuncio y navegar a la pantalla principal
+  const handleCloseAd = () => {
+    setShowAd(false);
+    navigation.navigate('Map');
+   };
   const handleImagePick = async () => {
     // Solicitar permisos para acceder a los archivos
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -263,141 +271,144 @@ const RegisterScreen = () => {
   `;
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/login_background.webp")} 
-      style={styles.background_image}
-      resizeMode="cover"
-      className='image-background'
-    >
-      <View style={styles.semi_transparent_overlay} />
-      <StyledScrollView className="flex-1 base-container">
-        <StyledView className="flex-1 justify-center items-center min-h-screen">
-          <style dangerouslySetInnerHTML={{ __html: customInputStyles }} />
-          <div style={{ 
-            backgroundColor: 'white', 
-            padding: 40,
-            borderRadius: 12, 
-            width: '410px',
-            maxWidth: '410px', 
-            margin: '0 auto',
-            display: 'flex', 
-            flexDirection: 'column',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-          }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: 30 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Image source={require('../../assets/images/logo.png')} style={{ width: 40, height: 40 }} />
-                <StyledText style={{ fontSize: 24, fontWeight: 'bold', marginLeft: 10, color: '#333' }}>
-                  MapYourWorld
+    <>
+      {showAd && <StaticAd onClose={handleCloseAd} />}
+      
+      <ImageBackground
+        source={require("../../assets/images/login_background.webp")} 
+        style={styles.background_image}
+        resizeMode="cover"
+        className='image-background'
+      >
+        <View style={styles.semi_transparent_overlay} />
+        <StyledScrollView className="flex-1 base-container">
+          <StyledView className="flex-1 justify-center items-center min-h-screen">
+            <style dangerouslySetInnerHTML={{ __html: customInputStyles }} />
+            <div style={{ 
+              backgroundColor: 'white', 
+              padding: 40,
+              borderRadius: 12, 
+              width: '410px',
+              maxWidth: '410px', 
+              margin: '0 auto',
+              display: 'flex', 
+              flexDirection: 'column',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: 30 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Image source={require('../../assets/images/logo.png')} style={{ width: 40, height: 40 }} />
+                  <StyledText style={{ fontSize: 24, fontWeight: 'bold', marginLeft: 10, color: '#333' }}>
+                    MapYourWorld
+                  </StyledText>
+                </div>
+                <StyledText style={{ fontSize: 24, fontWeight: 'bold', color: '#333', marginTop: 30, marginBottom: 8, textAlign: 'center' }}>
+                  Crea tu cuenta
+                </StyledText>
+                <StyledText style={{ fontSize: 15, color: '#666', textAlign: 'center' }}>
+                  Comienza a documentar tus aventuras hoy mismo
                 </StyledText>
               </div>
-              <StyledText style={{ fontSize: 24, fontWeight: 'bold', color: '#333', marginTop: 30, marginBottom: 8, textAlign: 'center' }}>
-                Crea tu cuenta
-              </StyledText>
-              <StyledText style={{ fontSize: 15, color: '#666', textAlign: 'center' }}>
-                Comienza a documentar tus aventuras hoy mismo
-              </StyledText>
-            </div>
-            
-            <div style={{ width: '100%', marginBottom: 20 }}>
-                  {/* Nombre */}
-                  <div className="input-container" style={{ marginBottom: 20 }}>
-                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Nombre
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+              
+              <div style={{ width: '100%', marginBottom: 20 }}>
+                    {/* Nombre */}
+                    <div className="input-container" style={{ marginBottom: 20 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                        Nombre
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Nombre"
-                        value={formData.firstName}
-                        onChange={(e) => handleChange('firstName', e.target.value)}
-                        style={{ 
-                          width: '100%',
-                          paddingLeft: '35px',
-                          paddingRight: '10px',
-                          height: '44px',
-                          borderColor: errors.firstName ? '#e53e3e' : undefined
-                        }}
-                      />
-                    </div>
-                    {errors.firstName && (
-                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.firstName}
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Nombre"
+                          value={formData.firstName}
+                          onChange={(e) => handleChange('firstName', e.target.value)}
+                          style={{ 
+                            width: '100%',
+                            paddingLeft: '35px',
+                            paddingRight: '10px',
+                            height: '44px',
+                            borderColor: errors.firstName ? '#e53e3e' : undefined
+                          }}
+                        />
                       </div>
-                    )}
-                  </div>
+                      {errors.firstName && (
+                        <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                          {errors.firstName}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Apellidos */}
-                  <div className="input-container" style={{ marginBottom: 20 }}>
-                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Apellido
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+                    {/* Apellidos */}
+                    <div className="input-container" style={{ marginBottom: 20 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                        Apellido
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Apellido"
-                        value={formData.lastName}
-                        onChange={(e) => handleChange('lastName', e.target.value)}
-                        style={{ 
-                          width: '100%',
-                          paddingLeft: '35px',
-                          paddingRight: '10px',
-                          height: '44px',
-                          borderColor: errors.lastName ? '#e53e3e' : undefined
-                        }}
-                      />
-                    </div>
-                    {errors.lastName && (
-                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.lastName}
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Apellido"
+                          value={formData.lastName}
+                          onChange={(e) => handleChange('lastName', e.target.value)}
+                          style={{ 
+                            width: '100%',
+                            paddingLeft: '35px',
+                            paddingRight: '10px',
+                            height: '44px',
+                            borderColor: errors.lastName ? '#e53e3e' : undefined
+                          }}
+                        />
                       </div>
-                    )}
-                  </div>
+                      {errors.lastName && (
+                        <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                          {errors.lastName}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Nombre de usuario */}
-                  <div className="input-container" style={{ marginBottom: 20 }}>
-                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Nombre de usuario
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+                    {/* Nombre de usuario */}
+                    <div className="input-container" style={{ marginBottom: 20 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                        Nombre de usuario
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Nombre de usuario"
-                        value={formData.username}
-                        onChange={(e) => handleChange('username', e.target.value)}
-                        style={{ 
-                          width: '100%',
-                          paddingLeft: '35px',
-                          paddingRight: '10px',
-                          height: '44px',
-                          borderColor: errors.username ? '#e53e3e' : undefined
-                        }}
-                      />
-                    </div>
-                    {errors.username && (
-                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.username}
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Nombre de usuario"
+                          value={formData.username}
+                          onChange={(e) => handleChange('username', e.target.value)}
+                          style={{ 
+                            width: '100%',
+                            paddingLeft: '35px',
+                            paddingRight: '10px',
+                            height: '44px',
+                            borderColor: errors.username ? '#e53e3e' : undefined
+                          }}
+                        />
                       </div>
-                    )}
-                  </div>
+                      {errors.username && (
+                        <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                          {errors.username}
+                        </div>
+                      )}
+                    </div>
 
                   {/* Selección de imagen */}
                   <div className="input-container" style={{ marginBottom: 20 }}>
@@ -433,133 +444,135 @@ const RegisterScreen = () => {
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
                         {errors.picture}
                       </div>
-                    )}
-                  </div>
+                      
+                      )}
+                    </div>
 
-                  {/* Correo electrónico */}
-                  <div className="input-container" style={{ marginBottom: 20 }}>
-                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Correo electrónico
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                          <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
+                    {/* Correo electrónico */}
+                    <div className="input-container" style={{ marginBottom: 20 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                        Correo electrónico
                       </div>
-                      <input
-                        type="email"
-                        placeholder="Correo electrónico"
-                        value={formData.email}
-                        onChange={(e) => handleChange('email', e.target.value)}
-                        style={{ 
-                          width: '100%',
-                          paddingLeft: '35px',
-                          paddingRight: '10px',
-                          height: '44px',
-                          borderColor: errors.email ? '#e53e3e' : undefined
-                        }}
-                      />
-                    </div>
-                    {errors.email && (
-                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.email}
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                          </svg>
+                        </div>
+                        <input
+                          type="email"
+                          placeholder="Correo electrónico"
+                          value={formData.email}
+                          onChange={(e) => handleChange('email', e.target.value)}
+                          style={{ 
+                            width: '100%',
+                            paddingLeft: '35px',
+                            paddingRight: '10px',
+                            height: '44px',
+                            borderColor: errors.email ? '#e53e3e' : undefined
+                          }}
+                        />
                       </div>
-                    )}
-                  </div>
+                      {errors.email && (
+                        <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                          {errors.email}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Contraseña */}
-                  <div className="input-container" style={{ marginBottom: 20 }}>
-                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Contraseña
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
+                    {/* Contraseña */}
+                    <div className="input-container" style={{ marginBottom: 20 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                        Contraseña
                       </div>
-                      <input
-                        type="password"
-                        placeholder="Contraseña"
-                        value={formData.password}
-                        onChange={(e) => handleChange('password', e.target.value)}
-                        style={{ 
-                          width: '100%',
-                          paddingLeft: '35px',
-                          paddingRight: '10px',
-                          height: '44px',
-                          borderColor: errors.password ? '#e53e3e' : undefined
-                        }}
-                      />
-                    </div>
-                    {errors.password && (
-                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.password}
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                          </svg>
+                        </div>
+                        <input
+                          type="password"
+                          placeholder="Contraseña"
+                          value={formData.password}
+                          onChange={(e) => handleChange('password', e.target.value)}
+                          style={{ 
+                            width: '100%',
+                            paddingLeft: '35px',
+                            paddingRight: '10px',
+                            height: '44px',
+                            borderColor: errors.password ? '#e53e3e' : undefined
+                          }}
+                        />
                       </div>
-                    )}
-                  </div>
+                      {errors.password && (
+                        <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                          {errors.password}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Términos y condiciones */}
-                  <div className="terms-container">
-                    <div className="terms-text">
-                      Para registrarte, debes leer y aceptar{' '}
+                    {/* Términos y condiciones */}
+                    <div className="terms-container">
+                      <div className="terms-text">
+                        Para registrarte, debes leer y aceptar{' '}
+                        <span 
+                          className="terms-link"
+                          onClick={openTermsModal}
+                        >
+                          los términos y condiciones
+                        </span>
+                      </div>
+                    </div>
+                    {errors.acceptTerms && (
+                      <div className="error-text">{errors.acceptTerms}</div>
+                    )}
+
+                    <button 
+                      onClick={handleRegister}
+                      disabled={isLoading}
+                      style={{ 
+                        backgroundColor: APP_TEAL,
+                        color: 'white',
+                        padding: '10px 15px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        width: '100%',
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                        marginBottom: '20px',
+                        marginTop: '10px'
+                      }}
+                    >
+                      {isLoading ? 'Registrando...' : 'Registrarse'}
+                    </button>
+
+                    <div style={{ textAlign: 'center', color: '#666', fontSize: '14px' }}>
+                      ¿Ya tienes una cuenta?{' '}
                       <span 
-                        className="terms-link"
-                        onClick={openTermsModal}
+                        onClick={goToLogin}
+                        style={{ color: APP_TEAL, cursor: 'pointer', fontWeight: '500' }}
                       >
-                        los términos y condiciones
+                        Inicia sesión
                       </span>
                     </div>
-                  </div>
-                  {errors.acceptTerms && (
-                    <div className="error-text">{errors.acceptTerms}</div>
-                  )}
-
-                  <button 
-                    onClick={handleRegister}
-                    disabled={isLoading}
-                    style={{ 
-                      backgroundColor: APP_TEAL,
-                      color: 'white',
-                      padding: '10px 15px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      width: '100%',
-                      fontWeight: 'bold',
-                      fontSize: '16px',
-                      cursor: 'pointer',
-                      marginBottom: '20px',
-                      marginTop: '10px'
-                    }}
-                  >
-                    {isLoading ? 'Registrando...' : 'Registrarse'}
-                  </button>
-
-                  <div style={{ textAlign: 'center', color: '#666', fontSize: '14px' }}>
-                    ¿Ya tienes una cuenta?{' '}
-                    <span 
-                      onClick={goToLogin}
-                      style={{ color: APP_TEAL, cursor: 'pointer', fontWeight: '500' }}
-                    >
-                      Inicia sesión
-                    </span>
-                  </div>
+              </div>
             </div>
-          </div>
-        </StyledView>
-      </StyledScrollView>
+          </StyledView>
+        </StyledScrollView>
 
-      {/* Modal de términos y condiciones */}
-      <TermsAndConditions 
-        isVisible={termsModalVisible}
-        onClose={closeTermsModal}
-        onAccept={acceptTerms}
-        alreadyRead={termsAlreadyRead}
-      />
-    </ImageBackground>
+        {/* Modal de términos y condiciones */}
+        <TermsAndConditions 
+          isVisible={termsModalVisible}
+          onClose={closeTermsModal}
+          onAccept={acceptTerms}
+          alreadyRead={termsAlreadyRead}
+        />
+      </ImageBackground>
+    </>
   );
 };
 

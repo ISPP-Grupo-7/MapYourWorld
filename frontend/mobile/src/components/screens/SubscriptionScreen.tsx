@@ -10,7 +10,11 @@ import { RootStackParamList } from '../../navigation/types';
 
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>;
 
-const SubscriptionScreen = () => {
+interface SubscriptionScreenProps {
+  updateSubscription?: () => Promise<void>;
+}
+
+const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscription }) => {
   const { user } = useAuth();
   const navigation = useNavigation<PaymentScreenNavigationProp>();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -69,6 +73,10 @@ const SubscriptionScreen = () => {
       } else {
         console.log('Suscripción actualizada a PREMIUM');
         fetchActualPlan();
+        // Si existe la función de actualización del componente padre, la llamamos
+        if (updateSubscription) {
+          await updateSubscription();
+        }
       }
     } catch (error) {
       console.error('Error al actualizar el plan:', error);
