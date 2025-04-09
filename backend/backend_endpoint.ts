@@ -123,7 +123,7 @@ const startServer = async () => {
     // Crear y arrancar el servidor HTTPS
     const server = https.createServer(httpsOptions, app);
 
-    server.listen(3010, '0.0.0.0', () => {
+    server.listen(3020, '0.0.0.0', () => {
       console.log(`🚀 Servidor HTTPS en https://52.143.134.165:${PORT}`);
      });
   } catch (error) {
