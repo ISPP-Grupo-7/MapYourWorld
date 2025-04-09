@@ -57,9 +57,8 @@ module.exports = {
   extra: {
     rootDir: __dirname,
     eas: {
-      projectId: "757d70e0-f889-46f3-a4bb-8066e43fe863" // ID del proyecto en EAS
-    },
-    API_URL: "https://mapyourworld.es"
+      projectId: "620b1165-0238-4807-8766-6b2c3c1b76aa" // ID del proyecto en EAS
+    }
   },
 
   // Habilitar la nueva arquitectura explícitamente

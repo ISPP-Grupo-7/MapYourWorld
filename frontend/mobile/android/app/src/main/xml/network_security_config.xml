@@ -2,7 +2,7 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">mapyourworld.es</domain>
-        <domain includeSubdomains="true">52.143.134.165</domain>
+        <domain includeSubdomains="true">34.42.143.166</domain>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
