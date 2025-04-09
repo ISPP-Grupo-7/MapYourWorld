@@ -327,7 +327,8 @@ function sincronizarDependencias() {
       'chalk': '5.4.1',
       'cross-env': '7.0.3',
       'babel-plugin-module-resolver': '5.0.2',
-      "supertest": "7.0.0"
+      "supertest": "7.0.0",
+      "selenium-webdriver": "4.31.0"
     };
     
     // Actualizar cada package.json encontrado
