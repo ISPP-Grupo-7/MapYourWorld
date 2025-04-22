@@ -42,10 +42,7 @@ react {
     // bundleConfig = file(../rn-cli.config.js)
     //
     //   The name of the generated asset file containing your JS bundle
-    project.ext.react = [
-        bundleAssetName: "index.android.bundle",
-        entryFile: "index.js",
-    ]
+    // bundleAssetName = "MyApplication.android.bundle"
     //
     //   The entry file for bundle generation. Default is 'index.android.js' or 'index.js'
     // entryFile = file("../js/MyApplication.android.js")
