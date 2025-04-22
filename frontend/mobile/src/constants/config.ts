@@ -75,7 +75,7 @@ const getBackendUrl = () => {
 
 // Configuración de API
 //export const API_URL = process.env.API_URL || `http://localhost:3000`;
-export const API_URL = "https://mapyourworld.es:3010";
+export const API_URL = "https://mapyourworld.es:3020";
 console.log("API_URL configurada como:", API_URL);
 export const API_TIMEOUT = 30000; // 30 segundos
 

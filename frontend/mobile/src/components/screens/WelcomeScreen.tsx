@@ -81,8 +81,8 @@ const WelcomeScreen = () => {
               </TouchableOpacity>
           </View>
         </View>
-        {/* Versión 2.0 */}
-        <Text style={styles.versionText}>Versión 2.0</Text>
+        {/* Versión 3.0 */}
+        <Text style={styles.versionText}>Versión 3.0</Text>
       </View>
 
       {/* Banner de cookies */}

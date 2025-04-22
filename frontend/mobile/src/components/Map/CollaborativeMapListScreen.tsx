@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -10,9 +10,10 @@ import {
   Alert,
   ActivityIndicator,
   Pressable,
-  Keyboard
+  Keyboard,
+  InteractionManager,
 } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { useNavigation, NavigationProp, useFocusEffect, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../../constants/config";
@@ -36,6 +37,7 @@ type NavigationProps = NavigationProp<RootStackParamList, 'CollaborativeMapListS
 
 const CollaborativeMapListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
+  const isFocused = useIsFocused();
   const [maps, setMaps] = useState<CollaborativeMap[]>([]);
   const [map, setMap] = useState<CollaborativeMap | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -48,7 +50,6 @@ const CollaborativeMapListScreen: React.FC = () => {
   const [mapDescription, setMapDescription] = useState<string>("");
   const [maxUsers, setMaxUsers] = useState<number>(6);
   const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
-
 
   // Estado para el modal de invitación
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
@@ -73,151 +74,156 @@ const CollaborativeMapListScreen: React.FC = () => {
     "#9C27B0"  // Morado
   ];
 
-  // Obtener el ID del usuario al cargar el componente
+  // Referencia para verificar si el componente está montado
+  const isMountedRef = useRef(true);
+
+  // Al montar/desmontar
   useEffect(() => {
+    // Al montar
+    isMountedRef.current = true;
+
+    // Cargamos el userId una vez
     const getUserId = async () => {
       try {
-        // Intentar obtener el ID del usuario del AsyncStorage
         const storedUserId = await AsyncStorage.getItem("userId");
-
-        if (storedUserId) {
-          console.log("Usuario encontrado en AsyncStorage:", storedUserId);
+        if (storedUserId && isMountedRef.current) {
           setUserId(storedUserId);
-        } else {
-          console.log("No se encontró usuario en AsyncStorage, usando ID temporal para pruebas");
-
-          // ID de usuario temporal para pruebas
-          const temporalUserId = "user-456";
-
-          // Guardamos el ID temporal en AsyncStorage para futuras consultas
-          await AsyncStorage.setItem("userId", temporalUserId);
-          setUserId(temporalUserId);
-
-          // Informamos al usuario que estamos usando un modo de prueba
-          Alert.alert(
-            "Modo de Prueba",
-            "Estás usando la aplicación en modo de prueba. Algunas funciones podrían estar limitadas.",
-            [{ text: "Entendido", style: "default" }]
-          );
         }
       } catch (error) {
-        console.error("Error al obtener el ID del usuario:", error);
-
-        // En caso de error, usar un ID temporal
-        const fallbackId = "user-456";
-        setUserId(fallbackId);
+        console.error("Error obteniendo userId:", error);
       }
     };
 
     getUserId();
+
+    // Al desmontar
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
-  // Cargar los mapas colaborativos del usuario
+  // Solo un useEffect para fetchSubscription
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchSubscription = async () => {
+      try {
+        if (!isMountedRef.current) return;
+
+        const response = await fetch(`${API_URL}/api/subscriptions/active/${userId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error en la solicitud de subscripción: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (isMountedRef.current) {
+          setSubscription(data);
+        }
+      } catch (error) {
+        if (isMountedRef.current) {
+          console.error("Error al obtener la subscripción", error);
+        }
+      }
+    };
+
+    fetchSubscription();
+  }, [userId]);
+
+  // Cargar mapas solo cuando userId cambia
   useEffect(() => {
     if (userId) {
       fetchCollaborativeMaps();
     }
   }, [userId]);
 
-    useEffect(() => {
-      const fetchSubscription = async () => {
-        try {
-          if (!userId) return;
-          const response = await fetch(`${API_URL}/api/subscriptions/active/${userId}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
-          if (!response.ok) {
-            throw new Error(`Error en la solicitud de subscripción: ${response.statusText}`);
-          }
-          const data = await response.json();
-          setSubscription(data);
-        } catch (error) {
-          console.error("Error al obtener la subscripción", error);
-        }
+  // Limpieza centralizada al perder foco o desmontar
+  useFocusEffect(
+    useCallback(() => {
+      // Al ganar foco
+      isMountedRef.current = true;
+      if (userId) {
+        fetchCollaborativeMaps(); // Recargar datos si es necesario
+      }
+
+      // Al perder foco (navegar fuera) o desmontar
+      return () => {
+        console.log("CollaborativeMapListScreen perdiendo foco o desmontando - Limpieza COMPLETA...");
+        isMountedRef.current = false;
+        // Cerrar todos los modales
+        setShowInviteModal(false);
+        setShowCreateModal(false);
+        setShowDeleteConfirm(false);
+        // Limpiar estados relacionados con modales y selecciones
+        setMap(null);
+        setSelectedMapId("");
+        setMapToDelete("");
+        setInvitedFriends([]);
+        setFriends([]);
+        setMapName("");
+        setMapDescription("");
+        setErrors({ mapName: "" });
       };
-  
-      fetchSubscription();
-      
-    }, [userId]);
+    }, [userId]) // Dependencia principal para recarga
+  );
 
-  // Función para obtener los mapas colaborativos
+  // Versión corregida de fetchCollaborativeMaps
   const fetchCollaborativeMaps = async () => {
+    if (!isMountedRef.current || !isFocused) {
+      console.log("fetchCollaborativeMaps: Componente no montado o no enfocado, abortando fetch.");
+      if (loading) setLoading(false);
+      if (refreshing) setRefreshing(false);
+      return;
+    }
+    setLoading(true); // Mover setLoading aquí para indicar inicio
+    if (refreshing) setRefreshing(true);
     try {
-      setLoading(true);
-      console.log(`Obteniendo mapas colaborativos para el usuario: ${userId}`);
-
       const response = await fetch(`${API_URL}/api/maps/collaborative/user/${userId}`);
+      const data = await response.json();
 
-      if (!response.ok) {
-        console.warn(`Error en la petición: ${response.status}`);
-        // Si hay un error, seguimos adelante para mostrar los datos de ejemplo
-      }
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        console.warn("La respuesta no es JSON válido");
-        // En lugar de abandonar, mostramos el mensaje pero seguimos adelante
-      }
-
-      try {
-        const data = await response.json();
-        console.log("Respuesta de mapas colaborativos:", data);
-
+      if (isMountedRef.current && isFocused) { // Doble chequeo antes de setear estado
         if (data.success && data.maps && data.maps.length > 0) {
           setMaps(data.maps);
-
-          // Si son datos de ejemplo, mostramos una notificación sutil
-          if (data.isExample) {
-            console.log("Mostrando datos de ejemplo");
-            // Opcional: mostrar una notificación o un indicador de "modo demo"
-          }
         } else {
-          console.log("No se encontraron mapas colaborativos");
           setMaps([]);
         }
-      } catch (jsonError) {
-        console.error("Error al procesar JSON:", jsonError);
-        // Proporcionar algunos mapas de ejemplo en caso de error
-        setMaps([
-          {
-            id: "map-demo-1",
-            name: "Mapa Demo 1",
-            description: "Este es un mapa de demostración",
-            is_colaborative: true,
-            users_joined: [{ id: userId, username: "Tú" }],
-            created_at: new Date().toISOString()
-          }
-        ]);
       }
     } catch (error) {
-      console.error("Error al obtener los mapas colaborativos:", error);
-      // En lugar de mostrar un error al usuario, proporcionamos datos de ejemplo
-      setMaps([
-        {
+      if (isMountedRef.current && isFocused) { // Doble chequeo antes de setear estado
+        console.error("Error al obtener mapas:", error);
+        setMaps([{
           id: "map-offline-1",
           name: "Mapa Sin Conexión",
           description: "Este mapa está disponible sin conexión",
           is_colaborative: true,
           users_joined: [{ id: userId, username: "Usuario Offline" }],
           created_at: new Date().toISOString()
-        }
-      ]);
+        }]);
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current && isFocused) { // Doble chequeo antes de setear estado
+        setLoading(false);
+        setRefreshing(false);
+      }
+    }
+  };
+
+  // Función de refresh segura
+  const onRefresh = () => {
+    if (userId) {
+      setRefreshing(true);
+      fetchCollaborativeMaps();
+    } else {
       setRefreshing(false);
     }
   };
 
-  // Función para refrescar la lista de mapas
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchCollaborativeMaps();
-  };
-
   // Función para crear un nuevo mapa colaborativo
   const createCollaborativeMap = async () => {
-    
     if (subscription && subscription.plan !== "PREMIUM") {
       throw new Error("Solo los usuarios premium pueden crear mapas colaborativos");
     }
@@ -297,27 +303,23 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Función para eliminar un mapa colaborativo
   const deleteCollaborativeMap = async () => {
-    // Asegúrate de tener definidos tanto mapToDelete como userId (por ejemplo, obtenido del contexto o estado de autenticación)
     if (!mapToDelete || !userId) return;
 
     try {
       setLoading(true);
       console.log(`Intentando eliminar mapa con ID: ${mapToDelete} para el usuario: ${userId}`);
 
-      // Se arma la URL incluyendo ambos parámetros según la ruta: '/delete/:mapId/:userId'
       const response = await fetch(`${API_URL}/api/maps/delete/${mapToDelete}/${userId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" }
       });
 
-      // Se verifica si la respuesta es en formato JSON y se procesa
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         console.log("Respuesta del servidor:", data);
       }
 
-      // Actualización de la lista de mapas en el estado
       setMaps(maps.filter(map => map.id !== mapToDelete));
       setShowDeleteConfirm(false);
       setMapToDelete("");
@@ -325,7 +327,6 @@ const CollaborativeMapListScreen: React.FC = () => {
 
     } catch (error) {
       console.error("Error al eliminar mapa colaborativo:", error);
-      // Aunque ocurra error, se actualiza la UI para reflejar que el mapa ha sido eliminado localmente
       setMaps(maps.filter(map => map.id !== mapToDelete));
       setShowDeleteConfirm(false);
       setMapToDelete("");
@@ -338,19 +339,19 @@ const CollaborativeMapListScreen: React.FC = () => {
       setLoading(false);
     }
   };
+
   const fetchFriends = async (userId: string) => {
     try {
       console.log(`Solicitando amigos para el usuario: ${userId}`);
       const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
       const data = await response.json();
 
-      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+      console.log("Respuesta del backend:", data);
 
       if (Array.isArray(data)) {
-        // Si la respuesta es directamente un array de usuarios, lo asignamos
         setFriends(data.map((user) => ({
           id: user.id,
-          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+          name: user.email,
         })));
       } else {
         console.warn("Formato inesperado en la respuesta de amigos:", data);
@@ -359,6 +360,7 @@ const CollaborativeMapListScreen: React.FC = () => {
       console.error("Error al obtener amigos:", error);
     }
   };
+
   useEffect(() => {
     if (showInviteModal && userId) {
       console.log("Modal abierto, cargando amigos para el usuario:", userId);
@@ -378,9 +380,9 @@ const CollaborativeMapListScreen: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-              Alert.alert("Invitación enviada", `Has invitado a `+ data.friend.recipient.profile.username);
+        Alert.alert("Invitación enviada", `Has invitado a ` + data.friend.recipient.profile.username);
       } else {
-         Alert.alert("No se pudo enviar la invitación", "El usuario ya tiene una invitación pendiente para este mapa.");
+        Alert.alert("No se pudo enviar la invitación", "El usuario ya tiene una invitación pendiente para este mapa.");
       }
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
@@ -388,79 +390,97 @@ const CollaborativeMapListScreen: React.FC = () => {
   };
 
   const getAvailableFriends = () => {
+    if (!friends || !Array.isArray(friends)) return [];
+    if (!map || !map.users_joined) return friends;
+
     return friends.filter(
       (friend) =>
         !invitedFriends.includes(friend.id) &&
-        !map?.users_joined.some((user) => user.id === friend.id)
+        !map.users_joined.some((user) => user.id === friend.id)
     );
+  };
+
+  const handleNavigateToMap = (item: CollaborativeMap) => {
+    console.log(`[InteractionManager] Preparando navegación a mapId: ${item.id}`);
+
+    setShowInviteModal(false);
+    setShowCreateModal(false);
+    setShowDeleteConfirm(false);
+    setMap(null);
+    setSelectedMapId("");
+    setMapToDelete("");
+
+    InteractionManager.runAfterInteractions(() => {
+      if (isMountedRef.current) {
+        console.log(`[InteractionManager] Ejecutando navegación a mapId: ${item.id}`);
+        navigation.navigate('CollaborativeMapScreen', {
+          mapId: item.id,
+          userId: userId,
+        });
+      } else {
+        console.log("[InteractionManager] Navegación cancelada, componente desmontado.");
+      }
+    });
   };
 
   const renderInviteFriendsModal = () => {
     const availableFriends = getAvailableFriends();
     return (
       <Modal
-                visible={showInviteModal}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setShowInviteModal(false)}
-              >
-                <View style={styles.modalContainer}>
-                  <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Invitar Amigos</Text>
-                    <Text style={styles.modalSubtitle}>
-                      Máximo 5 amigos (6 usuarios en total)
-                    </Text>
-          
-                    {availableFriends.length === 0 ? (
-                      <Text style={styles.noFriendsText}>
-                        Tus amigos ya se han unido a este mapa.
-                      </Text>
-                    ) : (
-                      <FlatList
-                        data={availableFriends}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                          <View style={styles.invitedItem}>
-                            <Text style={styles.friendName}>{item.name}</Text>
-                            <TouchableOpacity
-                              style={styles.inviteButton}
-                              onPress={() => sendFriendRequest(item.id)}
-                            >
-                              <Text style={styles.inviteButtonText}>Invitar</Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      />
-                    )}
-          
+        visible={showInviteModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowInviteModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invitar Amigos</Text>
+            <Text style={styles.modalSubtitle}>
+              Máximo 5 amigos (6 usuarios en total)
+            </Text>
+
+            {availableFriends.length === 0 ? (
+              <Text style={styles.noFriendsText}>
+                Tus amigos ya se han unido a este mapa.
+              </Text>
+            ) : (
+              <FlatList
+                data={availableFriends}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.invitedItem}>
+                    <Text style={styles.friendName}>{item.name}</Text>
                     <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={() => setShowInviteModal(false)}
+                      style={styles.inviteButton}
+                      onPress={() => sendFriendRequest(item.id)}
                     >
-                      <Text style={styles.closeButtonText}>Cerrar</Text>
+                      <Text style={styles.inviteButtonText}>Invitar</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
-              </Modal>
+                )}
+              />
+            )}
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowInviteModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     );
   };
 
-  // Renderizado de cada elemento de la lista de mapas
   const renderMapItem = ({ item }: { item: CollaborativeMap }) => {
-    // Encontrar si el usuario actual es el creador del mapa
     const isCreator = item.users_joined && item.users_joined.length > 0 &&
       item.users_joined[0]?.id === userId;
 
     return (
       <TouchableOpacity
         style={styles.mapItem}
-        onPress={() => {
-          // Usar el método navigate con los tipos correctos
-          navigation.navigate('CollaborativeMapScreen', {
-            mapId: item.id,
-            userId: userId,
-          });
-        }}
+        onPress={() => handleNavigateToMap(item)}
       >
         <View style={styles.mapInfoContainer}>
           <Text style={styles.mapName}>{item.name}</Text>
@@ -477,6 +497,8 @@ const CollaborativeMapListScreen: React.FC = () => {
             style={styles.actionButton}
             onPress={(e) => {
               e.stopPropagation();
+              setShowCreateModal(false);
+              setShowDeleteConfirm(false);
               setSelectedMapId(item.id);
               setMap(item);
               setShowInviteModal(true);
@@ -485,24 +507,23 @@ const CollaborativeMapListScreen: React.FC = () => {
             <Icon name="person-add" size={20} color="#2196F3" />
           </TouchableOpacity>
 
-          
-            <TouchableOpacity
-              style={[styles.actionButton, styles.deleteButton]}
-              onPress={(e) => {
-                e.stopPropagation();
-                setMapToDelete(item.id);
-                setShowDeleteConfirm(true);
-              }}
-            >
-              <Icon name="delete" size={20} color="#f44336" />
-            </TouchableOpacity>
-          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={(e) => {
+              e.stopPropagation();
+              setShowInviteModal(false);
+              setShowCreateModal(false);
+              setMapToDelete(item.id);
+              setShowDeleteConfirm(true);
+            }}
+          >
+            <Icon name="delete" size={20} color="#f44336" />
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
   };
 
-  // Modal para crear un nuevo mapa colaborativo
   const renderCreateModal = () => (
     subscription && subscription.plan === "PREMIUM" ? (
       <Modal
@@ -515,7 +536,7 @@ const CollaborativeMapListScreen: React.FC = () => {
           <View style={styles.modalContent}>
             <Pressable onPress={Keyboard.dismiss}>
               <Text style={styles.modalTitle}>Crear Mapa Colaborativo</Text>
-  
+
               <Text style={styles.inputLabel}>Nombre del mapa*</Text>
               <TextInput
                 style={[styles.input, errors.mapName ? { borderColor: "#e53e3e" } : {}]}
@@ -532,7 +553,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                   {errors.mapName}
                 </Text>
               ) : null}
-  
+
               <Text style={styles.inputLabel}>Descripción</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
@@ -542,7 +563,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                 multiline={true}
                 maxLength={100}
               />
-  
+
               <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
               <View style={styles.pickerContainer}>
                 {[2, 3, 4, 5, 6].map((num) => {
@@ -553,7 +574,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                   const backgroundColor = isSelected
                     ? playerColors[0]
                     : (num <= maxUsers ? playerColors[num - 1] : "#f0f0f0");
-  
+
                   return (
                     <TouchableOpacity
                       key={num}
@@ -569,7 +590,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                   );
                 })}
               </View>
-  
+
               <View style={styles.playerPreview}>
                 {[...Array(maxUsers)].map((_, index) => (
                   <View
@@ -581,7 +602,7 @@ const CollaborativeMapListScreen: React.FC = () => {
               <Text style={styles.playerPreviewText}>
                 Vista previa de colores de jugadores
               </Text>
-  
+
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
@@ -589,7 +610,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                 >
                   <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
                 </TouchableOpacity>
-  
+
                 <TouchableOpacity
                   style={[styles.modalButton, styles.createButton]}
                   onPress={createCollaborativeMap}
@@ -625,7 +646,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                 style={[styles.modalButton, styles.createButton]}
                 onPress={() => {
                   setShowCreateModal(false);
-                  navigation.navigate('Payment');  // Redirige a la página de pago
+                  navigation.navigate('Payment');
                 }}
               >
                 <Text style={styles.buttonText}>Mejorar a Premium</Text>
@@ -636,10 +657,7 @@ const CollaborativeMapListScreen: React.FC = () => {
       </Modal>
     )
   );
-  
 
-
-  // Modal para confirmar la eliminación de un mapa
   const renderDeleteConfirmModal = () => (
     <Modal
       visible={showDeleteConfirm}
@@ -678,7 +696,6 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Cabecera */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Mapas Colaborativos</Text>
         <TouchableOpacity
@@ -689,7 +706,6 @@ const CollaborativeMapListScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Lista de mapas */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#2196F3" />
@@ -725,7 +741,6 @@ const CollaborativeMapListScreen: React.FC = () => {
         />
       )}
 
-      {/* Modales */}
       {renderCreateModal()}
       {renderInviteFriendsModal()}
       {renderDeleteConfirmModal()}
@@ -888,7 +903,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inviteButton: {
-    backgroundColor: "#14b8a6", // Tono medio para el botón
+    backgroundColor: "#14b8a6",
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -901,7 +916,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    backgroundColor: "#03045E",
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -989,7 +1004,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   cancelButton: {
-    backgroundColor: "#f44336", // Rojo para botones de cancelar
+    backgroundColor: "#f44336",
   },
   createButton: {
     backgroundColor: "#2196F3",
@@ -1039,4 +1054,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollaborativeMapListScreen; 
+export default CollaborativeMapListScreen;
