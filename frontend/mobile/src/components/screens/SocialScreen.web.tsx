@@ -219,9 +219,15 @@ const SocialScreenWeb = () => {
         }
         // Quitamos la solicitud de la lista
         setFriendRequests((prev) => prev.filter((r) => r.id !== friendId));
+      }else if (data.error) {
+        window.alert(data.error);
       }
+
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al unirse al mapa';
+      window.alert(errorMessage);
       console.error(`Error al actualizar invitación (${status}):`, error);
+      
     }
   };
 

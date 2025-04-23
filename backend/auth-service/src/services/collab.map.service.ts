@@ -20,7 +20,7 @@ export const joinMap = async (
   try {
     const mapa = await mapRepo.getMapById(MapId);
     if ((mapa.is_colaborative === true && mapa.users_joined.length > 4) || !mapa.is_colaborative) {
-      throw new Error("No puedes unirte a este mapa");
+      throw new Error("No puedes unirte a este mapa porque ya está completo.");
     }
     await repo.joinMap(MapId, UserId);
     await friendRepo.deleteFriendInvitation(friendId);
