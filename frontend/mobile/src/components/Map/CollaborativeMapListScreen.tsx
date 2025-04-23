@@ -46,7 +46,7 @@ const CollaborativeMapListScreen: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [mapName, setMapName] = useState<string>("");
   const [mapDescription, setMapDescription] = useState<string>("");
-  const [maxUsers, setMaxUsers] = useState<number>(6);
+  const [maxUsers, setMaxUsers] = useState<number>(5);
   const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
 
 
@@ -70,7 +70,7 @@ const CollaborativeMapListScreen: React.FC = () => {
     "#FFC107", // Amarillo
     "#FF9800", // Naranja
     "#E91E63", // Rosa
-    "#9C27B0"  // Morado
+
   ];
 
   // Obtener el ID del usuario al cargar el componente
@@ -269,7 +269,7 @@ const CollaborativeMapListScreen: React.FC = () => {
         // Limpiar los campos del formulario
         setMapName("");
         setMapDescription("");
-        setMaxUsers(6);
+        setMaxUsers(5);
         setShowCreateModal(false);
 
         // Añadir el nuevo mapa a la lista si viene en la respuesta
@@ -408,12 +408,12 @@ const CollaborativeMapListScreen: React.FC = () => {
                   <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Invitar Amigos</Text>
                     <Text style={styles.modalSubtitle}>
-                      Máximo 5 amigos (6 usuarios en total)
+                      Máximo 4 amigos (5 usuarios en total)
                     </Text>
           
                     {availableFriends.length === 0 ? (
                       <Text style={styles.noFriendsText}>
-                        Tus amigos ya se han unido a este mapa.
+                        No te quedan amigos por invitar a este mapa.
                       </Text>
                     ) : (
                       <FlatList
@@ -468,7 +468,7 @@ const CollaborativeMapListScreen: React.FC = () => {
             {item.description || "Sin descripción"}
           </Text>
           <Text style={styles.mapUsers}>
-            {item.users_joined?.length || 1} / {maxUsers} usuarios
+            {item.users_joined?.length || 1} / 5 usuarios
           </Text>
         </View>
 
@@ -543,9 +543,9 @@ const CollaborativeMapListScreen: React.FC = () => {
                 maxLength={100}
               />
   
-              <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+              <Text style={styles.inputLabel}>Previsualización de los colores de los usuarios</Text>
               <View style={styles.pickerContainer}>
-                {[2, 3, 4, 5, 6].map((num) => {
+                {[2, 3, 4, 5].map((num) => {
                   const isSelected = maxUsers === num;
                   const buttonStyle = isSelected
                     ? styles.pickerItemSelected
@@ -578,9 +578,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                   />
                 ))}
               </View>
-              <Text style={styles.playerPreviewText}>
-                Vista previa de colores de jugadores
-              </Text>
+              
   
               <View style={styles.modalButtons}>
                 <TouchableOpacity

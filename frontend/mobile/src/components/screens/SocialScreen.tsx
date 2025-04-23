@@ -219,8 +219,12 @@ const SocialScreen = () => {
           Alert.alert("Invitación rechazada", "La invitación ha sido eliminada.");
         }
         setFriendRequests(friendRequests.filter((r) => r.id !== friendId));
+      }else if (data.error) {
+        Alert.alert("Vaya", data.error);
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al unirse al mapa';
+      Alert.alert("Vaya", errorMessage);
       console.error(`Error al actualizar invitación (${status}):`, error);
     }
   };
