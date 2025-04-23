@@ -397,12 +397,25 @@ const SocialScreen = () => {
       {/* Tabs */}
       <StyledView className="flex-row justify-around mb-8">
         {['amigos', 'solicitudes', 'buscar'].map((tab) => (
-          <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}
-            className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${activeTab === tab ? 'bg-[#2196F3]' : 'bg-white'}`}>
-            <StyledText className={`text-center font-medium ${activeTab === tab ? 'text-white' : 'text-[#2196F3]'}`}>
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </StyledText>
-          </TouchableOpacity>
+                  <TouchableOpacity
+                  key={tab}
+                  onPress={() => setActiveTab(tab as any)}
+                  className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${activeTab === tab ? 'bg-[#2196F3]' : 'bg-white'}`}
+                >
+                  <StyledView className="relative">
+                    <StyledText className={`text-center font-medium ${activeTab === tab ? 'text-white' : 'text-[#2196F3]'}`}>
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </StyledText>
+                   
+                    {tab === 'solicitudes' && friendRequests.length > 0 && (
+                      <StyledView className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 justify-center items-center">
+                        <StyledText className="text-white text-xs font-bold">
+                          {friendRequests.length}
+                        </StyledText>
+                      </StyledView>
+                    )}
+                  </StyledView>
+                </TouchableOpacity>
         ))}
       </StyledView>
 

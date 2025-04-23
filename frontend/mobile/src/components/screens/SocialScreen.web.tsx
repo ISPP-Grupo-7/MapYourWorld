@@ -379,9 +379,16 @@ const SocialScreenWeb = () => {
                     style={[webStyles.tabButton, active && webStyles.tabButtonActive]}
                     onPress={() => setActiveTab(tab as any)}
                   >
+                    
                     <Text style={[webStyles.tabButtonText, active && webStyles.tabButtonTextActive]}>
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {tab === 'solicitudes' && friendRequests.length > 0 && (
+                        <View style={webStyles.badgeContainer}>
+                          <Text style={webStyles.badgeText}>{friendRequests.length}</Text>
+                        </View>
+                      )}
                     </Text>
+
                   </TouchableOpacity>
                 );
               })}
@@ -625,5 +632,21 @@ const webStyles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    right: -24,
+    top: -8,
+    backgroundColor: '#e11d48',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

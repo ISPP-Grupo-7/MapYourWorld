@@ -9,13 +9,14 @@ export const joinMap = async (req: Request, res: Response): Promise<void> => {
     const mapId = req.params.mapId;
     const userId = req.params.userId;
     const { friendId } = req.body;
+    const status = req.body.status; // Valor por defecto
 
     if (!mapId || !userId || !friendId) {
       res.status(400).json({ success: false, message: 'MapId y UserId son requeridos' });
       return;
     }
 
-    await collabMapService.joinMap(mapId, userId, friendId);
+    await collabMapService.joinMap(mapId, userId, friendId, status);
 
     res.status(200).json({
       success: true,
