@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-    18/02/2025
+    01/05/2025
 </p>
 
 **CONTROL DE VERSIONES**
@@ -33,7 +33,7 @@
 | V1.3    | 13/03/2025| Revisión para la entrega del Sprint 1 | Alfonso Luis Alonso Lanzarán |
 | V1.4    | 27/03/2025| Actualizacion del Sprint 2 | Claudio González Benito |
 | V1.5    | 10/04/2025| Actualizacion del Sprint 3 | Claudio González Benito |
-| V1.6    | 10/04/2025| Actualizacion del PPL | Claudio González Benito |
+| V1.6    | 30/04/2025| Actualizacion del PPL | Claudio González Benito |
 
 <!-- omit in toc--> 
 # Índice

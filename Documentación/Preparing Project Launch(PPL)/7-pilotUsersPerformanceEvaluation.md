@@ -18,7 +18,7 @@
     Claudio Gonzalez Benito
 </p>
 <p align="center">
-    13/03/2025
+    30/04/2025
 </p>
 
 **CONTROL DE VERSIONES**
