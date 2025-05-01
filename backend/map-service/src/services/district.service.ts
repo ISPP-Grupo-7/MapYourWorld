@@ -8,66 +8,84 @@ import db from '../../../database/db';
 import { District } from '../models/district.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import DistrictRepository from '../repositories/district.repository';
+import MapRepository from '../repositories/map.repository';
+import * as fs from 'fs';
+import { Geometry } from 'geojson';
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
+import { UserDistrict } from '../models/user-district.model';
+import RegionRepository from '../repositories/region.repository';
+
+const filePath = 'database/map.geojson';
+const rawData = fs.readFileSync(filePath, 'utf-8');
+const geojsonData = JSON.parse(rawData);
 
 const repo = new DistrictRepository();
+const mapRepo = new MapRepository();
+const userRepo = new AuthRepository();
+const regionRepo = new RegionRepository();
 
 
-
-
-/**
- * Crea un nuevo distrito
- * @param districtData Datos del distrito a crear
- * @param userId ID del usuario administrador que crea el distrito
- */
-
-
-
-export const createDistrict = async (
-  districtData: Omit<District, 'id'>,
-  userId: string
-): Promise<District> => {
-
+export const createDistricts = async (
+  mapaId: string
+): Promise<void> => {
   try {
-    // TODO: Implementar la creación de un distrito
-    // 1. Validar los datos del distrito
-    if (!districtData.name || !districtData.boundaries || !districtData.description) {
-      throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
+    const districtsPerRegion = 5;
+    const totalDistricts = geojsonData.features.length;
+    const numberOfRegions = Math.ceil(totalDistricts / districtsPerRegion);
+
+    const map = await mapRepo.getMapById(mapaId);
+
+    if (!map) {
+      throw new Error('Mapa no encontrado.');
     }
 
-    // 2. Verificar que el usuario tiene permisos de administrador
 
-    // 3. Validar que los límites geográficos no se solapan con otros distritos
+    for (let i = 0; i < numberOfRegions; i++) {
+      const regionName = geojsonData.region_name;
+      const regionData = {
+        name: regionName,
+        description: `Región generada para ${regionName}`,
+        map_assignee: map
+      };
 
+      // Crea la región y obtén el objeto que la representa
+      const region = await regionRepo.createRegion(regionData, mapaId);
 
+      if (!region) {
+        throw new Error('Región no creada correctamente.');
+      }
 
+      // Selecciona el grupo de distritos para esta región
+      const start = i * districtsPerRegion;
+      const end = start + districtsPerRegion;
+      const districtGroup = geojsonData.features.slice(start, end);
 
-    // 3. Crear y guardar el distrito correctamente
-    const newDistrict = repo.createDistrict(districtData);
+      for (const [index, feature] of districtGroup.entries()) {
+        const districtData = {
+          name: `Distrito ${start + index + 1} de ${regionName}`,
+          description: `Descripción para Distrito ${start + index + 1}`,
+          boundaries: {
+            type: feature.geometry.type,
+            coordinates: feature.geometry.coordinates
+          },
+          isUnlocked: false,
+          region_assignee: region, // Asigna la región creada
+          userDistrict: []
+        };
 
-    // // 5. Publicar evento de distrito creado
-    // await publishEvent('district.created', {
-    //   districtId: createdDistrict.id,
-    //   name: createdDistrict.name,
-    //   description: createdDistrict.description,
-    //   boundaries: createdDistrict.boundaries,
-    //   timestamp: new Date()
-    // });
-
-
-    console.log("Distrito creado correctamente:", newDistrict);
-    return newDistrict;
-
+        // Crea el distrito con la información anterior
+        await repo.createDistrict(districtData);
+      }
+    }
   } catch (error) {
-    console.log(error)
+    console.error("Error al crear distritos y regiones:", error);
+    throw error;
   }
-
-
-
-  throw new Error('Método no implementado');
 };
 
 
- 
+
+
 
 /**
  * Obtiene un distrito por su ID
@@ -150,14 +168,16 @@ export const updateDistrict = async (
  */
 export const unlockDistrict = async (
   districtId: string,
-  userId: string
+  userId: string,
+  regionId: string,
+  color: string
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
   // TODO: Implementar el desbloqueo de un distrito
   // 1. Verificar si el usuario puede desbloquear el distrito
-  const unlockedDistrict = await repo.unlockDistrict(districtId);
+  const unlockedDistrict = await repo.unlockDistrict(districtId, userId, regionId, color);
   // 3. Publicar evento de distrito desbloqueado
   if (unlockedDistrict.isUnlocked === true) {
     return { success: true, message: 'Distrito desbloqueado correctamente' };
@@ -173,20 +193,49 @@ export const unlockDistrict = async (
 export const getUserUnlockedDistricts = async (userId: string): Promise<District[]> => {
   // TODO: Implementar la obtención de distritos desbloqueados por un usuario
   // 1. Consultar los registros de desbloqueo del usuario
-  const districts = await repo.getDistrictsUnlocked();
+  const districts = await repo.getDistrictsUnlocked(userId);
   return districts;
 
 };
 
+
+
+export const getDistrictsByMapId = async (mapId: string): Promise<any[]> => {
+  try {
+    console.log(`Buscando distritos para el mapa ${mapId}`);
+    const districts = await repo.getDistrictsByMapId(mapId);
+    console.log(`Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
+    return districts;
+  } catch (error) {
+    console.error(`Error al obtener distritos para el mapa ${mapId}:`, error);
+    throw new Error(`Error al obtener distritos para el mapa ${mapId}`);
+  }
+};
+
+
+
 /**
- * Encuentra el distrito que contiene una ubicación geográfica
- * @param latitude Latitud de la ubicación
- * @param longitude Longitud de la ubicación
+ * Obtiene los distritos desbloqueados por un usuario con sus colores asignados
+ * @param userId ID del usuario
  */
-export const findDistrictContainingLocation = async (
-  latitude: number,
-  longitude: number
-): Promise<District | null> => {
-  const situation = await repo.findDistrictContainingLocation(latitude, longitude);
-  return situation;
+export const getUserDistrictsWithColors = async (userId: string): Promise<UserDistrict[]> => {
+  try {
+    console.log(`Buscando distritos con colores para el usuario ${userId}`);
+
+    // Realizamos la consulta con relaciones y nos aseguramos de que no haya distritos nulos
+    const userDistricts = await repo.getUserDistrictsByUserId(userId);
+    console.log(`Se encontraron ${userDistricts.length} distritos para el usuario ${userId}`);
+
+    // Filtramos los que puedan tener distrito nulo
+    const validUserDistricts = userDistricts.filter(ud => ud.district !== null);
+
+    if (validUserDistricts.length < userDistricts.length) {
+      console.log(`Se filtraron ${userDistricts.length - validUserDistricts.length} distritos nulos`);
+    }
+
+    return validUserDistricts;
+  } catch (error) {
+    console.error(`Error al obtener distritos con colores:`, error);
+    throw new Error(`No se pudieron obtener los distritos con colores: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+  }
 }; 

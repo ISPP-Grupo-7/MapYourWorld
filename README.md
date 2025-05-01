@@ -157,7 +157,15 @@ Para arreglar automáticamente problemas de linting:
 npm run lint:fix
 ```
 
-## Pruebas
+### Iniciar servicios externos con Docker
+
+Para iniciar servicios como PostgreSQL, Redis y RabbitMQ:
+
+```bash
+npm run docker:backend-only
+```
+
+## 🧪 Pruebas
 
 ### Ejecutar todas las pruebas
 

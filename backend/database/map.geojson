@@ -1,5 +1,6 @@
 {
     "type": "FeatureCollection",
+    "region_name":"Sevilla",
     "features": [
         {
             "type": "Feature",

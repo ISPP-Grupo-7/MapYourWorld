@@ -1,28 +1,6 @@
 import { Request, Response } from 'express';
 import * as DistrictService from '../services/district.service';
 
-/**
- * Crea un nuevo distrito
- */
-
-
-export const createDistrict = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { districtData, userId } = req.body;
-
-    if (!districtData || !userId) {
-      res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
-      return;
-    }
-
-    const newDistrict = await DistrictService.createDistrict(districtData, userId);
-    res.status(201).json({ success: true, message: 'Distrito creado correctamente', district: newDistrict });
-  } catch (error) {
-    console.error('Error al crear distrito:', error);
-    res.status(500).json({ success: false, message: error instanceof Error ? error.message : 'Error al crear distrito' });
-  }
-};
-
 
 /**
  * Obtiene un distrito por su ID
@@ -88,16 +66,18 @@ export const updateDistrict = async (req: Request, res: Response): Promise<void>
 /**
  * Desbloquea un distrito para un usuario
  */
+// district.controller.ts: unlockDistrict
 export const unlockDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const districtId  = req.params.districtId;
-    const userId  = req.params.userId;
-    if (!districtId || !userId) {
+    const { districtId, userId, regionId } = req.params;
+    const { color } = req.body;
+
+    if (!districtId || !userId || !regionId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
       return;
     }
-
-    const result = await DistrictService.unlockDistrict(districtId, userId);
+    
+    const result = await DistrictService.unlockDistrict(districtId, userId, regionId, color);
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });
       return;
@@ -111,8 +91,100 @@ export const unlockDistrict = async (req: Request, res: Response): Promise<void>
 };
 
 /**
- * Obtiene los distritos desbloqueados por un usuario
+ * Obtiene los distritos asociados a un mapa específico
  */
+export const getDistrictsByMapId = async (req: Request, res: Response): Promise<void> => {
+  const mapId = req.params.mapId;
+  console.log(`Controlador: Obteniendo distritos para el mapa ${mapId}`);
+
+  // Validación básica: Si el mapId es nulo, vacío o solo espacios se retorna 400.
+  if (!mapId || mapId.trim() === "" || mapId === '""') {
+    res.status(400).json({ success: false, message: 'Falta el ID del mapa' });
+    return;
+  }
+
+  try {
+    // Intentamos obtener los distritos del mapa
+    const districts = await DistrictService.getDistrictsByMapId(mapId);
+    console.log(`Controlador: Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
+
+    if (districts && districts.length > 0) {
+      res.status(200).json({ success: true, districts });
+      return;
+    }
+
+    // Si no hay distritos, se intenta crearlos
+    console.log(`Controlador: No se encontraron distritos, creando distritos para el mapa ${mapId}`);
+    try {
+      await DistrictService.createDistricts(mapId);
+      
+      // Se vuelven a obtener los distritos recién creados
+      const newDistricts = await DistrictService.getDistrictsByMapId(mapId);
+      console.log(`Controlador: Se crearon ${newDistricts.length} distritos para el mapa ${mapId}`);
+      
+      res.status(200).json({ success: true, districts: newDistricts });
+      return;
+    } catch (createError) {
+      console.error(`Controlador: Error al crear distritos para el mapa ${mapId}:`, createError);
+      
+      // Fallback: Intentamos obtener todos los distritos genéricos
+      try {
+        const allDistricts = await DistrictService.getAllDistricts();
+        console.log(`Controlador: Se encontraron ${allDistricts.length} distritos genéricos como fallback`);
+        res.status(200).json({ success: true, districts: allDistricts });
+        return;
+      } catch (fallbackError) {
+        console.error(`Controlador: Error al obtener distritos de fallback:`, fallbackError);
+        res.status(500).json({ success: false, message: 'Error al obtener distritos de fallback' });
+        return;
+      }
+    }
+  } catch (error) {
+    console.error(`Controlador: Error al obtener/crear distritos para el mapa ${mapId}:`, error);
+    // En caso de error general, se retorna un 500 o se decide una estrategia de fallback similar
+    try {
+      const allDistricts = await DistrictService.getAllDistricts();
+      console.log(`Controlador: Se encontraron ${allDistricts.length} distritos genéricos como fallback`);
+      res.status(200).json({ success: true, districts: allDistricts });
+      return;
+    } catch (fallbackError) {
+      console.error(`Controlador: Error al obtener distritos de fallback:`, fallbackError);
+      res.status(500).json({ success: false, message: 'Error al obtener distritos de fallback' });
+      return;
+    }
+  }
+};
+
+
+
+/**
+ * Obtiene los distritos con colores para un usuario
+ */
+// district.controller.ts: getUserDistrictsWithColors
+export const getUserDistrictsWithColors = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    if (!userId || userId.trim() === "" || userId === '""') {
+      res.status(400).json({ success: false, message: 'Falta el ID del usuario' });
+      return;
+    }
+    const userDistricts = await DistrictService.getUserDistrictsWithColors(userId);
+    res.status(200).json({ 
+      success: true, 
+      userDistricts: userDistricts.map(ud => ({
+        id: ud.id,
+        districtId: ud.district?.id || null,
+        districtName: ud.district?.name || 'Distrito no disponible',
+        color: ud.color,
+        isUnlocked: ud.district?.isUnlocked || false,
+      }))
+    });
+  } catch (error) {
+    console.error('Error al obtener distritos con colores:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener distritos con colores' });
+  }
+};
+
 export const getUserUnlockedDistricts = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId  = req.params.userId;
@@ -122,35 +194,5 @@ export const getUserUnlockedDistricts = async (req: Request, res: Response): Pro
   } catch (error) {
     console.error('Error al obtener distritos desbloqueados:', error);
     res.status(500).json({ success: false, message: 'Error al obtener distritos desbloqueados' });
-  }
-};
-
-/**
- * Encuentra el distrito que contiene una ubicación geográfica
- */
-export const findDistrictContainingLocation = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const latitude  = req.params.latitude;
-    const longitude  = req.params.longitude;
-
-    if (!latitude || !longitude) {
-      res.status(400).json({ success: false, message: 'Latitud y longitud son requeridos' });
-      return;
-    }
-
-    const district = await DistrictService.findDistrictContainingLocation(
-      parseFloat(latitude as string),
-      parseFloat(longitude as string)
-    );
-
-    if (!district) {
-      res.status(404).json({ success: false, message: 'No se encontró un distrito para la ubicación' });
-      return;
-    }
-
-    res.status(200).json({ success: true, district });
-  } catch (error) {
-    console.error('Error al buscar distrito por ubicación:', error);
-    res.status(500).json({ success: false, message: 'Error al buscar distrito por ubicación' });
   }
 };

@@ -5,60 +5,118 @@
 
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import { User, IUser } from '@backend/auth-service/src/models/user.model';
-import { sendVerificationEmail,sendPasswordResetEmail } from '@backend/auth-service/src/services/email.service';
-import { publishEvent } from '@shared/libs/rabbitmq';
-import { generateToken,verifyToken} from '@shared/config/jwt.config';
+import { Role, User } from '../models/user.model';
+import { sendPasswordResetEmail } from '../services/email.service';
+import { generateToken, verifyToken } from '../../../../shared/security/jwt';
+import AuthRepository  from '../repositories/auth.repository';
+import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
+import { UserProfile } from '../../../user-service/src/models/userProfile.model';
+import { createMap } from '../../../map-service/src/services/map.service';
+import { createDistricts } from '../../../map-service/src/services/district.service';
+import MapRepository from '../../../map-service/src/repositories/map.repository';
+import { PlanType, Subscription } from '../../../payment-service/models/subscription.model';
+import SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
+import { createPOIsOnLagMaps } from '../../../map-service/src/services/poi.service';
+
+const repo = new AuthRepository();
+const profileRepo = new UserProfileRepository();
+const mapRepo = new MapRepository();
+const subscriptionsRepo = new SubscriptionRepository();
+const userRepo = new UserProfileRepository();
+
+export const getUserById = async (userId: string): Promise<User | null> => {
+  return await repo.findById(userId);
+};
+
 
 /**
  * Registra un nuevo usuario en el sistema
  * @param userData Datos del usuario a registrar
  */
-export const registerUser = async (userData: any): Promise<IUser> => {
-  // 1. Validar datos de entrada
-  if (!userData.email || !userData.password || !userData.firstName || !userData.lastName) {
-    throw new Error('Faltan campos requeridos');
+export const registerUser = async (userData: any): Promise<User> => {
+  try {
+    // 1. Validar datos de entrada
+    if (!userData.email || !userData.password || !userData.username || !userData.firstName || !userData.lastName) {
+      throw new Error('Faltan campos requeridos');
+    }
+
+    // 2. Verificar que el email no existe en la base de datos
+    const existingUser = await repo.findByEmail(userData.email);
+    if (existingUser) {
+      throw new Error('Ya existe un usuario con este email');
+    }
+    const existingUsername = await userRepo.findByUsername(userData.username);
+    if (existingUsername) {
+      throw new Error('Ya existe un usuario con este nombre de usuario');
+    }
+
+
+    // 3. Crear el perfil de usuario
+    const newProfile = new UserProfile();
+    newProfile.username = userData.username;
+    newProfile.firstName = userData.firstName;
+    newProfile.lastName = userData.lastName;
+    newProfile.picture = userData.picture || '';
+    const savedProfile = await profileRepo.create(newProfile);
+
+    // 4. Crear el usuario con el perfil asociado
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const newUser = new User();
+    newUser.email = userData.email;
+    newUser.role = userData.role || Role.USER;
+    newUser.password = hashedPassword;
+    newUser.is_active = true; // Activamos la cuenta automáticamente (podría cambiarse si se requiere verificación)
+    newUser.profile = savedProfile;
+
+    // Guardar el usuario en la base de datos
+    let savedUser = await repo.save(newUser);
+
+    // 4. Generar token JWT
+    const token = generateToken(
+      { sub: savedUser.id, email: savedUser.email },
+      process.env.JWT_SECRET || 'development-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    // 5. Guardar el token en el campo token_data
+    savedUser.token_data = token;
+    savedUser =await repo.save(savedUser);
+
+
+
+    // 5. Crear mapa y distritos para el usuario
+    try {
+      const newMap = await createMap(savedUser.id);
+      if (newMap) {
+        const savedMap = await mapRepo.getMapById(newMap.id);
+        await createDistricts(savedMap.id);
+        await createPOIsOnLagMaps(savedMap.id);
+
+      }
+    } catch (mapError) {
+      console.error('Error al crear mapa o distritos:', mapError);
+      // No fallamos el registro si el mapa no se puede crear
+    }
+
+    const suscriptionUserData = new Subscription();
+    const now = new Date();
+
+    suscriptionUserData.plan = PlanType.FREE;
+    suscriptionUserData.user = newUser;
+    suscriptionUserData.is_active = true;
+    suscriptionUserData.startDate = now;
+    suscriptionUserData.endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    await subscriptionsRepo.create(suscriptionUserData);
+
+    return savedUser;
+  } catch (error) {
+    console.error('Error en registerUser:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al registrar el usuario');
   }
-
-  // 2. Verificar que el email no existe en la base de datos
-  const existingUser = await User.findOne({ email: userData.email });
-  if (existingUser) {
-    throw new Error('El usuario ya existe con este email');
-  }
-
-  // 3. Crear el usuario en la base de datos
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-  const newUser = new User({
-    email: userData.email,
-    password: hashedPassword,
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    plan: 'free',
-    active: false, 
-    lastLogin: null,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  });
-
-  // 4. Generar y enviar email de verificación
-  // Generamos un token aleatorio para la verificación
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  const tokenData = {token: verificationToken};
-  newUser.tokenData =  tokenData;
-  await newUser.save();
-
-  await sendVerificationEmail(newUser.email, newUser.username, verificationToken);
-
-  // 5. Publicar evento de usuario registrado
-  await publishEvent('user.registered', {
-    userId: newUser._id.toString(),
-    email: newUser.email,
-    firstName: newUser.firstName,
-    lastName: newUser.lastName,
-    timestamp: new Date().toISOString()
-  });
-
-  return newUser;
 };
 
 /**
@@ -66,64 +124,87 @@ export const registerUser = async (userData: any): Promise<IUser> => {
  * @param email Email del usuario
  * @param password Contraseña del usuario
  */
-export const loginUser = async (email: string, password: string): Promise<{user: IUser, token: string}> => {
-  // TODO: Implementar la lógica de inicio de sesión
-  // 1. Buscar usuario por email
-  // 2. Verificar contraseña
-  // 3. Generar token JWT
-  // 4. Actualizar lastLogin y guardar
-  // 5. Publicar evento de inicio de sesión
-  const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    throw new Error('Usuario no encontrado');
+export const loginUser = async (email: string, password: string): Promise<{ user: User, token: string }> => {
+  try {
+    // 1. Buscar usuario por email
+    const user = await repo.findWithPassword(email);
+    if (!user) {
+      throw new Error('Credenciales inválidas');
+    }
+
+    // 2. Verificar contraseña
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error('Credenciales inválidas');
+    }
+
+    // 3. Verificar que la cuenta esté activa
+    if (!user.is_active) {
+      throw new Error('La cuenta no está activada');
+    }
+
+    // 4. Generar token JWT
+    const token = generateToken(
+      { sub: user.id, email: user.email },
+      process.env.JWT_SECRET || 'development-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    // 5. Guardar el token en el campo token_data
+    user.token_data = token;
+    await repo.save(user);
+
+    // 6. Devolver usuario y token (sin contraseña)
+    const { password: _, ...userWithoutPassword } = user;
+    return { user: userWithoutPassword as User, token };
+  } catch (error) {
+    console.error('Error en loginUser:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al iniciar sesión');
   }
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    throw new Error('Credenciales incorrectas');
-  }
-
-  const token = generateToken({
-    userId: user._id.toString(),
-    email: user.email,
-    plan: user.plan
-  });
-
-  user.lastLogin = new Date();
-  await user.save();
-
-  await publishEvent('user.loggedin', {
-    userId: user._id.toString(),
-    email: user.email,
-    timestamp: new Date().toISOString()
-  });
-
-  return { user, token };
 };
 
 /**
  * Verifica un token JWT
  * @param token Token JWT a verificar
  */
-export const verifyUserToken = async (token: string): Promise<any> => {
-  // TODO: Implementar la verificación de token
-  // 1. Verificar firma y expiración del token
-  const decoded = verifyToken(token);
-  if(!decoded) {
-    throw new Error('Token inválido o expirado');
-  } 
-  // 2. Obtener información actualizada del usuario
-  const user = await User.findById(decoded.userId);
-  if (!user) {
-    throw new Error('Usuario no encontrado');
+export const verifyUserToken = async (token: string): Promise<{
+  userId: string;
+  email: string;
+  role: Role;
+}> => {
+  try {
+    // 1. Verificar firma y expiración del token
+    const result = verifyToken(token, process.env.JWT_SECRET || 'development-secret-key');
+    if (!result.valid || !result.payload) {
+      throw new Error('Token inválido o expirado');
+    }
+
+    // 2. Obtener información actualizada del usuario
+    const user = await repo.findById(result.payload.sub);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    // 3. Verificar que el token está en token_data
+    if (user.token_data !== token) {
+      throw new Error('Sesión inválida. Por favor, inicie sesión nuevamente');
+    }
+
+    return {
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    };
+  } catch (error) {
+    console.error('Error en verifyUserToken:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al verificar token');
   }
-  return {
-    userId: user._id.toString(),
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    plan: user.plan
-  };
 };
 
 /**
@@ -133,28 +214,43 @@ export const verifyUserToken = async (token: string): Promise<any> => {
  * @param newPassword Nueva contraseña
  */
 export const changePassword = async (userId: string, currentPassword: string, newPassword: string): Promise<boolean> => {
-  // TODO: Implementar cambio de contraseña
-  // 1. Buscar usuario por ID
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new Error('Usuario no encontrado');
+  try {
+    // 1. Buscar usuario por ID
+    const user = await repo.findById(userId);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    
+    // 2. Verificar contraseña actual
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Contraseña actual incorrecta');
+    }
+    
+    // 3. Validar nueva contraseña
+    if (newPassword.length < 8) {
+      throw new Error('La nueva contraseña debe tener al menos 8 caracteres');
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      throw new Error('La nueva contraseña debe contener al menos una mayúscula y un número');
+    }
+    
+    // 4. Actualizar contraseña y guardar
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await repo.updatePassword(user.id, hashedPassword);
+    
+    // 5. Invalidar todas las sesiones existentes por seguridad
+    user.token_data = "";
+    await repo.save(user);
+    
+    return true;
+  } catch (error) {
+    console.error('Error en changePassword:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al cambiar la contraseña');
   }
-  // 2. Verificar contraseña actual
-  const correctPassword = await user.comparePassword(currentPassword);
-  if (!correctPassword) {
-    throw new Error('Credenciales incorrectas');
-  }
-  // 3. Validar nueva contraseña
-  if (newPassword.length < 8) {
-    throw new Error('La nueva contraseña debe tener al menos 8 caracteres');
-  }
-  if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-    throw new Error('La nueva contraseña debe contener al menos una mayúscula y un número');
-  }
-  // 4. Actualizar contraseña y guardar
-  user.password=newPassword;
-  await user.save();
-  return true;
 };
 
 /**
@@ -162,24 +258,141 @@ export const changePassword = async (userId: string, currentPassword: string, ne
  * @param email Email del usuario
  */
 export const requestPasswordReset = async (email: string): Promise<boolean> => {
-  // TODO: Implementar solicitud de restablecimiento de contraseña
-  // 1. Buscar usuario por email
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new Error('Usuario no encontrado');
+  try {
+    // 1. Buscar usuario por email
+    const user = await repo.findByEmail(email);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    
+    // 2. Generar token único y temporal
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // 3. Almacenar el token en token_data
+    const tokenData = {
+      resetPassword: {
+        token: resetToken,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString() // 1 hora de validez
+      }
+    };
+    
+    user.token_data = JSON.stringify(tokenData);
+    await repo.save(user);
+    
+    // 4. Enviar email con instrucciones
+    await sendPasswordResetEmail(user.email, user.profile?.username || '', resetToken);
+    
+    return true;
+  } catch (error) {
+    console.error('Error en requestPasswordReset:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al procesar la solicitud de recuperación de contraseña');
   }
-  // 2. Generar token único y temporal
-  const token = crypto.randomBytes(32).toString('hex');
-  const tokenExpiration = new Date();
-  tokenExpiration.setHours(tokenExpiration.getHours() + 1); // Válido por 1 hora
-  // 3. Guardar token en el usuario
-  user.tokenData.token = token
-  user.tokenData.expiration = tokenExpiration
+};
 
-  await user.save();
+/**
+ * Restablece la contraseña usando un token
+ * @param token Token de recuperación
+ * @param newPassword Nueva contraseña
+ * @returns true si el restablecimiento fue exitoso
+ */
+export const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
+  try {
+    if (!token || !newPassword) {
+      throw new Error('Token y nueva contraseña son requeridos');
+    }
+    
+    // 1. Validar la nueva contraseña
+    if (newPassword.length < 8) {
+      throw new Error('La contraseña debe tener al menos 8 caracteres');
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      throw new Error('La contraseña debe contener al menos una mayúscula y un número');
+    }
+    
+    // 2. Buscar usuario por token
+    const users = await repo.findAll();
+    let targetUser: User | null = null;
+    
+    for (const user of users) {
+      if (!user.token_data) continue;
+      
+      try {
+        const tokenData = JSON.parse(user.token_data);
+        if (
+          tokenData.resetPassword &&
+          tokenData.resetPassword.token === token &&
+          new Date(tokenData.resetPassword.expiresAt) > new Date()
+        ) {
+          targetUser = user;
+          break;
+        }
+      } catch (e) {
+        // Ignora errores de formato JSON
+        continue;
+      }
+    }
+    
+    if (!targetUser) {
+      throw new Error('Token inválido o expirado');
+    }
+    
+    // 3. Actualizar contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await repo.updatePassword(targetUser.id, hashedPassword);
+    
+    // 4. Limpiar token
+    targetUser.token_data = '';
+    await repo.save(targetUser);
+    
+    return true;
+  } catch (error) {
+    console.error('Error en resetPassword:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al restablecer la contraseña');
+  }
+};
 
-  // 4. Enviar email con instrucciones
-  await sendPasswordResetEmail(user.email, user.username, token);
+/**
+ * Cierra la sesión de un usuario
+ * @param userId ID del usuario
+ * @param token Token específico a invalidar (opcional)
+ */
+export const logout = async (userId: string, token?: string): Promise<boolean> => {
+  try {
+    const user = await repo.findById(userId);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    
+    if (token && user.token_data === token) {
+      // Si se especifica un token y coincide con el almacenado, lo eliminamos
+      user.token_data = '';
+      await repo.save(user);
+    } else if (!token) {
+      // Si no se especifica token, invalidamos todas las sesiones
+      user.token_data = '';
+      await repo.save(user);
+    } else {
+      // Si el token no coincide, no hacemos nada
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error en logout:', error);
+    if (error instanceof Error) {
+      throw error; // Retransmitir errores conocidos
+    }
+    throw new Error('Error al cerrar sesión');
+  }
+};
 
-  return true;
-}; 
+export const getUserProfileById = async (userId: string): Promise<UserProfile | null> => {
+  return await repo.findProfileByUserId(userId);
+};

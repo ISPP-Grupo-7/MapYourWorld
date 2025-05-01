@@ -1,0 +1,30 @@
+name: Run Tests
+
+on:
+  push:
+    branches: '**'
+  pull_request:
+    branches: '**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Install Node.js manually
+      run: |
+        curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+        node -v
+        npm -v
+        
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps && npm install reflect-metadata --save
+      
+    - name: Run backend tests
+      run: npm test --workspace=backend
+      
+    - name: Run frontend tests
+      run: npm test --workspace=frontend

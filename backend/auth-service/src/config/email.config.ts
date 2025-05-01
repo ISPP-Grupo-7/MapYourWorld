@@ -27,7 +27,7 @@ export interface EmailConfig {
 
 // Configuración por defecto para el servicio de email
 export const emailConfig: EmailConfig = {
-  host: process.env.EMAIL_HOST || 'smtp.example.com',
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.EMAIL_PORT || '587'),
   secure: process.env.EMAIL_SECURE === 'true',
   auth: {

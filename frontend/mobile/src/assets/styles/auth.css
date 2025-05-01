@@ -1,0 +1,64 @@
+.auth-container {
+    width: 40vw;
+    height: 75vh;
+    background-color: white;
+    border-radius: 30px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    text-align: center;
+}
+
+.input {
+    margin-bottom: 2vh;
+}
+
+.input div {
+    font-size: 1rem;
+    text-align: left;
+    color: #333;
+}
+
+.input div .css-view-175oi2r {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+
+    width: 100%;
+    margin-top: 1vh;
+}
+
+input + div {
+    width: auto;
+}
+
+/* 
+botones de mostrar contraseñas
+TODO: encontrar un mejor selector
+*/
+div.css-view-175oi2r.r-transitionProperty-1i6wzkk.r-userSelect-lrvibr.r-cursor-1loqt21.r-touchAction-1otgn73.r-marginLeft-1jkjb,
+div.css-view-175oi2r.r-transitionProperty-1i6wzkk.r-userSelect-lrvibr.r-cursor-1loqt21.r-touchAction-1otgn73.r-marginLeft-1jkjb > div {
+    width: auto;
+}
+
+.input input {
+    width: 100%;
+}
+
+.link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+}
+
+
+.forgotten-password {
+    text-align: right;
+    font: 1rem #6b6b6b;
+}

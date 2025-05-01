@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "510b8054-ed01-4e02-af1f-cb6d92e6377b",
+		"name": "Payment service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42986778",
+		"_collection_link": "https://dark-astronaut-737727.postman.co/workspace/MapYourWorld~6b309750-69a8-4428-90be-1adea045f9e7/collection/26147126-510b8054-ed01-4e02-af1f-cb6d92e6377b?action=share&source=collection_link&creator=42986778"
+	},
+	"item": [
+		{
+			"name": "Subscription",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"plan\": \"PREMIUM\",\r\n  \"startDate\": \"\",\r\n  \"endDate\": \"\",\r\n  \"is_active\": null,\r\n  \"autoRenew\": false,\r\n  \"createdAt\": \"\",\r\n  \"updatedAt\": \"\",\r\n  \"user\": {\r\n    \"id\": \"e96d1f96-fe26-4942-ae9e-a8f3c8248feb\"\r\n  }\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/subscriptions/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"subscriptions",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getSubscription",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "post payment",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"subscription_id\": \"123e4567-e89b-12d3-a456-426614174000\",\r\n\"amount\": 100.50,\r\n\"currency\": \"USD\",\r\n\"status\": \"pending\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/payment/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"payment",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all payments",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/payment/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"payment",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/payment/80254b2d-d9e2-4cd5-834b-81130b0c3d2c",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"payment",
+						"80254b2d-d9e2-4cd5-834b-81130b0c3d2c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit payment",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \"status\": \"completed\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/payment/update/80254b2d-d9e2-4cd5-834b-81130b0c3d2c",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"payment",
+						"update",
+						"80254b2d-d9e2-4cd5-834b-81130b0c3d2c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete payment",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/payment/delete/80254b2d-d9e2-4cd5-834b-81130b0c3d2c",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"payment",
+						"delete",
+						"80254b2d-d9e2-4cd5-834b-81130b0c3d2c"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

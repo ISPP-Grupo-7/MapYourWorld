@@ -1,31 +1,42 @@
 import { Router } from 'express';
 import {
   getProfile,
-  getPublicProfile,
   updateProfile,
-  updateAvatar,
-  updatePreferences,
+  updatePicture,
   searchProfiles,
-  deactivateAccount,
-  reactivateAccount,
+  createProfile,
 } from '../controllers/profile.controller';
 
 const router: Router = Router();
 
-router.get('/:userId', getProfile);
+/**
+ * Obtiene un perfil por su ID
+ * GET /api/profiles/:profileId
+ */
+router.get('/:profileId', getProfile);
 
-router.get('/:userId/public', getPublicProfile);
+/**
+ * Actualiza los campos de un perfil
+ * PUT /api/profiles/:profileId
+ */
+router.put('/:profileId', updateProfile);
 
-router.put('/:userId', updateProfile);
+/**
+ * Actualiza la imagen de perfil
+ * PUT /api/profiles/:profileId/picture
+ */
+router.put('/:profileId/picture', updatePicture);
 
-router.put('/:userId/avatar', updateAvatar);
-
-router.put('/:userId/preferences', updatePreferences);
-
+/**
+ * Busca perfiles por username, nombre o apellido
+ * GET /api/profiles?query=texto
+ */
 router.get('/', searchProfiles);
 
-router.post('/:userId/deactivate', deactivateAccount);
-
-router.post('/:userId/reactivate', reactivateAccount);
+/**
+ * Crea un nuevo perfil
+ * POST /api/profiles
+ */
+router.post('/', createProfile);
 
 export default router;

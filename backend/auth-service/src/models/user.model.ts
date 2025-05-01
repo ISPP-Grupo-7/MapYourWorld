@@ -1,136 +1,93 @@
-/**
- * Modelo de usuario para el servicio de autenticación
- */
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  OneToMany,
+  ManyToMany,
+  JoinColumn,
+  JoinTable,
+} from 'typeorm';
+import { UserProfile } from "../../../user-service/src/models/userProfile.model";
+import { Friend } from "../../../social-service/src/models/friend.model"
+//TODO Aún está pendiente de hacer y corregir la importación
+//TODO Aún está pendiente de hacer y corregir la importación
+import { Map } from '../../../map-service/src/models/map.model';
+import { Subscription } from '../../../payment-service/models/subscription.model';
+import { UserDistrict } from '../../../map-service/src/models/user-district.model';
+//TODO Aún está pendiente de hacer y corregir la importación
+//import { Plan } from './Plan';
 
-import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 
-// Interfaz para los datos del usuario
-export interface IUser extends Document {
-  userId: string;
-  username: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  plan: 'free' | 'premium';
-  active: boolean;
-  lastLogin: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  role: 'user' | 'admin';
-  comparePassword(candidatePassword: string): Promise<boolean>;
-  tokenData : {
-    token: string;
-    expiration?: Date;
-  };
+export enum Role {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
 }
 
-// Esquema de mongoose para el usuario
-const UserSchema = new Schema<IUser>(
-  {
-    userId: {
-      type: String,
-      required: true,
-      default: () => crypto.randomUUID()
-    },
-    email: {
-      type: String,
-      required: [true, 'El email es obligatorio'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Por favor, introduce un email válido'],
-    },
-    password: {
-      type: String,
-      required: [true, 'La contraseña es obligatoria'],
-      minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
-      select: false, // No incluir en las consultas por defecto
-    },
-    firstName: {
-      type: String,
-      required: [true, 'El nombre es obligatorio'],
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      required: [true, 'El apellido es obligatorio'],
-      trim: true,
-    },
-    plan: {
-      type: String,
-      enum: ['free', 'premium'],
-      default: 'free',
-    },
-    active: {
-      type: Boolean,
-      default: true,
-    },
-    lastLogin: {
-      type: Date,
-      default: Date.now,
-    },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
-    }
-  },
-  {
-    timestamps: true, // Añadir createdAt y updatedAt automáticamente
-  }
-);
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-// Hook pre-save para cifrar la contraseña
-UserSchema.pre<IUser>('save', async function (next) {
-  // Sólo cifrar si la contraseña ha sido modificada
-  if (!this.isModified('password')) return next();
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email!: string;
 
-  try {
-    // Implementación con AES y SHA-256 para mayor seguridad
-    // 1. Generar un salt aleatorio
-    const salt = await bcrypt.genSalt(10);
-    
-    // 2. Crear un hash SHA-256 de la contraseña
-    const sha256Hash = crypto
-      .createHash('sha256')
-      .update(this.password)
-      .digest('hex');
-    
-    // 3. Cifrar el hash con bcrypt (que ya usa un método más robusto internamente)
-    const hashedPassword = await bcrypt.hash(sha256Hash, salt);
-    
-    // 4. Guardar la contraseña cifrada
-    this.password = hashedPassword;
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role!: Role;
 
-// Método para comparar contraseñas
-UserSchema.methods.comparePassword = async function (
-  candidatePassword: string
-): Promise<boolean> {
-  try {
-    // Primero, crear un hash SHA-256 de la contraseña candidata
-    const sha256Hash = crypto
-      .createHash('sha256')
-      .update(candidatePassword)
-      .digest('hex');
-    
-    // Comparar con la contraseña almacenada (que ya está cifrada)
-    // Seleccionar explícitamente el campo password ya que está excluido por defecto
-    const user = await this.model('User').findById(this._id).select('+password');
-    if (!user) return false;
-    
-    return await bcrypt.compare(sha256Hash, user.password);
-  } catch (error) {
-    throw new Error(`Error al comparar contraseñas: ${error}`);
-  }
-};
+  @Column({ type: 'varchar', length: 255 })
+  password!: string;
 
-// Crear y exportar el modelo
-export const User = mongoose.model<IUser>('User', UserSchema); 
+  @Column({ type: 'boolean', default: false })
+  is_active!: boolean;
+
+  @Column({ type: 'varchar', length: 700, nullable: true })
+  token_data?: string;
+  /**
+   * Relación inversa de 1:1 con UserProfile.
+   * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.
+   */
+
+  @OneToOne(() => UserProfile, { eager: true })
+  @JoinColumn()
+  profile!: UserProfile;
+
+  /**
+   * Relación 1:N con solicitudes de amistad enviadas.
+   */
+  @OneToMany(() => Friend, (friend) => friend.requester)
+  sentFriendRequests!: Friend[];
+
+  /**
+   * Relación 1:N con solicitudes de amistad recibidas.
+   */
+  @OneToMany(() => Friend, (friend) => friend.recipient)
+  receivedFriendRequests!: Friend[];
+  /**
+   * Relación 1:N con Map
+   * "Map belongs to User" => en la entidad Map habrá un @ManyToOne(...).
+   */
+  @ManyToMany(() => Map, (map) => map.users_joined, { eager: true , cascade: ['remove'], onDelete: 'CASCADE'})
+  @JoinTable({
+    name: 'user_maps_joined',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'map_id',
+      referencedColumnName: 'id',
+    },
+  })
+  maps_joined!: Map[];
+
+  @OneToOne(() => Subscription, (subscription) => subscription.user)
+  subscription!: Subscription;
+
+  @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.user)
+  userDistrict!: UserDistrict[];
+}

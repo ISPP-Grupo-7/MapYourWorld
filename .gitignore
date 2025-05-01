@@ -57,3 +57,6 @@ uploads/
 
 # Archivos de bloqueo
 package-lock.json
+
+# IDE
+.cursor/rules

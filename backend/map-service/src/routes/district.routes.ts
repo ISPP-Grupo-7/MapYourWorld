@@ -1,21 +1,21 @@
 import { Router } from 'express';
-import { createDistrict, getDistrictById, getAllDistricts, unlockDistrict, getUserUnlockedDistricts, findDistrictContainingLocation, updateDistrict } from '../controllers/district.controller';
+import { getDistrictById, getAllDistricts, updateDistrict, unlockDistrict, getUserUnlockedDistricts, getDistrictsByMapId, getUserDistrictsWithColors } from '../controllers/district.controller';
 
 const router: Router = Router();
 
-router.post('/district/create', createDistrict);
+router.get('/:districtId', getDistrictById);
 
-router.get('/district/:districtId', getDistrictById);
+router.get('/', getAllDistricts);
 
-router.get('/districts', getAllDistricts);
+router.put('/update/:districtId', updateDistrict );
 
-router.get('/districts/update/:districtId', updateDistrict );
+router.put('/unlock/:districtId/:userId/:regionId', unlockDistrict);
 
-router.get('/districts/unlock/:districtId/:userId', unlockDistrict);
+router.get('/user/unlock/:userId', getUserUnlockedDistricts);
 
-router.get('/districts/user/unlock/:userId', getUserUnlockedDistricts);
+router.get('/map/:mapId', getDistrictsByMapId);
 
-router.get('/districts/location/:latitude/:longitude', findDistrictContainingLocation);
+router.get('/user-districts/:userId', getUserDistrictsWithColors);
 
 
 export default router;

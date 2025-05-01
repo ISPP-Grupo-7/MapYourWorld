@@ -1,122 +1,80 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   getUserProfile,
-  getPublicUserProfile,
   updateUserProfile,
-  updateUserAvatar,
-  updateUserPreferences,
+  updateUserPicture,
   searchUsers,
-  deactivateUserAccount,
-  reactivateUserAccount,
+  createUserProfile,
 } from '../services/profile.service';
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfile: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
-    const profile = await getUserProfile(userId);
+    const profileId = req.params.profileId;
+    const profile = await getUserProfile(profileId);
     if (!profile) {
-      return res.status(404).json({ message: 'Perfil no encontrado' });
+      res.status(404).json({ message: 'Perfil no encontrado' });
+      return;
     }
-    return res.json(profile);
+    res.json(profile);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al obtener el perfil' });
+    console.error(`Error al obtener el perfil ${req.params.profileId}:`, error);
+    next(error);
   }
 };
 
-export const getPublicProfile = async (req: Request, res: Response) => {
+export const updateProfile: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
-
-    const viewerId = req.query.viewerId as string | undefined;
-    const profile = await getPublicUserProfile(userId, viewerId);
-    if (!profile) {
-      return res.status(404).json({ message: 'Perfil no encontrado' });
-    }
-    return res.json(profile);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al obtener el perfil público' });
-  }
-};
-
-export const updateProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = req.params.userId;
+    const profileId = req.params.profileId;
     const profileData = req.body;
-    const updatedProfile = await updateUserProfile(userId, profileData);
+    const updatedProfile = await updateUserProfile(profileId, profileData);
     if (!updatedProfile) {
-      return res.status(404).json({ message: 'Perfil no encontrado' });
+      res.status(404).json({ message: 'Perfil no encontrado' });
+      return;
     }
-    return res.json(updatedProfile);
+    res.json(updatedProfile);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al actualizar el perfil' });
+    console.error(`Error al actualizar el perfil ${req.params.profileId}:`, error);
+    next(error);
   }
 };
 
-export const updateAvatar = async (req: Request, res: Response) => {
+export const updatePicture: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
-    const { avatarData } = req.body;
-    if (!avatarData) {
-      return res.status(400).json({ message: 'Falta avatarData en la solicitud' });
+    const profileId = req.params.profileId;
+    const { pictureData } = req.body;
+    if (!pictureData) {
+      res.status(400).json({ message: 'Falta pictureData en la solicitud' });
+      return;
     }
-    const result = await updateUserAvatar(userId, avatarData);
-    return res.json(result);
+    const result = await updateUserPicture(profileId, pictureData);
+    res.json(result);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al actualizar el avatar' });
+    console.error(`Error al actualizar la imagen del perfil ${req.params.profileId}:`, error);
+    next(error);
   }
 };
 
-export const updatePreferences = async (req: Request, res: Response) => {
-  try {
-    const userId = req.params.userId;
-    const preferences = req.body;
-    const updatedPreferences = await updateUserPreferences(userId, preferences);
-    if (!updatedPreferences) {
-      return res.status(404).json({ message: 'Perfil no encontrado' });
-    }
-    return res.json(updatedPreferences);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al actualizar las preferencias' });
-  }
-};
-
-export const searchProfiles = async (req: Request, res: Response) => {
+export const searchProfiles: RequestHandler = async (req, res, next) => {
   try {
     const query = req.query.query as string;
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = parseInt(req.query.offset as string) || 0;
     const result = await searchUsers(query, limit, offset);
-    return res.json(result);
+    res.json(result);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al buscar perfiles' });
+    console.error(`Error al buscar perfiles con query "${req.query.query}":`, error);
+    next(error);
   }
 };
 
-export const deactivateAccount = async (req: Request, res: Response) => {
-  try {
-    const userId = req.params.userId;
-    const { reason } = req.body;
-    const result = await deactivateUserAccount(userId, reason);
-    return res.json({ success: result });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al desactivar la cuenta' });
-  }
-};
+  export const createProfile: RequestHandler = async (req, res, next) => {
+    try {
+      const profileData = req.body;
+      const newProfile = await createUserProfile(profileData);
+      res.status(201).json(newProfile);
+    } catch (error) {
+      console.error('Error al crear el perfil:', error);
+      next(error);
+    }
+  };
 
-export const reactivateAccount = async (req: Request, res: Response) => {
-  try {
-    const userId = req.params.userId;
-    const result = await reactivateUserAccount(userId);
-    return res.json({ success: result });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al reactivar la cuenta' });
-  }
-};
