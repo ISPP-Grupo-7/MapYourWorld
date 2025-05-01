@@ -1,6 +1,6 @@
 # 🌍 MapYourWorld
 
-Una aplicación que permite a los usuarios registrar lugares visitados con elementos de gamificación.
+Map Your World es un divertido juego con el que podrás vivir experiencias interactivas orientadas a adictos a los viajes: crea y registra puntos de interés, desbloquea distritos solo o con amigos, completa logros y conecta con nuestra comunidad de viajeros. Map Your World posee un gran componente de gamificación (mediante logros que recompensan la exploración) y social (conecta con amigos y participa con ellos en mapas colaborativos).
 
 <div align="center">
   <h2>🚀 ¡ACTUALIZACIÓN IMPORTANTE! 🚀</h2>
@@ -12,22 +12,24 @@ Una aplicación que permite a los usuarios registrar lugares visitados con eleme
 
 Hemos realizado varias mejoras para simplificar la ejecución del proyecto:
 
-1. **Nuevo Comando de Ejecución Sin Errores**: 
+1. **Arrancar el proyecto**: 
    ```bash
-   npm run app
+   node scripts/start-without-microservice.js
    ```
-   Este comando inicia solamente los componentes funcionales (API Gateway y Frontend Web) evitando errores de los microservicios que aún no están completamente implementados.
+   Este comando arranca la aplicación por completo.
 
-2. **Script Visual Mejorado**:
+2. **Arrancar solo el backend**:
    ```bash
-   node scripts/start-minimal.js
+   node backend/runBackend.ts
    ```
-   Proporciona una interfaz visual mejorada con mensajes claros durante el inicio de la aplicación.
+   Este comando arranca solamente el backend de la aplicación, en el puerto 3000
 
-3. **Documentación de Instalación Detallada**:
-   Revisa el archivo `README-INSTALACION.md` para obtener instrucciones detalladas sobre la instalación y ejecución.
-
-> **Nota**: Debido a la estructura de workspaces de npm, cuando ejecutas `npm run` sin especificar un comando exacto, se muestran los scripts de todos los workspaces. Siempre usa el nombre completo del script.
+3. **Arrancar solo el frontend**:
+   ```bash
+   node frontend/runFrontend.ts
+   ```
+   Este comando arranca solamente el frontend de la aplicación, en el puerto 4444 en el caso de web, y 6969 en el caso de móvil
+   
 
 ## 📋 Tabla de Contenidos
 
@@ -40,7 +42,7 @@ Hemos realizado varias mejoras para simplificar la ejecución del proyecto:
 - [Solución de Problemas Comunes](#solución-de-problemas-comunes)
 - [Contribuir](#contribuir)
 
-## 🏗️ Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 mapyourworld/
@@ -65,14 +67,14 @@ mapyourworld/
 └── scripts/                 # Scripts de utilidad
 ```
 
-## 🛠️ Requisitos
+## Requisitos
 
 - **Node.js**: v18.0.0 o superior
 - **npm**: v8.0.0 o superior
-- **Docker** y **Docker Compose**: Para despliegue y ejecución de servicios
 - **Git**
+- **postgreSQL** y su extensión **postGis**
 
-## ⚙️ Instalación
+## Instalación
 
 ### 1. Clonar el repositorio
 
@@ -81,14 +83,25 @@ git clone https://github.com/tu-usuario/mapyourworld.git
 cd mapyourworld
 ```
 
-### 2. Instalar todas las dependencias 
+### 2. Gestión de dependencias con script automatizado
+
+Para facilitar la gestión de dependencias del proyecto, puedes utilizar el script `actualizar-dependencias.js`:
 
 ```bash
-npm install
+node actualizar-dependencias.js
 ```
 
-Este comando instalará todas las dependencias definidas en los archivos `package.json` en los diferentes directorios del proyecto (raíz, backend, frontend, shared).
+Este script ofrece las siguientes opciones:
 
+1. **Borrar todos los node_modules del proyecto**: Elimina de forma recursiva todos los directorios `node_modules` en el proyecto.
+2. **Instalar todas las dependencias del proyecto**: Reinstala todas las dependencias definidas en todos los archivos `package.json`.
+3. **Fijar versiones exactas desde node_modules instalados**: Actualiza los archivos `package.json` para utilizar las versiones exactas de las dependencias instaladas.
+
+Es especialmente útil cuando:
+- Necesitas realizar una instalación limpia del proyecto
+- Hay conflictos de dependencias o errores de compatibilidad
+- Quieres asegurarte de que todos los miembros del equipo utilizan las mismas versiones de dependencias
+  
 ### 3. Verificar la instalación
 
 Para asegurarte de que la instalación se realizó correctamente, ejecuta:
@@ -114,40 +127,7 @@ cp frontend/web/.env.example frontend/web/.env
 cp frontend/mobile/.env.example frontend/mobile/.env
 ```
 
-### 5. Gestión de dependencias con script automatizado
-
-Para facilitar la gestión de dependencias del proyecto, puedes utilizar el script `actualizar-dependencias.js`:
-
-```bash
-node actualizar-dependencias.js
-```
-
-Este script ofrece las siguientes opciones:
-
-1. **Borrar todos los node_modules del proyecto**: Elimina de forma recursiva todos los directorios `node_modules` en el proyecto.
-2. **Instalar todas las dependencias del proyecto**: Reinstala todas las dependencias definidas en todos los archivos `package.json`.
-3. **Fijar versiones exactas desde node_modules instalados**: Actualiza los archivos `package.json` para utilizar las versiones exactas de las dependencias instaladas.
-
-Es especialmente útil cuando:
-- Necesitas realizar una instalación limpia del proyecto
-- Hay conflictos de dependencias o errores de compatibilidad
-- Quieres asegurarte de que todos los miembros del equipo utilizan las mismas versiones de dependencias
-
-## 💻 Desarrollo
-
-### Ejecutar la aplicación sin errores (Recomendado)
-
-Este comando iniciará solo los componentes que funcionan correctamente:
-
-```bash
-npm run app
-```
-
-O con una interfaz visual mejorada:
-
-```bash
-node scripts/start-minimal.js
-```
+## Desarrollo
 
 ### Ejecutar todo el proyecto en modo desarrollo-debug
 
@@ -156,30 +136,6 @@ Este comando iniciará tanto el backend como el frontend web:
 ```bash
 npm run dev
 ```
-
-### Ejecutar solo los servicios de backend
-
-```bash
-npm run dev:backend
-```
-
-Este comando iniciará todos los microservicios del backend en modo desarrollo con recarga automática cuando detecte cambios.
-
-### Ejecutar solo la aplicación web
-
-```bash
-npm run dev:web
-```
-
-Esto ejecutará la aplicación web en modo desarrollo, accesible en `http://localhost:3001` por defecto.
-
-### Ejecutar solo la aplicación móvil
-
-```bash
-npm run dev:mobile
-```
-
-Esto iniciará el entorno de desarrollo de React Native. Sigue las instrucciones en la terminal para ejecutar la aplicación en un emulador o dispositivo físico.
 
 ### Verificar tipos y linting
 
@@ -235,7 +191,7 @@ npm run test:web
 npm run test:mobile
 ```
 
-## 🚀 Despliegue
+## Despliegue
 
 ### Usando el script de despliegue
 
@@ -245,33 +201,9 @@ El script de despliegue te guiará a través del proceso:
 npm run deploy
 ```
 
-### Despliegue manual con Docker Compose
+Actualmente la aplicación se puede visitar en [el siguiente enlace](https://app3.mapyourworld.es/)
 
-#### Solo backend
-
-```bash
-npm run docker:backend-only
-```
-
-#### Solo frontend
-
-```bash
-npm run docker:frontend-only
-```
-
-#### Proyecto completo
-
-```bash
-npm run docker:up
-```
-
-Para detener todos los servicios:
-
-```bash
-npm run docker:down
-```
-
-## ❓ Solución de Problemas Comunes
+## Solución de Problemas Comunes
 
 ### Problemas con la ejecución de scripts npm
 
@@ -317,7 +249,7 @@ Si tienes problemas con la autenticación:
 1. Verifica que el servicio de autenticación esté en ejecución
 2. Comprueba que las variables de entorno relacionadas con JWT estén configuradas correctamente
 
-## 🤝 Contribuir
+## Contribuir
 
 1. Crear una rama para tu característica: `git checkout -b feature/[backend/frontend]_nombre_caracteristica`
 2. Realizar cambios y commits: `git commit -am 'Añadir nueva característica'`
@@ -331,7 +263,7 @@ Si tienes problemas con la autenticación:
 - Documentar funciones y componentes con JSDoc
 - Escribir pruebas para todas las características nuevas
 
-## 📜 Licencia
+## Licencia
 
 Este proyecto está licenciado bajo la licencia ISC - ver el archivo LICENSE para más detalles.
 
