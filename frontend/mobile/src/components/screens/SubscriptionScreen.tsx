@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Pressable, SafeAreaView } from 'react-native';
 import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,22 +7,22 @@ import { API_URL } from '../../constants/config';
 import { useAuth } from '@/contexts/AuthContext';
 import PricingTable from '../UI/PricingTable';
 import { RootStackParamList } from '../../navigation/types';
-
+ 
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>;
-
+ 
 interface SubscriptionScreenProps {
   updateSubscription?: () => Promise<void>;
 }
-
+ 
 const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscription }) => {
   const { user } = useAuth();
   const navigation = useNavigation<PaymentScreenNavigationProp>();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-
+ 
   const [loading, setLoading] = useState(false);
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [isPricingTableOpen, setIsPricingTableOpen] = useState(false);
-
+ 
   // Obtiene el plan actual del usuario
   const fetchActualPlan = async () => {
     try {
@@ -38,7 +38,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       setSubscriptionPlan(null);
     }
   };
-
+ 
   // Solicita la creación de un PaymentIntent en el servidor para el PaymentSheet
   const fetchPaymentSheetParams = async () => {
     try {
@@ -58,7 +58,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       console.error('Error al obtener PaymentIntent:', error);
     }
   };
-
+ 
   // Actualiza el plan del usuario a PREMIUM
   const updateSubscriptionPlan = async () => {
     try {
@@ -82,7 +82,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       console.error('Error al actualizar el plan:', error);
     }
   };
-
+ 
   // Abre el PaymentSheet para que el usuario realice el pago
   const openPaymentSheet = async () => {
     setLoading(true);
@@ -92,18 +92,18 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       setLoading(false);
       return;
     }
-
+ 
     const { error } = await initPaymentSheet({
       paymentIntentClientSecret: clientSecret,
       merchantDisplayName: 'Mi Empresa',
     });
-
+ 
     if (error) {
       console.log('Error al inicializar PaymentSheet:', error);
       setLoading(false);
       return;
     }
-
+ 
     const { error: paymentError } = await presentPaymentSheet();
     if (paymentError) {
       Alert.alert('Error al procesar el pago', paymentError.message);
@@ -117,53 +117,82 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
     }
     setLoading(false);
   };
-
+ 
   useEffect(() => {
     if (user) {
       fetchActualPlan();
     }
   }, [user]);
-
+ 
   return (
     <StripeProvider publishableKey="pk_test_51R4l53COc5nj88VcYd6SLzaAhHazLwG2eu4s7HcQOqYB7H1BolfivjPrFzeedbiZuJftKEZYdozfe6Dmo7wCP5lA00rN9xJSro">
-      {subscriptionPlan === 'PREMIUM' ? (
-        <View style={styles.premiumContainer}>
-          <Text style={styles.premiumTitle}>Enhorabuena, ya eres miembro Premium</Text>
-          <Text style={styles.premiumDescription}>
-            Ahora puedes disfrutar de todas las características exclusivas, incluyendo acceso ilimitado a mapas y estadísticas avanzadas. ¡Gracias por ser parte de nuestra comunidad Premium!
-          </Text>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Map')}>
-            <Text style={styles.buttonText}>Ir a mi mapa</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.subscriptionContainer}>
-          <TouchableOpacity
-            style={styles.collapsibleHeader}
-            onPress={() => setIsPricingTableOpen((prev) => !prev)}
-          >
-            <Text style={styles.collapsibleHeaderText}>
-              {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
-            </Text>
-          </TouchableOpacity>
-          {isPricingTableOpen && (
-            <View style={styles.pricingTableWrapper}>
-              <PricingTable />
-            </View>
-          )}
-          <Text style={styles.title}>Hazte Premium Ahora</Text>
-          <Pressable style={styles.button} onPress={openPaymentSheet} disabled={loading}>
-            <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Pagar con Stripe'}</Text>
-          </Pressable>
-        </View>
-      )}
+      <SafeAreaView style={styles.container}>
+        {subscriptionPlan === 'PREMIUM' ? (
+          <View style={styles.premiumContainer}>
+            <TouchableOpacity
+              style={styles.collapsibleHeader}
+              onPress={() => setIsPricingTableOpen((prev) => !prev)}
+            >
+              <Text style={styles.collapsibleHeaderText}>
+                {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
+              </Text>
+            </TouchableOpacity>
+           
+            {isPricingTableOpen ? (
+              <View style={styles.pricingTableContainer}>
+                <PricingTable />
+              </View>
+            ) : (
+              <View style={styles.contentContainer}>
+                <Text style={styles.premiumTitle}>Enhorabuena, ya eres miembro Premium</Text>
+                <Text style={styles.premiumDescription}>
+                  Ahora puedes disfrutar de todas las características exclusivas, incluyendo acceso ilimitado a mapas y estadísticas avanzadas. ¡Gracias por ser parte de nuestra comunidad Premium!
+                </Text>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Map')}>
+                  <Text style={styles.buttonText}>Ir a mi mapa</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={styles.subscriptionContainer}>
+            <TouchableOpacity
+              style={styles.collapsibleHeader}
+              onPress={() => setIsPricingTableOpen((prev) => !prev)}
+            >
+              <Text style={styles.collapsibleHeaderText}>
+                {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
+              </Text>
+            </TouchableOpacity>
+           
+            {isPricingTableOpen ? (
+              <View style={styles.pricingTableContainer}>
+                <PricingTable />
+              </View>
+            ) : (
+              <View style={styles.contentContainer}>
+                <Text style={styles.title}>Hazte Premium Ahora</Text>
+                <Pressable style={styles.button} onPress={openPaymentSheet} disabled={loading}>
+                  <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Pagar con Stripe'}</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        )}
+      </SafeAreaView>
     </StripeProvider>
   );
 };
-
+ 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
   premiumContainer: {
-    alignItems: 'center',
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 12,
@@ -172,6 +201,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     margin: 16,
+    flex: 1,
+  },
+  contentContainer: {
+    alignItems: 'center',
+    paddingTop: 20,
+    flex: 1,
+  },
+  pricingTableContainer: {
+    flex: 1,
+    marginTop: 10,
   },
   premiumTitle: {
     fontSize: 24,
@@ -195,10 +234,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-    alignItems: 'center',
+    flex: 1,
   },
   pricingTableWrapper: {
-    height: 250,
+    minHeight: 300,
     width: '100%',
     marginBottom: 16,
   },
@@ -222,7 +261,6 @@ const styles = StyleSheet.create({
     color: '#0d9488',
     marginBottom: 16,
     textAlign: 'center',
-    marginTop: 80,
   },
   button: {
     backgroundColor: '#14b8a6',
@@ -238,5 +276,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
+ 
 export default SubscriptionScreen;
