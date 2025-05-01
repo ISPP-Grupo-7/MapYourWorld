@@ -226,7 +226,7 @@
 
 ## 4. Demo de la Evaluación
 
-- **URL:** [Demo de MapYourWorld](https://youtu.be/-NMG96XzjbQ)
+- **URL:** [Demo de MapYourWorld](https://www.youtube.com/shorts/LzOtpgP5Hh8)
 
 ## 5. Acceso al despliegue
 
