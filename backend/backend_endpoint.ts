@@ -61,7 +61,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 3020;
+const PORT = process.env.PORT || 3030;
 
 // Definir las rutas
 
@@ -92,11 +92,11 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'Servidor de desarrollo de MapYourWorld',
     services: [
-      { name: 'Auth Service', url: 'http://localhost:3021' },
-      { name: 'User Service', url: 'http://localhost:3022' },
-      { name: 'Map Service', url: 'http://localhost:3023' },
-      { name: 'Notification Service', url: 'http://localhost:3024' },
-      { name: 'Social Service', url: 'http://localhost:3025' }
+      { name: 'Auth Service', url: 'http://localhost:3031' },
+      { name: 'User Service', url: 'http://localhost:3032' },
+      { name: 'Map Service', url: 'http://localhost:3033' },
+      { name: 'Notification Service', url: 'http://localhost:3034' },
+      { name: 'Social Service', url: 'http://localhost:3035' }
     ] as Service[],
     status: 'online'
   });
@@ -123,7 +123,7 @@ const startServer = async () => {
     // Crear y arrancar el servidor HTTPS
     const server = https.createServer(httpsOptions, app);
 
-    server.listen(3020, '0.0.0.0', () => {
+    server.listen(3030, '0.0.0.0', () => {
       console.log(`🚀 Servidor HTTPS en https://52.143.134.165:${PORT}`);
      });
   } catch (error) {

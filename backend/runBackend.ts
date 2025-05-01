@@ -309,10 +309,10 @@ async function startAllServices(mode: 'dev' | 'prod'): Promise<void> {
     }
     
     log('runBackend', 'Todos los servicios iniciados correctamente ✅', 'success');
-    log('runBackend', `Sistema completo disponible en: http://localhost:${process.env.PORT || 3020}`, 'success');
+    log('runBackend', `Sistema completo disponible en: http://localhost:${process.env.PORT || 3030}`, 'success');
     
     // Mostrar información sobre los servicios
-    const apiGatewayPort = process.env.API_GATEWAY_PORT || 3020;
+    const apiGatewayPort = process.env.API_GATEWAY_PORT || 3030;
     log('runBackend', `
 🔹 API Gateway: http://localhost:${apiGatewayPort}
 🔹 Documentación API: http://localhost:${apiGatewayPort}/api/docs

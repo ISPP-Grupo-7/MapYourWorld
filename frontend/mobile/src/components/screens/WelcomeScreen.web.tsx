@@ -81,8 +81,8 @@ const WelcomeScreen = () => {
               </View>
             </View>
           </View>
-          {/* Versión 3.0 */}
-          <Text style={webStyles.versionText}>Versión 3.0</Text>
+          {/* Versión 4.0 */}
+          <Text style={webStyles.versionText}>Versión 3.1</Text>
         </View>
 
         {/* Banner de cookies */}
