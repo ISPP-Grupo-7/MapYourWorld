@@ -46,7 +46,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
     const [mapName, setMapName] = useState<string>("");
     const [mapDescription, setMapDescription] = useState<string>("");
-    const [maxUsers, setMaxUsers] = useState<number>(6);
+    const [maxUsers, setMaxUsers] = useState<number>(5);
     const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
 
 
@@ -72,7 +72,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
         "#FFC107", // Amarillo
         "#FF9800", // Naranja
         "#E91E63", // Rosa
-        "#9C27B0"  // Morado
+        
     ];
 
     // Obtener el ID del usuario al cargar el componente
@@ -357,7 +357,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                         {item.description || "Sin descripción"}
                     </Text>
                     <Text style={webStyles.mapUsers}>
-                        {item.users_joined?.length || 1} / {maxUsers} usuarios
+                        {item.users_joined?.length || 1} / 5 usuarios
                     </Text>
                 </View>
                 <View style={webStyles.mapActions}>
@@ -430,9 +430,9 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                             maxLength={100}
                         />
 
-                        <Text style={webStyles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+                        <Text style={webStyles.inputLabel}>Previsualización de los colores de los usuarios</Text>
                         <View style={webStyles.pickerContainer}>
-                            {[2, 3, 4, 5, 6].map((num) => {
+                            {[2, 3, 4, 5].map((num) => {
                                 const isSelected = maxUsers === num;
                                 return (
                                     <TouchableOpacity
@@ -467,9 +467,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                                 />
                             ))}
                         </View>
-                        <Text style={webStyles.playerPreviewText}>
-                            Vista previa de colores de jugadores
-                        </Text>
+                        
 
                         <View style={webStyles.modalButtons}>
                             <TouchableOpacity
@@ -565,11 +563,11 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
           >
             <div style={webStyles.modalContent}>
               <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
-              <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
+              <p style={webStyles.modalSubtitle}>Máximo 4 amigos (5 usuarios en total)</p>
               <div style={{ maxHeight: 150, overflowY: "auto" }}>
               {availableFriends.length === 0 ? (
                 <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
-                  Tus amigos ya se han unido a este mapa.
+                  No te quedan amigos por invitar a este mapa.
                 </p>
               ) : (
                 availableFriends.map((friend) => (

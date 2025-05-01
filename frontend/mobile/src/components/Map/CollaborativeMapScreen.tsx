@@ -762,12 +762,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Invitar Amigos</Text>
             <Text style={styles.modalSubtitle}>
-              Máximo 5 amigos (6 usuarios en total)
+              Máximo 4 amigos (5 usuarios en total)
             </Text>
 
             {availableFriends.length === 0 ? (
               <Text style={styles.noFriendsText}>
-                Tus amigos ya se han unido a este mapa.
+                No te quedan amigos por invitar a este mapa.
               </Text>
             ) : (
               <FlatList

@@ -16,7 +16,6 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
   try {
     const poiData = req.body;
 
-    // Obtener token desde los headers
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -24,16 +23,23 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
       return;
     }
 
-    // Extraer el token después de "Bearer "
     const token = authHeader.split(" ")[1];
-
-    // Verificar el token
     const verifiedUser = await AuthService.verifyUserToken(token);
 
     if (!verifiedUser) {
       res.status(401).json({ error: 'Token inválido o expirado' });
       return;
     }
+
+    // 💥 VALIDACIÓN DE CAMPOS REQUERIDOS 💥
+    const requiredFields = ['name', 'description', 'location'];
+    const missingFields = requiredFields.filter(field => poiData[field] === undefined);
+
+    if (missingFields.length > 0) {
+      res.status(400).json({ message: `Faltan parámetros requeridos: ${missingFields.join(', ')}` });
+      return;
+    }
+
     const newPOI = await POIService.createPOI(poiData, verifiedUser.userId);
     res.status(201).json(newPOI);
   } catch (error) {
@@ -43,6 +49,7 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
     });
   }
 };
+
 
 
 export const createPOIInAllMaps = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -74,14 +81,14 @@ export const getPOIById = async (req: AuthenticatedRequest, res: Response): Prom
     const poiId = req.params.id;
 
     if (!poiId) {
-      res.status(400).json({ error: 'ID del punto de interés no proporcionado' });
+      res.status(400).json({ message: 'ID del punto de interés no proporcionado' });
       return;
     }
 
     const poi = await POIService.getPOIById(poiId);
 
     if (!poi) {
-      res.status(404).json({ error: 'Punto de interés no encontrado' });
+      res.status(404).json({ message: 'Punto de interés no encontrado' });
       return;
     }
 
@@ -89,10 +96,11 @@ export const getPOIById = async (req: AuthenticatedRequest, res: Response): Prom
   } catch (error) {
     console.error('Error al obtener el punto de interés:', error);
     res.status(500).json({
-      error: error instanceof Error ? error.message : 'Error al obtener el punto de interés'
+      message: 'Error al obtener el punto de interés'
     });
   }
 };
+
 
 /**
  * Actualiza un punto de interés existente
@@ -187,7 +195,7 @@ export const getPOIsByMapId = async (req: Request, res: Response): Promise<void>
     const mapId = req.params.mapId;
     console.log(`Controlador POI: Obteniendo POIs para el mapa ${mapId}`);
 
-    if (!mapId) {
+    if (!mapId || mapId === "" || mapId.trim() === "") {
       res.status(400).json({ success: false, message: 'Falta el ID del mapa' });
       return;
     }

@@ -1,7 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Geometry } from 'geojson';
-import { Map } from './map.model';
-import { User } from '../../../auth-service/src/models/user.model';
 import { UserDistrict } from "./user-district.model";
 import { Region } from './region.model';
 

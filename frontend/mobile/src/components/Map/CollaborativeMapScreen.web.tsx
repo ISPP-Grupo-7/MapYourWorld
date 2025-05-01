@@ -807,11 +807,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
       >
         <div style={styles.modalContent}>
           <h2 style={styles.modalTitle}>Invitar Amigos</h2>
-          <p style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
+          <p style={styles.modalSubtitle}>Máximo 4 amigos (5 usuarios en total)</p>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
           {availableFriends.length === 0 ? (
             <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
-              Tus amigos ya se han unido a este mapa.
+              No te quedan amigos por invitar a este mapa.
             </p>
           ) : (
             availableFriends.map((friend) => (

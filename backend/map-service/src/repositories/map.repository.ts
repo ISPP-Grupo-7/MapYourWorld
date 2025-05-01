@@ -4,7 +4,7 @@ import { AppDataSource } from '../../../database/appDataSource'; // Importa la i
 import { User } from '../../../auth-service/src/models/user.model';
 import { Friend } from '../../../social-service/src/models/friend.model';
 import { PointOfInterest } from '../models/poi.model';
-import PointOfInterestRepository  from '../repositories/poi.repostory';
+import PointOfInterestRepository  from './poi.repostory';
 
 export default class MapRepository {
     private mapRepo: Repository<Map>;
