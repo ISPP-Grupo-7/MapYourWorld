@@ -7,7 +7,7 @@ import TextInput from '../UI/TextInput';
 import { styles as globalStyles } from '../../assets/styles/styles';
 import { API_URL } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
+import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import TermsAndConditions from '../UI/TermsAndConditions';
 import StaticAd from '../Ads/StaticAd';

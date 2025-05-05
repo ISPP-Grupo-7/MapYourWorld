@@ -136,23 +136,22 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
           >
             <Text style={styles.sectionTitle}>Acuerdo de uso</Text>
             <Text style={styles.text}>
-              Por favor, lee estos términos de uso antes de hacer uso de nuestra aplicación. Al acceder y usar el servicio admites haber leído, entendido y aceptado estos términos. Si no aceptas estas condiciones, no podrás acceder al servicio.
+            Por favor, lee estos términos de uso antes de hacer uso de nuestra aplicación. Al acceder y usar el servicio admites haber leído, entendido y aceptado estos términos ya que necesitarás dar tu consentimiento a estos. Si no aceptas estas condiciones, no podrás acceder al servicio.
             </Text>
             <Text style={styles.text}>
-              Estas condiciones de uso no son definitivas y pueden ser modificadas, en cuyo caso el uso continuado del servicio significará que has aceptado las nuevas condiciones de uso.
+            Estas condiciones de uso no son definitivas y pueden ser modificadas, en cuyo caso la aceptación de estos términos se pedirá nuevamente. El uso continuado del servicio significará que has aceptado las nuevas condiciones de uso.
             </Text>
             <Text style={styles.text}>
-              Estos términos afectan al uso de toda versión e iteración de MapYourWorld, esto incluye tanto las versiones online accesibles desde www.mapyourworld.es o mapyourworld.netlify.app como versiones nativas para dispositivos Android e iOS.
-            </Text>
+            Estos términos afectan al uso de toda versión e iteración de MapYourWorld, esto incluye tanto las versiones online accesibles desde www.mapyourworld.es o mapyourworld.netlify.app como versiones nativas para dispositivos Android e iOS.            </Text>
 
             <Text style={styles.sectionTitle}>1. Descripción del servicio</Text>
             <Text style={styles.text}>
-              MapYourWorld es una aplicación innovadora que transforma la exploración del mundo en un juego interactivo. A medida que visitas nuevas ciudades, barrios o rincones escondidos, tu mapa personal se actualiza, desbloqueando logros y permitiéndote compartir tus aventuras con amigos. Con opciones gratuitas y premium, gamificación y mapas colaborativos, MapYourWorld convierte cada viaje en una experiencia única. MapYourWorld incluye funcionalidades de:
+            MapYourWorld es una aplicación innovadora que transforma la exploración del mundo en un juego interactivo. A medida que visitas nuevas ciudades, barrios o rincones escondidos, tu mapa personal se actualiza, desbloqueando logros y permitiéndote compartir tus aventuras con amigos. Con opciones gratuitas y premium, gamificación y mapas colaborativos, MapYourWorld convierte cada viaje en una experiencia única. MapYourWorld incluye funcionalidades de:
             </Text>
             <Text style={styles.listItem}>• Ver un mapa interactivo y personalizado que muestra tu progreso a tiempo real.</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real.</Text>
             <Text style={styles.listItem}>• Registro de los distritos descubiertos.</Text>
-            <Text style={styles.listItem}>• Descubrir puntos de interés cultural incluidos en el mapa.</Text>
+            <Text style={styles.listItem}>• Registro de los distritos descubiertos.</Text>
             <Text style={styles.listItem}>• Crear tus propios puntos de interés.</Text>
             <Text style={styles.listItem}>• Conseguir logros definidos por la aplicación.</Text>
             <Text style={styles.listItem}>• Crear logros personalizados e individuales.</Text>
@@ -160,7 +159,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Crear mapas compartidos de hasta 6 jugadores en los que estos pueden descubrir distritos conjuntamente.</Text>
             <Text style={styles.listItem}>• Ser invitado a un mapa colaborativo de otro jugador.</Text>
             <Text style={styles.listItem}>• Visualizar tus estadísticas sobre distancia recorrida y mapa descubierto.</Text>
-            <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros jugadores.</Text>
             <Text style={styles.text}>
               Además, para empresas ajenas existe la posibilidad de promocionarse en nuestro mapa, creando un punto de interés visible a todos los usuarios.
             </Text>
@@ -171,7 +169,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             </Text>
             <Text style={styles.subSectionTitle}>Plan Básico (Gratis):</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real: Incluido</Text>
-            <Text style={styles.listItem}>• Descubrir puntos de interés incluidos en el mapa: Incluido</Text>
             <Text style={styles.listItem}>• Crear puntos de interés: Limitado a 1 por distrito</Text>
             <Text style={styles.listItem}>• Desbloquear logros predeterminados: Incluido</Text>
             <Text style={styles.listItem}>• Crear logros personalizados: No disponible</Text>
@@ -179,12 +176,10 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Crear mapas colaborativos con otros usuarios: No disponible</Text>
             <Text style={styles.listItem}>• Unirte a un mapa colaborativo: Limitado a 1 por usuario</Text>
             <Text style={styles.listItem}>• Ver tus estadísticas: No disponible</Text>
-            <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros usuarios: No disponible</Text>
             <Text style={styles.listItem}>• Interfaz sin anuncios estáticos: No incluido</Text>
 
             <Text style={styles.subSectionTitle}>Plan Premium (2.99 € / mes):</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real: Incluido</Text>
-            <Text style={styles.listItem}>• Descubrir puntos de interés incluidos en el mapa: Incluido</Text>
             <Text style={styles.listItem}>• Crear puntos de interés: Creación de puntos ilimitados</Text>
             <Text style={styles.listItem}>• Desbloquear logros predeterminados: Incluido</Text>
             <Text style={styles.listItem}>• Crear logros personalizados: Creación de logros ilimitados</Text>
@@ -192,17 +187,15 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Crear mapas colaborativos con otros usuarios: Creación de mapas ilimitados</Text>
             <Text style={styles.listItem}>• Unirte a un mapa colaborativo: No limitado</Text>
             <Text style={styles.listItem}>• Ver tus estadísticas: Incluido</Text>
-            <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros usuarios: Incluido</Text>
             <Text style={styles.listItem}>• Interfaz sin anuncios estáticos: Incluido</Text>
 
             <Text style={styles.text}>
-              Para empresas que deseen publicitarse estas podrán ponerse en contacto con nosotros a través del formulario en mapyourworld.netlify.app o www.mapyoutworld.es.
+              Para empresas que deseen publicitarse estas podrán ponerse en contacto con nosotros a través del formulario en mapyourworld.netlify.app o www.mapyourworld.es.
             </Text>
 
             <Text style={styles.sectionTitle}>2. Uso del servicio</Text>
             <Text style={styles.text}>
-              Debido a la gran importancia de la localización del usuario para utilizar nuestros servicios, el uso de MapYourWorld puede llegar a ser considerado peligroso por diversos factores como son el terreno y el tiempo. La existencia de un distrito o punto de interés no implica la seguridad o legalidad de llegar a este. Todos los riesgos que puedan surgir por usar MapYourWorld deben ser asumidos plenamente por el usuario.
-            </Text>
+            Debido a la gran importancia de la localización del usuario para utilizar nuestros servicios, el uso de MapYourWorld puede llegar a ser considerado peligroso por diversos factores como son el terreno y el tiempo. La existencia de un distrito o punto de interés no implica la seguridad o legalidad de llegar a este. Todos los riesgos que puedan surgir por usar MapYourWorld deben ser asumidos plenamente por el usuario.            </Text>
             <Text style={styles.text}>
               De forma independiente, el uso del servicio implicará la adherencia a un código de conducta. Este código prohibe:
             </Text>
