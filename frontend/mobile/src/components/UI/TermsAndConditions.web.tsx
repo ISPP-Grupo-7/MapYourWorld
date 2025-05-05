@@ -8,11 +8,11 @@ import {
 import styled from 'styled-components';
 
 // Colores de la aplicación - mismas tonalidades que en la versión móvil
-const APP_TEAL = '#009688';
-const APP_DARK = '#333333';
-const APP_LIGHT = '#f5f5f5';
-const APP_TEAL_LIGHT = '#e6f3f1';
-const APP_TEAL_DARK = '#2c7873';
+const APP_TEAL = '#007df3';
+const APP_DARK = '#00386d';
+const APP_LIGHT = '#ffffff';
+const APP_TEAL_LIGHT = '#ade8f4';
+const APP_TEAL_DARK = '#00b0dc';
 
 // Componentes estilizados para la versión web
 const ModalOverlay = styled.div`

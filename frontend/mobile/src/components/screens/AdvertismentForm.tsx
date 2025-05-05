@@ -137,7 +137,7 @@ const AdvertisementForm = () => {
             <Text style={{ fontSize: 16, textAlign: 'center', }}>En breves nos pondremos en contacto con vosotros.</Text>
                 <View>
                     <TouchableOpacity 
-                        style={{ paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#2bbbad", marginTop: 20, }} 
+                        style={{ paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#007df3", marginTop: 20, }} 
                         onPress={() => navigation.navigate('Welcome')}
                     >
                         <Text style={{ fontWeight: "bold", fontSize: 16, color: "white", }}>Volver al inicio</Text>
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   titleHighlight: {
-    color: '#2bbbad',
+    color: '#007df3',
   },
   description: {
     fontSize: 16,
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   primaryButton: {
-    backgroundColor: '#2bbbad',
+    backgroundColor: '#007df3',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',

@@ -14,10 +14,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 // Colores de la aplicación
-const APP_TEAL = '#009688';
-const APP_DARK = '#333333';
-const APP_TEAL_LIGHT = '#e6f3f1';
-const APP_TEAL_DARK = '#2c7873';
+const APP_TEAL = '#007df3';
+const APP_DARK = '#00386d';
+const APP_TEAL_LIGHT = '#ade8f4';
+const APP_TEAL_DARK = '#00b0dc';
+
+
 
 interface TermsAndConditionsProps {
   isVisible: boolean;
@@ -421,7 +423,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   scrollToBottomText: {
-    color: '#666',
+    color: '#007df3',
     fontStyle: 'italic',
     fontSize: 12,
   },
@@ -520,10 +522,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
+    backgroundColor: '#ade8f4',
   },
   disabledButtonText: {
-    color: '#888888',
+    color: '#00386d',
   },
   progressIndicator: {
     flexDirection: 'row',
@@ -533,7 +535,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: '#666',
+    color: '#007df3',
     marginRight: 10,
   },
   progressBar: {

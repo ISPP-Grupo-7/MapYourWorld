@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   premiumTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#0d9488',
+    color: '#00386d',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   collapsibleHeader: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -258,12 +258,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#0d9488',
+    color: '#00386d',
     marginBottom: 16,
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,

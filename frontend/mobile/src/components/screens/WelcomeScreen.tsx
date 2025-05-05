@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   titleHighlight: {
-    color: '#14b8a6',
+    color: '#007df3',
   },
   description: {
     fontSize: 16,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',

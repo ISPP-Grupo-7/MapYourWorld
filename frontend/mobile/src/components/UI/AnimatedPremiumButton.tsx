@@ -33,8 +33,7 @@ const AnimatedPremiumButton: React.FC<AnimatedPremiumButtonProps> = ({ onPress }
   // Interpolación del valor animado a varios colores para simular un efecto arcoíris
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
-    outputRange: ['red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-  });
+    outputRange: ['#007df3', '#00b0dc', '#ade8f4', '#007df3', '#00b0dc', '#ade8f4'],  });
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>

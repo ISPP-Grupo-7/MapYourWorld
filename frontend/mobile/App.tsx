@@ -240,7 +240,7 @@ const AppContent = () => {
   if (Platform.OS === 'web' && !isReadyRef.current) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0d9488" />
+        <ActivityIndicator size="large" color="#007df3" />
       </View>
     );
   }
@@ -265,7 +265,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Welcome</StyledText>
+                <StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>Welcome</StyledText>
               </View>
             )
           }}
@@ -279,7 +279,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Register</StyledText>
+                <StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>Register</StyledText>
               </View>
             )
           }}
@@ -293,7 +293,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Login</StyledText>
+                <StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>Login</StyledText>
               </View>
             )
           }}
@@ -307,7 +307,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Publicítate</StyledText>
+                <StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>Publicítate</StyledText>
               </View>
             )
           }}
@@ -332,7 +332,7 @@ const AppContent = () => {
                       onPress={() => navigation.navigate('Payment')}
                       style={{ flexDirection: 'row', alignItems: 'center' }}
                     >
-                      <Text style={{ marginRight: 5, fontSize: 14, color: '#0d9488' }}>
+                      <Text style={{ marginRight: 5, fontSize: 14, color: '#007df3' }}>
                         Premium
                       </Text>
                       <Image
@@ -406,8 +406,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Pago</StyledText>
-              </View>
+<StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>Pago</StyledText>              </View>
             ),
           }} 
         />

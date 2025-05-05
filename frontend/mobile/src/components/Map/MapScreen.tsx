@@ -507,7 +507,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 strokeColor={"#808080"}
                 fillColor={
                   distrito.isUnlocked
-                    ? "rgba(0, 255, 0, 0.3)"
+                    ? "rgba(0, 125, 243, 0.3)"
                     : "rgba(128, 128, 128, 0.7)"
                 }
                 strokeWidth={2}
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
     color: '#4a5568',
   },
   modalButton: {
-    backgroundColor: '#3182ce',
+    backgroundColor: '#007df3',
     borderRadius: 5,
     padding: 10,
     alignItems: 'center',

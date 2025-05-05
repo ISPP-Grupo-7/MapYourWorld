@@ -77,7 +77,7 @@ const Button = ({
       style={style}
     >
       {isLoading ? (
-        <ActivityIndicator color={variant === 'primary' ? 'white' : '#14b8a6'} />
+        <ActivityIndicator color={variant === 'primary' ? 'white' : '#0003ff'} />
       ) : (
         <StyledText className={textClasses}>{title}</StyledText>
       )}

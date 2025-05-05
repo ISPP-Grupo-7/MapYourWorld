@@ -35,7 +35,7 @@ const styles: { [key: string]: CSSProperties } = {
     textAlign: 'center',
     fontSize: '24px',
     fontWeight: 'bold',
-    color: '#0d9488',
+    color: '#00386d',
     marginBottom: '16px',
   },
   table: {

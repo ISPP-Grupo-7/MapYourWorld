@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   termsLink: {
-    color: '#14b8a6',
+    color: '#007df3',
     fontWeight: '500',
   },
   errorText: {
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   loginLink: {
-    color: '#14b8a6',
+    color: '#007df3',
     fontWeight: '500',
   },
   inputContainer: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   imagePickerButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,

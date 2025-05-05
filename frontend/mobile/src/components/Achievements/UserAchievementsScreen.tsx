@@ -260,7 +260,7 @@ const UserAchievementsScreen = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#14b8a6",
+        backgroundColor: "#00b0dc",
         paddingHorizontal: 16,
         paddingVertical: 12,
         elevation: 4,
@@ -293,12 +293,12 @@ const UserAchievementsScreen = () => {
       },
       activeFilterButton: {
         borderWidth: 2,
-        borderColor: "#14b8a6",
-        backgroundColor: "#14b8a6",
+        borderColor: "#00b0dc",
+        backgroundColor: "#00b0dc",
       },
       filterText: {
         fontWeight: "bold",
-        color: "#2bbbad",
+        color: "#007df3",
       },
       activeFilterText: {
         color: "white",
@@ -324,15 +324,15 @@ const UserAchievementsScreen = () => {
       achievementName: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#14b8a6",
+        color: "#00b0dc",
       },
       achievementDescription: {
         fontSize: 14,
-        color: "#555",
+        color: "#00386d",
       },
       achievementInfo: {
         fontSize: 12,
-        color: "#888",
+        color: "#ade8f4",
       },
       modalContainer: {
         flex: 1,
@@ -353,7 +353,7 @@ const UserAchievementsScreen = () => {
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center",
-        color: "#14b8a6",
+        color: "#00b0dc",
       },
       inputLabel: {
         fontSize: 16,
@@ -400,10 +400,10 @@ const UserAchievementsScreen = () => {
       cancelButton: {
         backgroundColor: "white",
         borderWidth: 1,
-        borderColor: "#14b8a6",
+        borderColor: "#00b0dc",
       },
       createButton: {
-        backgroundColor: "#14b8a6",
+        backgroundColor: "#00b0dc",
       },
       buttonText: {
         fontWeight: "bold",
@@ -417,10 +417,10 @@ const UserAchievementsScreen = () => {
       },
       cancelDetailButton: {
         fontWeight: "bold",
-        color: "#14b8a6",
+        color: "#00b0dc",
         backgroundColor: "white",
         borderWidth: 1,
-        borderColor: "#14b8a6",
+        borderColor: "#00b0dc",
         paddingVertical: 10,
         alignItems: "center",
         borderRadius: 8,
@@ -434,7 +434,7 @@ const UserAchievementsScreen = () => {
       },
       emptyStateText: {
         fontSize: 16,
-        color: '#888',
+        color: '#ade8f4',
         textAlign: 'center',
       },
     });
