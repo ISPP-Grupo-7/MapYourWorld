@@ -359,7 +359,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Mapas Colaborativos</StyledText>
+                <StyledText className="text-l font-bold ml-2 text-gray-800">Mapas Colaborativos</StyledText>
               </View>
             ),
             headerRight: () => <HamburgerMenu />,
@@ -396,20 +396,41 @@ const AppContent = () => {
             ),
           }} 
         />    
-        <Stack.Screen 
-          name="Payment" 
-          component={() => <SubscriptionScreenWrapper setSubscription={setSubscription} />}
-          options={{
+        <Stack.Screen
+          name="Payment"
+          options={({ navigation }) => ({
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image
-                  source={require('./src/assets/images/logo.png')} 
+                  source={require('./src/assets/images/logo.png')}
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-<StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>Pago</StyledText>              </View>
+                <StyledText className="text-xl font-bold ml-2" style={{ color: '#00386d' }}>
+                  Pago
+                </StyledText>
+              </View>
             ),
-          }} 
-        />
+            headerBackTitleVisible: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ marginLeft: 16, padding: 8 }}
+              >
+                <Text style={{ color: '#007df3', fontSize: 16, fontWeight: 'bold' }}>
+                  Atrás
+                </Text>
+              </TouchableOpacity>
+            ),
+          })}
+        >
+          {props => (
+            <SubscriptionScreenWrapper
+              {...props}
+              setSubscription={setSubscription}
+            />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen 
           name="UserAchievementsScreen" 
           component={UserAchievementsScreenWrapper}

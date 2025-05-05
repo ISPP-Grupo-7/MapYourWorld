@@ -280,7 +280,7 @@ const RegisterScreen = () => {
               onPress={handleRegister}
               isLoading={isLoading}
               fullWidth
-              className="mt-4 mb-3"
+              className="mt4 mb-3 bg-[#007df3]" 
             />
 
             <View style={styles.loginPromptContainer}>
