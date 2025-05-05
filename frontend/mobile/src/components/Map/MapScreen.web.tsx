@@ -391,8 +391,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
       }}
     >
       <div style={{ fontSize: '50px', marginBottom: '10px' }}>🏆</div>
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '5px' }}>¡Nuevo Logro!</h2>
-      <p style={{ fontSize: '18px', color: 'white', marginBottom: '5px' }}>Has desbloqueado un nuevo distrito</p>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '5px' }}>¡Distrito desbloqueado!</h2>
       <p style={{ fontSize: '16px', color: 'yellow' }}>{distrito}</p>
     </div>
   );

@@ -76,8 +76,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   return (
     <div style={styles.logroContainer}>
       <span style={styles.logroEmoji}>🏆</span>
-      <h2 style={styles.logroTitle}>¡Logro Conseguido!</h2>
-      <p style={styles.logroSubtitle}>Distrito desbloqueado en mapa colaborativo</p>
+      <h2 style={styles.logroTitle}>¡Distrito desbloqueado!</h2>
       <p style={styles.logroDistrito}>{distrito}</p>
     </div>
   );

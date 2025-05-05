@@ -128,8 +128,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   return (
     <Animated.View style={[styles.logroContainer, { opacity: opacityAnim }]}>
       <Text style={styles.logroEmoji}>🏆</Text>
-      <Text style={styles.logroTitle}>¡Logro Conseguido!</Text>
-      <Text style={styles.logroSubtitle}>Distrito desbloqueado en mapa colaborativo</Text>
+      <Text style={styles.logroTitle}>¡Distrito desbloqueado!</Text>
       <Text style={styles.logroDistrito}>{distrito}</Text>
     </Animated.View>
   );
