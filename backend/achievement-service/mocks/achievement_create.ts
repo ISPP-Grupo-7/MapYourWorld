@@ -99,6 +99,42 @@ try{
         iconUrl:"https://images.pexels.com/photos/31525462/pexels-photo-31525462/free-photo-of-silueta-de-un-hombre-fotografiando-una-vibrante-puesta-de-sol.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"  //TODO cambiar foto al logro
     }
     await createAchievement(racha_mensual);
+    await createAchievement(racha_semanal);
+    const pinta_tu_barrio:Omit<Achievement, 'id'>= {
+        name: "Pinta tu barrio",
+        description: "Desbloquea 5 distritos",
+        points: 10,
+        iconUrl:"https://images.pexels.com/photos/833317/pexels-photo-833317.jpeg"  //TODO cambiar foto al logro
+    }
+    await createAchievement(pinta_tu_barrio);
+    const pinta_tu_ciudad:Omit<Achievement, 'id'>= {
+        name: "Pinta tu ciudad",
+        description: "Desbloquea 10 distritos",
+        points: 100,
+        iconUrl:"https://images.pexels.com/photos/17184744/pexels-photo-17184744/free-photo-of-paisaje-punto-de-referencia-direccion-viaje.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    }
+    await createAchievement(pinta_tu_ciudad);
+    const colorea_el_mundo:Omit<Achievement, 'id'>= {
+        name: "Colorea el mundo",
+        description: "Desbloquea 50 distritos",
+        points: 500,
+        iconUrl:"https://images.pexels.com/photos/7235908/pexels-photo-7235908.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    }
+    await createAchievement(colorea_el_mundo);
+    const reparte_la_carga:Omit<Achievement, 'id'>= {
+        name: "Todo es mas facil en grupo",
+        description: "Participa en un mapa colaborativo",
+        points: 50,
+        iconUrl:"https://images.pexels.com/photos/9292812/pexels-photo-9292812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"  //TODO cambiar foto al logro
+    }
+    await createAchievement(reparte_la_carga);
+    const insaciable:Omit<Achievement, 'id'>= {
+        name: "Campeon",
+        description: "Desbloquea 10 logros",
+        points: 500,
+        iconUrl:"https://images.pexels.com/photos/3813341/pexels-photo-3813341.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"  //TODO cambiar foto al logro
+    }
+    await createAchievement(insaciable);
 }catch(error){
     console.error("❌ Error al crear los logros:", error);
 }
