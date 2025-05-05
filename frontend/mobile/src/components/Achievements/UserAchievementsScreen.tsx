@@ -6,6 +6,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/types';
+import { AchievementUtils, TransformedAchievement } from '../../utils/AchievementUtils';
 
 interface Achievement {
   id?: string;
@@ -74,44 +75,22 @@ const UserAchievementsScreen = () => {
       }
     };
 
-    const fetchAchievements = async () => {
-      if (!user) return;
-      setLoading(true);
-      try {
-        // 1) Fetch stats
-        const resStat = await fetch(`${API_URL}/api/userStat/${user.id}`);
-        if (!resStat.ok) throw new Error(resStat.statusText);
-        const d = await resStat.json();
-        const stats: Stats = {
-          achievements: d.numeroLogros || 0,
-          friends: d.numeroAmigos || 0,
-          createdPOI: d.numeroPoisCreados || 0,
-          unlockedDistricts: d.numeroDistritosDesbloqueados || 0,
-          collabMaps: d.numeroMapasColaborativos || 0,
+    const fetchAchievements = async (
+          userId: string
+        ) => {
+          if (!userId) return;
+          setLoading(true);
+          try {
+            const unlocked = await AchievementUtils.getUnlockedAchievements(userId);
+            setAchievements(unlocked);
+            setError(null);
+          } catch (err: any) {
+            console.error("Error al obtener estadísticas o logros:", err);
+            setError(err.message || "Error al obtener estadísticas o logros");
+          } finally {
+            setLoading(false);
+          }
         };
-        // 2) Calcular km recorridos
-        const km = stats.unlockedDistricts * 2;
-        // 3) Filtrar logros desbloqueados
-        const unlocked = allAchievements.filter((ach) => {
-          const m = ach.description.match(/(\d+)/);
-          const threshold = m ? parseInt(m[1], 10) : 1;
-          const desc = ach.description.toLowerCase();
-          if (desc.includes('punto')) return stats.createdPOI >= threshold;
-          if (desc.includes('amigo')) return stats.friends >= threshold;
-          if (desc.includes('kilómetro')) return km >= threshold;
-          return false;
-        });
-        
-          setAchievements(unlocked);
-          setError(null);
-        
-      } catch (err) {
-        console.error(err);
-        setError("Error al obtener estadísticas o logros");
-      } finally {
-        setLoading(false);
-      }
-    };
 
     const fetchAllAchievements = async () => {
       try {
@@ -133,8 +112,8 @@ const UserAchievementsScreen = () => {
 
 
     fetchSubscription();
-    if (filter === 'user') {
-      fetchAchievements();
+    if (filter === 'user' && user) {
+      fetchAchievements(user.id);
     } else {
       fetchAllAchievements();
     }

@@ -5,6 +5,7 @@
   import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
   import { RootStackParamList } from '@/navigation/types';
   import AlertModal from '../UI/Alert';
+import { AchievementUtils } from '../../utils/AchievementUtils';
 
   interface Stats {
     achievements: number;
@@ -77,9 +78,11 @@
         });
         if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
+
+        const unlocked = await AchievementUtils.getUnlockedAchievements(user.id);
   
         const statsData: Stats = {
-          achievements: data.numeroLogros || 0,
+          achievements: unlocked.length || 0,
           friends: data.numeroAmigos || 0,
           createdPOI: data.numeroPoisCreados || 0,
           unlockedDistricts: data.numeroDistritosDesbloqueados || 0,
