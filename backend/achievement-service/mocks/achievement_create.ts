@@ -59,7 +59,7 @@ try{
     await createAchievement(red_social);
     const primeros_pasos:Omit<Achievement, 'id'>= {
         name: "Primeros pasos",
-        description: "Acumula 1 kilómetro de distancia.",
+        description: "Acumula 10 kilómetros de distancia.",
         points: 20,
         iconUrl:"https://images.pexels.com/photos/3601094/pexels-photo-3601094.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"  //TODO cambiar foto al logro
     }
