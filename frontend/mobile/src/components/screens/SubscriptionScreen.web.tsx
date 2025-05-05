@@ -179,7 +179,7 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
                     textAlign: 'center',
                   }}
                 >
-                  Hazte Premium Ahora
+                  Hazte Premium Ahora (2.99€/mes)
                 </h2>
                 <CheckoutForm setLoading={setLoading} loading={loading} updateSubscription={updateSubscription} />
               </>
@@ -224,7 +224,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
       const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 550 }),
+        body: JSON.stringify({ amount: 299 }),
       });
  
       if (!response.ok) throw new Error('Error al crear el PaymentIntent');

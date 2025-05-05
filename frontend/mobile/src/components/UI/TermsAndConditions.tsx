@@ -182,7 +182,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             <Text style={styles.listItem}>• Comparar tus estadísticas con las de otros usuarios: No disponible</Text>
             <Text style={styles.listItem}>• Interfaz sin anuncios estáticos: No incluido</Text>
 
-            <Text style={styles.subSectionTitle}>Plan Premium (5.50 € / mes):</Text>
+            <Text style={styles.subSectionTitle}>Plan Premium (2.99 € / mes):</Text>
             <Text style={styles.listItem}>• Descubrir distritos a tiempo real: Incluido</Text>
             <Text style={styles.listItem}>• Descubrir puntos de interés incluidos en el mapa: Incluido</Text>
             <Text style={styles.listItem}>• Crear puntos de interés: Creación de puntos ilimitados</Text>

@@ -404,7 +404,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
               <ListItem>Interfaz sin anuncios estáticos: No incluido</ListItem>
             </List>
 
-            <SubSectionTitle>Plan Premium (5.50 € / mes):</SubSectionTitle>
+            <SubSectionTitle>Plan Premium (2.99 € / mes):</SubSectionTitle>
             <List>
               <ListItem>Descubrir distritos a tiempo real: Incluido</ListItem>
               <ListItem>Descubrir puntos de interés incluidos en el mapa: Incluido</ListItem>

@@ -45,7 +45,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 550 }),
+        body: JSON.stringify({ amount: 299 }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -171,7 +171,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
               </View>
             ) : (
               <View style={styles.contentContainer}>
-                <Text style={styles.title}>Hazte Premium Ahora</Text>
+                <Text style={styles.title}>Hazte Premium (2.99€/mes) </Text>
                 <Pressable style={styles.button} onPress={openPaymentSheet} disabled={loading}>
                   <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Pagar con Stripe'}</Text>
                 </Pressable>
