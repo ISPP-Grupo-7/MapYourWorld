@@ -7,13 +7,17 @@ import AlertModal from '../UI/Alert';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/types';
 import Button from '../UI/Button';
+import { AchievementUtils, TransformedAchievement } from '../../utils/AchievementUtils';
+
 
 interface Achievement {
+  id?: string;
   name: string;
   description: string;
   points: number;
   iconUrl: string;
 }
+
 
 const iconPlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQOuXSNhx4c8pKvcysPWidz4NibDU-xLeaJw&s";
 
@@ -68,31 +72,19 @@ const UserAchievementsScreen = () => {
       }
     };
 
-    const fetchAchievements = async () => {
-      if (!user) {
-        setError("No hay usuario autenticado");
-        setLoading(false);
-        return;
-      }
+    const fetchAchievements = async (
+      userId: string
+    ) => {
+      if (!userId) return;
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/api/user-achievements/achievements/${user.id}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!response.ok) throw new Error(response.statusText);
-        const data = await response.json();
-        const transformed = data.map((item: any) => ({
-          name: item.achievement ? item.achievement.name : item.name,
-          description: item.achievement ? item.achievement.description : item.description,
-          points: item.achievement ? item.achievement.points : item.points,
-          iconUrl: item.achievement ? item.achievement.iconUrl : item.iconUrl,
-        }));
-        setAchievements(transformed);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al obtener los logros", error);
-        setError("Error al obtener los logros");
+        const unlocked = await AchievementUtils.getUnlockedAchievements(userId);
+        setAchievements(unlocked);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error al obtener estadísticas o logros:", err);
+        setError(err.message || "Error al obtener estadísticas o logros");
+      } finally {
         setLoading(false);
       }
     };
@@ -117,8 +109,8 @@ const UserAchievementsScreen = () => {
 
 
     fetchSubscription();
-    if (filter === 'user') {
-      fetchAchievements();
+    if (filter === 'user' && user) {
+      fetchAchievements(user.id);
     } else {
       fetchAllAchievements();
     }

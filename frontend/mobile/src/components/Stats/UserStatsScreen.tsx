@@ -12,6 +12,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { API_URL } from '../../constants/config';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/types';
+import { AchievementUtils, TransformedAchievement } from '../../utils/AchievementUtils';
 
 interface Stats {
   achievements: number;
@@ -86,10 +87,12 @@ const UserStatsScreen = () => {
           if (!response.ok) throw new Error(response.statusText);
           const data = await response.json();
           console.log("Stats:", data);
+
+          const unlocked = await AchievementUtils.getUnlockedAchievements(user.id);
   
           if (isActive) {
             const statsData: Stats = {
-              achievements: data.numeroLogros || 0,
+              achievements: unlocked.length || 0,
               friends: data.numeroAmigos || 0,
               createdPOI: data.numeroPoisCreados || 0,
               unlockedDistricts: data.numeroDistritosDesbloqueados || 0,
