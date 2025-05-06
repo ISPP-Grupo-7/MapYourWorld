@@ -6,6 +6,7 @@ import { ImageBackground, View, TouchableOpacity, StyleSheet, Text, ScrollView, 
 import TextInput from '../UI/TextInput';
 import { styles as globalStyles } from '../../assets/styles/styles';
 import React, { useState } from 'react';
+import AdvertisementPlans from './AdvertisementPlans';
 
 type AdvertisementFormNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdvertisementForm'>;
 
@@ -17,10 +18,13 @@ interface AdvertisementPoint {
     city: string,
     postalcode: string,
     country: string,
-    comments: string
+    comments: string,
+    plan: string,
 }
 
 const MAIL_ADDRESS = 'mapyourworld.group7@gmail.com'
+
+const plans = ['Explorador local', 'Ruta destacada', 'Destino imperdible']
 
 const AdvertisementForm = () => {
     const [ point, setPoint ] = useState<AdvertisementPoint>({
@@ -31,7 +35,8 @@ const AdvertisementForm = () => {
         city: '',
         postalcode: '',
         country: '',
-        comments: ''
+        comments: '',
+        plan: ''
         })
     const [errors, setErrors] = useState({
         email: '',
@@ -41,10 +46,13 @@ const AdvertisementForm = () => {
         city: '',
         postalcode: '',
         country: '',
-        comments: ''
+        comments: '',
+        plan: ''
         });
     const [loading, setLoading] = useState(false);
     const [isSent, setIsSent] = useState(false);
+    const [plansVisible, setPlansVisible] = useState(false);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
 
     const navigation = useNavigation<AdvertisementFormNavigationProp>();
 
@@ -88,6 +96,12 @@ const AdvertisementForm = () => {
             isValid = false;
         }
 
+        // validación del plan
+        if (!point.plan.trim()) {
+          newErrors.plan = 'Se debe seleccionar un plan';
+          isValid = false;
+        }
+
         setErrors(newErrors);
         return isValid;
     }
@@ -103,7 +117,8 @@ const AdvertisementForm = () => {
         + `<br>Dirección: ${point.address}, ${point.city} ${point.postalcode}, ${point.country}</p>`
         + `<h3>Datos de contacto</h3><p>Correo electrónico: ${point.email}`
         + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}`
-        + `${point.comments ? `<br>Comentarios: ${point.comments}</p>` : `</p>`}`;
+        + `${point.comments ? `<br>Comentarios: ${point.comments}</p>` : `</p>`}`
+        + `<h3>Plan escogido</h3><p>${point.plan}`;
 
         const response = await fetch(`${API_URL}/api/email/send`, {
             method: 'POST',
@@ -127,6 +142,11 @@ const AdvertisementForm = () => {
             setLoading(false);
         }
         
+    };
+
+    const handleSelectPlan = (value: string) => {
+      setPoint({ ...point, plan: value });
+      setDropdownVisible(false);
     };
 
     const renderSentModal = () => (
@@ -167,6 +187,23 @@ const AdvertisementForm = () => {
                     <Text style={styles.description}>
                     Si quieres aparecer en nuestro mapa, ponte en contacto con nuestro equipo rellenando el siguiente formulario.
                     </Text>
+
+                    {/* Pricing */}
+                    <View>
+                      <TouchableOpacity
+                        onPress={() => setPlansVisible((prev) => !prev)}
+                      >
+                        <Text 
+                        style={{marginVertical: 10, padding: 10, textAlign: 'center', backgroundColor: '#007df3', borderWidth: 0.25, borderRadius: 10, borderColor: 'F0F0F0'}}
+                        >
+                          {plansVisible ? 'Ocultar' : 'Ver opciones de inversión'}
+                        </Text>
+                      </TouchableOpacity>
+                      {plansVisible 
+                        ? <View><AdvertisementPlans /></View>
+                        : <></>
+                      }
+                    </View>
                     
                     {/* Form */}
                     <View>
@@ -262,6 +299,36 @@ const AdvertisementForm = () => {
                         />
                     </View>
 
+                    {/* Plan option */}
+                    <View style={styles.dropdownContainer}>
+                      <Text>Plan</Text>
+                      <TouchableOpacity
+                        style={styles.dropdownButton}
+                        onPress={() => setDropdownVisible(!dropdownVisible)}
+                      >
+                        <Text style={styles.dropdownButtonText}>
+                          {point.plan
+                            ? plans.find((p) => p === point.plan)
+                            : 'Seleccionar plan'}
+                        </Text>
+                      </TouchableOpacity>
+                      {dropdownVisible && (
+                        <View style={styles.dropdownContainer}>
+                          {plans.map((p, index) => (
+                            <TouchableOpacity
+                              key={index}
+                              style={[
+                                styles.dropdownItem,
+                              ]}
+                              onPress={() => handleSelectPlan(p)}
+                            >
+                              <Text style={styles.dropdownItemText}>{p}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+
                     {/* Submit button */}
                     <TouchableOpacity
                         onPress={handleSubmit}
@@ -351,7 +418,34 @@ const styles = StyleSheet.create({
   },
   noBottomMargin: {
     marginBottom: 0,
-  }
+  },
+  dropdownButton: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  dropdownContainer: {
+    marginVertical: 10,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dropdownItemLast: {
+    borderBottomWidth: 0,
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
 });
 
 export default AdvertisementForm; 

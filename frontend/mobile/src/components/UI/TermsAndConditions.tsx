@@ -299,7 +299,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
 
             <Text style={styles.sectionTitle}>8. Terminación</Text>
             <Text style={styles.text}>
-              MapYourWorld se reserva la posibilidad de suspender o terminar la cuenta de cualquier usuario si se considera que se ha violado cuualquiera de los términos de este acuerdo. En función de la situación de la que se trate, especialmente si el usuario no ha puesto en peligro a ningún usuario ni a sus datos, se le dará al usuario una oportunidad para corregir su falta antes de la suspensión o terminación.
+              MapYourWorld se reserva la posibilidad de suspender o terminar la cuenta de cualquier usuario si se considera que se ha violado cualquiera de los términos de este acuerdo, es decir, si este ha hecho algo ilegal o ha dañado sobremanera a otro usuario de la aplicación. En función de la situación de la que se trate, especialmente si el usuario no ha puesto en peligro a ningún usuario ni a sus datos, se le dará al usuario una oportunidad para corregir su falta antes de la suspensión o terminación.
             </Text>
             <Text style={styles.text}>
               Todo usuario puede dejar de usar los servicios de MapYourWorld y terminar los términos de este acuerdo salvo aquellas cláusulas sin limitación, que incluye las cláusulas de Propiedad intelectual y Limitación de liabilidad.

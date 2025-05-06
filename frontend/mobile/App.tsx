@@ -25,7 +25,7 @@ import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordS
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 import UserStatsScreen from './src/components/Stats/UserStatsScreen';
 import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
-import AdvertisementForm from '@/components/screens/AdvertismentForm';
+import AdvertisementForm from '@/components/Advertisement/AdvertismentForm';
 import DashboardAdmin from '@/components/screens/DashboardAdmin';
 import SocialScreen from './src/components/screens/SocialScreen';
 import SocialScreenWeb from './src/components/screens/SocialScreen.web';
