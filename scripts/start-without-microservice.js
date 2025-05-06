@@ -26,14 +26,14 @@ function killProcess(port) {
 }
 
 async function startServices() {
-  await killProcess(8084);
+  await killProcess(8085);
 
   
     // Iniciar el servidor backend después de inicializar la base de datos
     await spawn("npx ts-node backend_endpoint.ts", { cwd: "backend", shell: true, stdio: "ignore" });
 
     // Iniciar la aplicación frontend
-    await spawn("npm start -- --port 8084", { cwd: "frontend/mobile", shell: true, stdio: "inherit" });
+    await spawn("npm start -- --port 8085", { cwd: "frontend/mobile", shell: true, stdio: "inherit" });
 
 }
 

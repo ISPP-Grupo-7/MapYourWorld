@@ -63,7 +63,7 @@ config.transformer = {
 // Configurar el Server
 config.server = {
   ...config.server,
-  port: 8084, // Puerto por defecto
+  port: 8085, // Puerto por defecto
   enhanceMiddleware: (middleware) => {
     return (req, res, next) => {
       // Manejo de errores en middleware

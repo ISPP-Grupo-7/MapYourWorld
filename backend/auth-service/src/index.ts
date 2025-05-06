@@ -16,7 +16,7 @@ dotenv.config();
 
 // Inicializar la app Express
 const app = express();
-const PORT = process.env.PORT || 3031;
+const PORT = process.env.PORT || 3041;
 
 // Middlewares
 app.use(cors());
