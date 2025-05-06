@@ -28,6 +28,7 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR                            |
 |---------|-----------|--------------------------|----------------------------------|
 | V1      | 01/05/2025| Primera versión          | Alejandro Aragón Sánchez     |
+| V2      | 06/05/2025| Segunda versión          | Alejandro Aragón Sánchez     |
 
 ---
 
@@ -35,22 +36,41 @@
 
 ## 1. Análisis de Palabras Clave
 
-Para optimizar la visibilidad de *MapYourWorld*, se identificaron **palabras clave relevantes** utilizando herramientas SEO (Google Keyword Planner, Ahrefs, SEMrush). Estas keywords están **alineadas con la temática** de la app (mapas colaborativos, viajes gamificados, exploración urbana) y cuentan con volúmenes de búsqueda significativos en España. En la siguiente tabla se presentan las palabras clave principales, junto con su volumen promedio mensual en España, el nivel de competencia estimado y una indicación de su dificultad SEO:
+Para optimizar la visibilidad de MapYourWorld, se identificaron palabras clave relevantes utilizando herramientas SEO (Google Keyword Planner, Ahrefs, SEMrush). Estas keywords están **alineadas con la temática** de la app (mapas colaborativos, viajes gamificados, exploración urbana) y cuentan con volúmenes de búsqueda significativos en España. En la siguiente tabla se presentan las palabras clave principales, junto con su volumen promedio mensual en España, el nivel de competencia estimado y una indicación de su dificultad SEO:
 
-| **Palabra Clave**                     | **Volumen (ES)** | **Competencia** | **Dificultad (KD)** | 
-|---------------------------------------|------------------|-----------------|---------------------|
-| **aplicaciones para viajar**          | 5.000 búsq/mes   | Media           | Alta (70/100)       |
-| **mapas colaborativos**               | 800 búsq/mes     | Baja            | Media (40/100)      |
-| **mapa de viajes personal**           | 600 búsq/mes     | Baja            | Baja (25/100)       |
-| **marcar lugares visitados en mapa**  | 500 búsq/mes     | Media           | Media (35/100)      |
-| **gamificación turismo**              | 200 búsq/mes     | Baja            | Baja (20/100)       |
-| **exploración urbana app**            | 300 búsq/mes     | Baja            | Baja (20/100)       |
-| **geocaching** *(competidor)*         | 6.000 búsq/mes   | Alta            | Alta (75/100)       |
-| **Polarsteps** *(competidor)*         | 2.000 búsq/mes   | Media           | Alta (70/100)       |
-| **Fog of World** *(competidor)*       | 300 búsq/mes     | Baja            | Media (45/100)      |
-| **MapYourWorld** *(marca)*           | *Nuevo* (branding) | N/D           | N/D                |
+| **Palabra Clave**                | **Volumen (ES)** | **Competencia** | **Dificultad (KD)** |
+| -------------------------------- | ---------------- | --------------- | ------------------- |
+| aplicaciones para viajar         | 5.000 búsq/mes   | Media           | Alta (70/100)       |
+| mapas colaborativos              | 800 búsq/mes     | Baja            | Media (40/100)      |
+| mapa de viajes personal          | 600 búsq/mes     | Baja            | Baja (25/100)       |
+| marcar lugares visitados en mapa | 500 búsq/mes     | Media           | Media (35/100)      |
+| gamificación turismo             | 200 búsq/mes     | Baja            | Baja (20/100)       |
+| exploración urbana app           | 300 búsq/mes     | Baja            | Baja (20/100)       |
+| geocaching (competidor)          | 6.000 búsq/mes   | Alta            | Alta (75/100)       |
+| Polarsteps (competidor)          | 2.000 búsq/mes   | Media           | Alta (70/100)       |
+| Fog of World (competidor)        | 300 búsq/mes     | Baja            | Media (45/100)      |
+| MapYourWorld (marca)             | Nuevo (branding) | N/D             | N/D                 |
 
 *Fuente:* Estimaciones de volumen y competencia tomadas de Google Keyword Planner y Ahrefs (España, 2025).
+
+Para **ampliar el alcance** y atraer **un mayor volumen de tráfico**, se han incorporado **palabras clave más generales** y de **alto tráfico**. Estas keywords permitirán captar audiencias más amplias que buscan información y herramientas de viaje. La siguiente tabla complementa las keywords específicas del proyecto con términos de uso común que aumentarán la visibilidad:
+
+| **Palabra Clave**          | **Volumen (ES)** | **Competencia** | **Dificultad (KD)** |
+| -------------------------- | ---------------- | --------------- | ------------------- |
+| viajes                     | 90.000 búsq/mes  | Alta            | 80/100              |
+| viajar                     | 60.000 búsq/mes  | Alta            | 75/100              |
+| mapas                      | 50.000 búsq/mes  | Alta            | 85/100              |
+| app viajes                 | 5.000 búsq/mes   | Media           | 65/100              |
+| mejores apps de viajes     | 3.500 búsq/mes   | Media           | 60/100              |
+| mapas online               | 8.000 búsq/mes   | Alta            | 70/100              |
+| rutas de viaje             | 7.000 búsq/mes   | Media           | 65/100              |
+| lugares turísticos         | 9.000 búsq/mes   | Alta            | 75/100              |
+| explorar ciudades          | 4.500 búsq/mes   | Media           | 60/100              |
+| app para planificar viajes | 2.500 búsq/mes   | Media           | 55/100              |
+
+*Fuente:* Estimaciones de volumen y competencia tomadas de Google Keyword Planner y Ahrefs (España, 2025).
+
+Estas keywords generales se suman a las específicas, ofreciendo un **enfoque dual**: por un lado, contenido de nicho para la propuesta de valor única de MapYourWorld; por otro, términos de alto volumen para escalar el tráfico y atraer nuevos usuarios que busquen apps y herramientas de viaje.
 
 **Variaciones semánticas y long-tail:** Además de estas keywords “head”, se identificaron consultas de **cola larga** que pueden atraer tráfico muy cualificado. Por ejemplo: *“crear mapas colaborativos con amigos”*, *“app para descubrir nuevos lugares”*, *“juego de explorar el mundo”* o *“mapa personalizado de viajes en ciudad”*. Estas variaciones incorporan la misma intención de búsqueda de las palabras clave principales, pero de forma más específica. Incluir este tipo de frases en el contenido (por ejemplo, en publicaciones de blog o sección de preguntas frecuentes) ayudará a **captar tráfico adicional** de nichos específicos.
 
