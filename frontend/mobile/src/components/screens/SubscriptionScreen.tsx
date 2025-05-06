@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Pressable, SafeAreaView } from 'react-native';
 import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -7,22 +7,39 @@ import { API_URL } from '../../constants/config';
 import { useAuth } from '@/contexts/AuthContext';
 import PricingTable from '../UI/PricingTable';
 import { RootStackParamList } from '../../navigation/types';
- 
+
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>;
- 
+
 interface SubscriptionScreenProps {
   updateSubscription?: () => Promise<void>;
 }
- 
+
 const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscription }) => {
   const { user } = useAuth();
   const navigation = useNavigation<PaymentScreenNavigationProp>();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
- 
+
   const [loading, setLoading] = useState(false);
   const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [isPricingTableOpen, setIsPricingTableOpen] = useState(false);
- 
+
+  // Configuramos la cabecera para usar un Text en el botón “Atrás”
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitleVisible: false, // ocultamos el texto por defecto si quieres
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ marginLeft: 16, padding: 8 }}
+        >
+          <Text style={{ color: '#007df3', fontSize: 16, fontWeight: 'bold' }}>
+            Atrás
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   // Obtiene el plan actual del usuario
   const fetchActualPlan = async () => {
     try {
@@ -38,14 +55,14 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       setSubscriptionPlan(null);
     }
   };
- 
-  // Solicita la creación de un PaymentIntent en el servidor para el PaymentSheet
+
+  // Solicita la creación de un PaymentIntent
   const fetchPaymentSheetParams = async () => {
     try {
       const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 550 }),
+        body: JSON.stringify({ amount: 299 }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -58,7 +75,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       console.error('Error al obtener PaymentIntent:', error);
     }
   };
- 
+
   // Actualiza el plan del usuario a PREMIUM
   const updateSubscriptionPlan = async () => {
     try {
@@ -73,7 +90,6 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       } else {
         console.log('Suscripción actualizada a PREMIUM');
         fetchActualPlan();
-        // Si existe la función de actualización del componente padre, la llamamos
         if (updateSubscription) {
           await updateSubscription();
         }
@@ -82,8 +98,8 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       console.error('Error al actualizar el plan:', error);
     }
   };
- 
-  // Abre el PaymentSheet para que el usuario realice el pago
+
+  // Abre el PaymentSheet
   const openPaymentSheet = async () => {
     setLoading(true);
     const clientSecret = await fetchPaymentSheetParams();
@@ -92,18 +108,18 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
       setLoading(false);
       return;
     }
- 
+
     const { error } = await initPaymentSheet({
       paymentIntentClientSecret: clientSecret,
       merchantDisplayName: 'Mi Empresa',
     });
- 
+
     if (error) {
       console.log('Error al inicializar PaymentSheet:', error);
       setLoading(false);
       return;
     }
- 
+
     const { error: paymentError } = await presentPaymentSheet();
     if (paymentError) {
       Alert.alert('Error al procesar el pago', paymentError.message);
@@ -117,13 +133,13 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
     }
     setLoading(false);
   };
- 
+
   useEffect(() => {
     if (user) {
       fetchActualPlan();
     }
   }, [user]);
- 
+
   return (
     <StripeProvider publishableKey="pk_test_51R4l53COc5nj88VcYd6SLzaAhHazLwG2eu4s7HcQOqYB7H1BolfivjPrFzeedbiZuJftKEZYdozfe6Dmo7wCP5lA00rN9xJSro">
       <SafeAreaView style={styles.container}>
@@ -131,13 +147,13 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
           <View style={styles.premiumContainer}>
             <TouchableOpacity
               style={styles.collapsibleHeader}
-              onPress={() => setIsPricingTableOpen((prev) => !prev)}
+              onPress={() => setIsPricingTableOpen(prev => !prev)}
             >
               <Text style={styles.collapsibleHeaderText}>
                 {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
               </Text>
             </TouchableOpacity>
-           
+
             {isPricingTableOpen ? (
               <View style={styles.pricingTableContainer}>
                 <PricingTable />
@@ -158,20 +174,20 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
           <View style={styles.subscriptionContainer}>
             <TouchableOpacity
               style={styles.collapsibleHeader}
-              onPress={() => setIsPricingTableOpen((prev) => !prev)}
+              onPress={() => setIsPricingTableOpen(prev => !prev)}
             >
               <Text style={styles.collapsibleHeaderText}>
                 {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
               </Text>
             </TouchableOpacity>
-           
+
             {isPricingTableOpen ? (
               <View style={styles.pricingTableContainer}>
                 <PricingTable />
               </View>
             ) : (
               <View style={styles.contentContainer}>
-                <Text style={styles.title}>Hazte Premium Ahora</Text>
+                <Text style={styles.title}>Hazte Premium (2.99€/mes)</Text>
                 <Pressable style={styles.button} onPress={openPaymentSheet} disabled={loading}>
                   <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Pagar con Stripe'}</Text>
                 </Pressable>
@@ -183,14 +199,11 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({ updateSubscript
     </StripeProvider>
   );
 };
- 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-  },
-  scrollContainer: {
-    flex: 1,
   },
   premiumContainer: {
     padding: 20,
@@ -201,6 +214,17 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     margin: 16,
+    flex: 1,
+  },
+  subscriptionContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
     flex: 1,
   },
   contentContainer: {
@@ -215,7 +239,7 @@ const styles = StyleSheet.create({
   premiumTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#0d9488',
+    color: '#00386d',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -225,24 +249,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
-  subscriptionContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    margin: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    flex: 1,
-  },
-  pricingTableWrapper: {
-    minHeight: 300,
-    width: '100%',
-    marginBottom: 16,
-  },
   collapsibleHeader: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -258,12 +266,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#0d9488',
+    color: '#00386d',
     marginBottom: 16,
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -276,5 +284,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
- 
+
 export default SubscriptionScreen;

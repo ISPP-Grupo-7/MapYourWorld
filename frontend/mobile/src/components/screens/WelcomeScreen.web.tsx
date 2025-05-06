@@ -137,7 +137,7 @@ const webStyles = StyleSheet.create({
     color: '#1e293b',
   },
   titleHighlight: {
-    color: '#14b8a6',
+    color: '#007df3',
   },
   description: {
     fontSize: 16,
@@ -151,7 +151,7 @@ const webStyles = StyleSheet.create({
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#0003ff',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -167,10 +167,10 @@ const webStyles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#007df3',
   },
   secondaryButtonText: {
-    color: '#334155',
+    color: '#007df3',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -192,7 +192,7 @@ const webStyles = StyleSheet.create({
     borderColor: 'white',
   },
   tertiaryButtonText: {
-    color: '#334155',
+    color: '#00b0dc',
     fontSize: 14,
   }
 });

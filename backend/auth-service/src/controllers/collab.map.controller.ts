@@ -8,8 +8,7 @@ export const joinMap = async (req: Request, res: Response): Promise<void> => {
   try {
     const mapId = req.params.mapId;
     const userId = req.params.userId;
-    const { friendId } = req.body;
-    const status = req.body.status; // Valor por defecto
+    const { friendId, status } = req.body;
 
     if (!mapId || !userId || !friendId) {
       res.status(400).json({ success: false, message: 'MapId y UserId son requeridos' });
