@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   acceptButton: {
     flex: 1,
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#00b0dc',
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 6,

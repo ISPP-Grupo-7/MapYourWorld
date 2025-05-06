@@ -118,7 +118,7 @@ import { AchievementUtils } from '../../utils/AchievementUtils';
             }}
           >
             <div style={{ marginBottom: 20 }}>
-              <ActivityIndicator size="large" color="#2bbbad" />
+              <ActivityIndicator size="large" color="#007df3" />
             </div>
             <div style={{ color: '#4b5563', fontSize: 16 }}>Cargando logros...</div>
           </div>
