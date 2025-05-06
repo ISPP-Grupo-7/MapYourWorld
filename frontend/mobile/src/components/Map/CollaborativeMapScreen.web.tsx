@@ -6,12 +6,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Definición de colores disponibles para los usuarios
 const USER_COLORS = [
-  "#007df3", 
-  "#00b0dc", 
-  "#fec107", 
-  "#ff9700", 
-  "#ea1e63", 
-  "#9c27b3",
+  "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
+  "#9c27b399",
 ];
 
 // Tipos para distritos, usuarios y POIs

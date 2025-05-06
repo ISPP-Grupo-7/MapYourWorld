@@ -208,7 +208,7 @@ const SocialScreenWeb = () => {
         headers: {
           "Content-Type": "application/json", 
         },
-        body: JSON.stringify({ friendId }),
+        body: JSON.stringify({ friendId, status }),
       });
       const data = await response.json();
       if (data.success) {

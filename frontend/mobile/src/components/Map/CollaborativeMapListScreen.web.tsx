@@ -67,11 +67,11 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
 
     // Colores para los jugadores (se mantiene el mismo orden que en la versión móvil)
     const playerColors = [
-        "#007df3", // Azul (propietario)
-        "#4CAF50", // Verde
-        "#ade8f4", // Amarillo
-        "#FF9800", // Naranja
-        "#E91E63", // Rosa
+        "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
         
     ];
 

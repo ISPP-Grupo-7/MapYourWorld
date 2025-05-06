@@ -65,11 +65,11 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Colores para los jugadores
   const playerColors = [
-    "#007df3", // Azul (propietario)
-    "#00b0dc", // Verde
-    "#ade8f4", // Amarillo
-    "#007df3", // Naranja
-    "#00386d", // Rosa
+  "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
 
   ];
 
