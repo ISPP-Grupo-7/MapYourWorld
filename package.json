@@ -156,7 +156,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.svg"
+      "favicon": "./assets/favicon.png"
     },
     "doctor": {
       "reactNativeDirectoryCheck": {
