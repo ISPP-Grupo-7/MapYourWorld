@@ -24,7 +24,7 @@ module.exports = {
     }
   },
   web: {
-    favicon: "./assets/favicon.png",
+    favicon: "./assets/favicon.svg",
     bundler: "metro"
   },
   // Desactivamos el auto-update check para evitar problemas
