@@ -354,10 +354,10 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
           <ContentWrapper>
             <SectionTitle>Acuerdo de uso</SectionTitle>
             <Paragraph>
-              Por favor, lee estos términos de uso antes de hacer uso de nuestra aplicación. Al acceder y usar el servicio admites haber leído, entendido y aceptado estos términos. Si no aceptas estas condiciones, no podrás acceder al servicio.
+            Por favor, lee estos términos de uso antes de hacer uso de nuestra aplicación. Al acceder y usar el servicio admites haber leído, entendido y aceptado estos términos ya que necesitarás dar tu consentimiento a estos. Si no aceptas estas condiciones, no podrás acceder al servicio.
             </Paragraph>
             <Paragraph>
-              Estas condiciones de uso no son definitivas y pueden ser modificadas, en cuyo caso el uso continuado del servicio significará que has aceptado las nuevas condiciones de uso.
+            Estas condiciones de uso no son definitivas y pueden ser modificadas, en cuyo caso la aceptación de estos términos se pedirá nuevamente. El uso continuado del servicio significará que has aceptado las nuevas condiciones de uso.
             </Paragraph>
             <Paragraph>
               Estos términos afectan al uso de toda versión e iteración de MapYourWorld, esto incluye tanto las versiones online accesibles desde www.mapyourworld.es o mapyourworld.netlify.app como versiones nativas para dispositivos Android e iOS.
@@ -534,7 +534,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
 
             <SectionTitle>8. Terminación</SectionTitle>
             <Paragraph>
-              MapYourWorld se reserva la posibilidad de suspender o terminar la cuenta de cualquier usuario si se considera que se ha violado cuualquiera de los términos de este acuerdo. En función de la situación de la que se trate, especialmente si el usuario no ha puesto en peligro a ningún usuario ni a sus datos, se le dará al usuario una oportunidad para corregir su falta antes de la suspensión o terminación.
+              MapYourWorld se reserva la posibilidad de suspender o terminar la cuenta de cualquier usuario si se considera que se ha violado cualquiera de los términos de este acuerdo, es decir, si este ha hecho algo ilegal o ha dañado sobremanera a otro usuario de la aplicación. En función de la situación de la que se trate, especialmente si el usuario no ha puesto en peligro a ningún usuario ni a sus datos, se le dará al usuario una oportunidad para corregir su falta antes de la suspensión o terminación.
             </Paragraph>
             <Paragraph>
               Todo usuario puede dejar de usar los servicios de MapYourWorld y terminar los términos de este acuerdo salvo aquellas cláusulas sin limitación, que incluye las cláusulas de Propiedad intelectual y Limitación de liabilidad.
