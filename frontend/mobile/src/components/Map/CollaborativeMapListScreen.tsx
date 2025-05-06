@@ -65,11 +65,11 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Colores para los jugadores
   const playerColors = [
-    "#2196F3", // Azul (propietario)
-    "#4CAF50", // Verde
-    "#FFC107", // Amarillo
-    "#FF9800", // Naranja
-    "#E91E63", // Rosa
+    "#007df3", // Azul (propietario)
+    "#00b0dc", // Verde
+    "#ade8f4", // Amarillo
+    "#007df3", // Naranja
+    "#00386d", // Rosa
 
   ];
 
@@ -482,7 +482,7 @@ const CollaborativeMapListScreen: React.FC = () => {
               setShowInviteModal(true);
             }}
           >
-            <Icon name="person-add" size={20} color="#2196F3" />
+            <Icon name="person-add" size={20} color="#007df3" />
           </TouchableOpacity>
 
           
@@ -494,7 +494,7 @@ const CollaborativeMapListScreen: React.FC = () => {
                 setShowDeleteConfirm(true);
               }}
             >
-              <Icon name="delete" size={20} color="#f44336" />
+              <Icon name="delete" size={20} color="#00386d" />
             </TouchableOpacity>
           
         </View>
@@ -647,7 +647,7 @@ const CollaborativeMapListScreen: React.FC = () => {
     >
       <View style={styles.modalContainer}>
         <View style={[styles.modalContent, styles.confirmModal]}>
-          <Icon name="warning" size={40} color="#f44336" style={styles.warningIcon} />
+          <Icon name="warning" size={40} color="#00386d" style={styles.warningIcon} />
 
           <Text style={styles.confirmTitle}>Eliminar Mapa</Text>
           <Text style={styles.confirmText}>
@@ -690,7 +690,7 @@ const CollaborativeMapListScreen: React.FC = () => {
       {/* Lista de mapas */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2196F3" />
+          <ActivityIndicator size="large" color="#007df3" />
           <Text style={styles.loadingText}>Cargando mapas colaborativos...</Text>
         </View>
       ) : (
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
     paddingHorizontal: 16,
     paddingVertical: 12,
     elevation: 4,
@@ -782,19 +782,19 @@ const styles = StyleSheet.create({
   },
   mapDescription: {
     fontSize: 14,
-    color: "#666",
+    color: "#00386",
     marginBottom: 6,
   },
   mapUsers: {
     fontSize: 12,
-    color: "#2196F3",
+    color: "#007df3",
   },
   mapActions: {
     flexDirection: "row",
   },
   modalSubtitle: {
     fontSize: 14,
-    color: "#666",
+    color: "#00386",
     marginBottom: 15,
     textAlign: "center",
   },
@@ -818,7 +818,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: "#00386",
   },
   emptyContainer: {
     alignItems: "center",
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#666",
+    color: "#00386",
     marginTop: 16,
   },
   emptySubtext: {
@@ -840,12 +840,12 @@ const styles = StyleSheet.create({
   },
   noFriendsText: {
     textAlign: "center",
-    color: "#666",
+    color: "#00386",
     marginVertical: 10,
     fontSize: 16,
   },
   createEmptyButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
@@ -886,7 +886,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inviteButton: {
-    backgroundColor: "#14b8a6", // Tono medio para el botón
+    backgroundColor: "#00b0dc", // Tono medio para el botón
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -899,7 +899,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    backgroundColor: "#00386d", // Tono oscuro para el botón de cerrar
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -948,11 +948,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   pickerItemSelected: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
   },
   pickerText: {
     fontSize: 16,
-    color: "#666",
+    color: "#00386",
   },
   pickerTextSelected: {
     color: "white",
@@ -972,7 +972,7 @@ const styles = StyleSheet.create({
   playerPreviewText: {
     textAlign: "center",
     fontSize: 12,
-    color: "#666",
+    color: "#00386",
     marginBottom: 24,
   },
   modalButtons: {
@@ -987,13 +987,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   cancelButton: {
-    backgroundColor: "#f44336", // Rojo para botones de cancelar
+    backgroundColor: "#00386d", // Rojo para botones de cancelar
   },
   createButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
   },
   deleteConfirmButton: {
-    backgroundColor: "#f44336",
+    backgroundColor: "#00386d",
   },
   buttonText: {
     fontWeight: "bold",
@@ -1011,11 +1011,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   toggleButtonActive: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
   },
   toggleText: {
     fontSize: 14,
-    color: "#666",
+    color: "#00386",
   },
   toggleTextActive: {
     color: "white",
@@ -1031,7 +1031,7 @@ const styles = StyleSheet.create({
   },
   confirmText: {
     fontSize: 16,
-    color: "#666",
+    color: "#00386",
     textAlign: "center",
     marginBottom: 24,
   },

@@ -8,11 +8,11 @@ import {
 import styled from 'styled-components';
 
 // Colores de la aplicación - mismas tonalidades que en la versión móvil
-const APP_TEAL = '#009688';
-const APP_DARK = '#333333';
-const APP_LIGHT = '#f5f5f5';
-const APP_TEAL_LIGHT = '#e6f3f1';
-const APP_TEAL_DARK = '#2c7873';
+const APP_TEAL = '#007df3';
+const APP_DARK = '#00386d';
+const APP_LIGHT = '#ffffff';
+const APP_TEAL_LIGHT = '#ade8f4';
+const APP_TEAL_DARK = '#00b0dc';
 
 // Componentes estilizados para la versión web
 const ModalOverlay = styled.div`
@@ -364,64 +364,60 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
             </Paragraph>
 
             <SectionTitle>1. Descripción del servicio</SectionTitle>
-            <Paragraph>
-              MapYourWorld es una aplicación innovadora que transforma la exploración del mundo en un juego interactivo. A medida que visitas nuevas ciudades, barrios o rincones escondidos, tu mapa personal se actualiza, desbloqueando logros y permitiéndote compartir tus aventuras con amigos. Con opciones gratuitas y premium, gamificación y mapas colaborativos, MapYourWorld convierte cada viaje en una experiencia única.
-            </Paragraph>
-            <Paragraph>MapYourWorld incluye funcionalidades de:</Paragraph>
-            <List>
-              <ListItem>Ver un mapa interactivo y personalizado que muestra tu progreso a tiempo real.</ListItem>
-              <ListItem>Descubrir distritos a tiempo real.</ListItem>
-              <ListItem>Registro de los distritos descubiertos.</ListItem>
-              <ListItem>Descubrir puntos de interés cultural incluidos en el mapa.</ListItem>
-              <ListItem>Crear tus propios puntos de interés.</ListItem>
-              <ListItem>Conseguir logros definidos por la aplicación.</ListItem>
-              <ListItem>Crear logros personalizados e individuales.</ListItem>
-              <ListItem>Establecer una relación de amistad con otros usuarios.</ListItem>
-              <ListItem>Crear mapas compartidos de hasta 6 jugadores en los que estos pueden descubrir distritos conjuntamente.</ListItem>
-              <ListItem>Ser invitado a un mapa colaborativo de otro jugador.</ListItem>
-              <ListItem>Visualizar tus estadísticas sobre distancia recorrida y mapa descubierto.</ListItem>
-              <ListItem>Comparar tus estadísticas con las de otros jugadores.</ListItem>
-            </List>
-            <Paragraph>
-              Además, para empresas ajenas existe la posibilidad de promocionarse en nuestro mapa, creando un punto de interés visible a todos los usuarios.
-            </Paragraph>
+              <Paragraph>
+                MapYourWorld es una aplicación innovadora que transforma la exploración del mundo en un juego interactivo. A medida que visitas nuevas ciudades, barrios o rincones escondidos, tu mapa personal se actualiza, desbloqueando logros y permitiéndote compartir tus aventuras con amigos. Con opciones gratuitas y premium, gamificación y mapas colaborativos, MapYourWorld convierte cada viaje en una experiencia única.
+              </Paragraph>
+              <Paragraph>MapYourWorld incluye funcionalidades de:</Paragraph>
+              <List>
+                <ListItem>Ver un mapa interactivo y personalizado que muestra tu progreso a tiempo real.</ListItem>
+                <ListItem>Descubrir distritos a tiempo real.</ListItem>
+                <ListItem>Registro de los distritos descubiertos.</ListItem>
+                <ListItem>Crear tus propios puntos de interés.</ListItem>
+                <ListItem>Conseguir logros definidos por la aplicación.</ListItem>
+                <ListItem>Crear logros personalizados e individuales.</ListItem>
+                <ListItem>Establecer una relación de amistad con otros usuarios.</ListItem>
+                <ListItem>Crear mapas compartidos de hasta 6 jugadores en los que estos pueden descubrir distritos conjuntamente.</ListItem>
+                <ListItem>Ser invitado a un mapa colaborativo de otro jugador.</ListItem>
+                <ListItem>Visualizar tus estadísticas sobre distancia recorrida y mapa descubierto.</ListItem>
+              </List>
+              <Paragraph>
+                Además, para empresas ajenas existe la posibilidad de promocionarse en nuestro mapa, creando un punto de interés visible a todos los usuarios.
+              </Paragraph>
 
-            <SectionTitle>1.1. Política de precios</SectionTitle>
-            <Paragraph>Aunque todas las funcionalidades previamente definidas estarán disponibles en la aplicación, están limitadas en función al plan del usuario:</Paragraph>
-            
-            <SubSectionTitle>Plan Básico (Gratis):</SubSectionTitle>
-            <List>
-              <ListItem>Descubrir distritos a tiempo real: Incluido</ListItem>
-              <ListItem>Descubrir puntos de interés incluidos en el mapa: Incluido</ListItem>
-              <ListItem>Crear puntos de interés: Limitado a 1 por distrito</ListItem>
-              <ListItem>Desbloquear logros predeterminados: Incluido</ListItem>
-              <ListItem>Crear logros personalizados: No disponible</ListItem>
-              <ListItem>Hacerte amigo de otro usuario: Incluido</ListItem>
-              <ListItem>Crear mapas colaborativos con otros usuarios: No disponible</ListItem>
-              <ListItem>Unirte a un mapa colaborativo: Limitado a 1 por usuario</ListItem>
-              <ListItem>Ver tus estadísticas: No disponible</ListItem>
-              <ListItem>Comparar tus estadísticas con las de otros usuarios: No disponible</ListItem>
-              <ListItem>Interfaz sin anuncios estáticos: No incluido</ListItem>
-            </List>
+              <SectionTitle>1.1. Política de precios</SectionTitle>
+              <Paragraph>
+                Aunque todas las funcionalidades previamente definidas estarán disponibles en la aplicación, están limitadas en función al plan del usuario:
+              </Paragraph>
 
-            <SubSectionTitle>Plan Premium (5.50 € / mes):</SubSectionTitle>
-            <List>
-              <ListItem>Descubrir distritos a tiempo real: Incluido</ListItem>
-              <ListItem>Descubrir puntos de interés incluidos en el mapa: Incluido</ListItem>
-              <ListItem>Crear puntos de interés: Creación de puntos ilimitados</ListItem>
-              <ListItem>Desbloquear logros predeterminados: Incluido</ListItem>
-              <ListItem>Crear logros personalizados: Creación de logros ilimitados</ListItem>
-              <ListItem>Hacerte amigo de otro usuario: Incluido</ListItem>
-              <ListItem>Crear mapas colaborativos con otros usuarios: Creación de mapas ilimitados</ListItem>
-              <ListItem>Unirte a un mapa colaborativo: No limitado</ListItem>
-              <ListItem>Ver tus estadísticas: Incluido</ListItem>
-              <ListItem>Comparar tus estadísticas con las de otros usuarios: Incluido</ListItem>
-              <ListItem>Interfaz sin anuncios estáticos: Incluido</ListItem>
-            </List>
+              <SubSectionTitle>Plan Básico (Gratis):</SubSectionTitle>
+              <List>
+                <ListItem>Descubrir distritos a tiempo real: Incluido</ListItem>
+                <ListItem>Crear puntos de interés: Limitado a 1 por distrito</ListItem>
+                <ListItem>Desbloquear logros predeterminados: Incluido</ListItem>
+                <ListItem>Crear logros personalizados: No disponible</ListItem>
+                <ListItem>Hacerte amigo de otro usuario: Incluido</ListItem>
+                <ListItem>Crear mapas colaborativos con otros usuarios: No disponible</ListItem>
+                <ListItem>Unirte a un mapa colaborativo: Limitado a 1 por usuario</ListItem>
+                <ListItem>Ver tus estadísticas: No disponible</ListItem>
+                <ListItem>Interfaz sin anuncios estáticos: No incluido</ListItem>
+              </List>
 
-            <Paragraph>
-              Para empresas que deseen publicitarse estas podrán ponerse en contacto con nosotros a través del formulario en mapyourworld.netlify.app o www.mapyoutworld.es.
-            </Paragraph>
+              <SubSectionTitle>Plan Premium (2.99 € / mes):</SubSectionTitle>
+              <List>
+                <ListItem>Descubrir distritos a tiempo real: Incluido</ListItem>
+                <ListItem>Crear puntos de interés: Creación de puntos ilimitados</ListItem>
+                <ListItem>Desbloquear logros predeterminados: Incluido</ListItem>
+                <ListItem>Crear logros personalizados: Creación de logros ilimitados</ListItem>
+                <ListItem>Hacerte amigo de otro usuario: Incluido</ListItem>
+                <ListItem>Crear mapas colaborativos con otros usuarios: Creación de mapas ilimitados</ListItem>
+                <ListItem>Unirte a un mapa colaborativo: No limitado</ListItem>
+                <ListItem>Ver tus estadísticas: Incluido</ListItem>
+                <ListItem>Interfaz sin anuncios estáticos: Incluido</ListItem>
+              </List>
+
+              <Paragraph>
+                Para empresas que deseen publicitarse estas podrán ponerse en contacto con nosotros a través del formulario en <a href="https://mapyourworld.netlify.app">mapyourworld.netlify.app</a> o <a href="https://www.mapyourworld.es">www.mapyourworld.es</a>.
+              </Paragraph>
 
             <SectionTitle>2. Uso del servicio</SectionTitle>
             <Paragraph>

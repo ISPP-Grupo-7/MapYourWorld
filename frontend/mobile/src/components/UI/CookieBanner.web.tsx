@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 56, 109, 0.7)',
     zIndex: 9999,
     padding: 15,
   },
@@ -324,18 +324,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#1e293b',
+    color: '#00386d',
   },
   description: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#007df3',
     marginBottom: 16,
     lineHeight: 20,
   },
   optionsContainer: {
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#ade8f4',
     borderRadius: 6,
     padding: 12,
   },
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: '#ade8f4',
   },
   optionTextContainer: {
     flex: 1,
@@ -355,11 +355,11 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#00386d',
   },
   optionDescription: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#007df3',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -373,11 +373,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#ade8f4',
     alignItems: 'center',
   },
   expandButtonText: {
-    color: '#334155',
+    color: '#00386d',
     fontSize: 14,
   },
   acceptButton: {
@@ -400,11 +400,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#ade8f4',
     alignItems: 'center',
   },
   rejectButtonText: {
-    color: '#334155',
+    color: '#00386d',
     fontSize: 14,
   },
   // Estilos para los controles de depuración
@@ -414,11 +414,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     padding: 8,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#ade8f4',
     borderRadius: 6,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#64748b',
+    borderColor: '#007df3',
   },
   debugToggleContainer: {
     flexDirection: 'row',
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   },
   debugLabel: {
     fontSize: 12,
-    color: '#334155',
+    color: '#00386d',
     marginRight: 8,
   },
   resetButton: {

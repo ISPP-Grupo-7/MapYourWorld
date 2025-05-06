@@ -148,7 +148,7 @@ const AdvertisementForm = () => {
     }
     
     .input-container input:focus {
-      border-color: #2bbbad;
+      border-color: #007df3;
       outline: none;
     }
     
@@ -174,7 +174,7 @@ const AdvertisementForm = () => {
         <Text style={{ fontSize: 16, textAlign: 'center', }}>En breves nos pondremos en contacto con vosotros.</Text>
               <View>
                 <TouchableOpacity 
-                  style={{ flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#2bbbad", marginTop: 20, }} 
+                  style={{ flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#007df3", marginTop: 20, }} 
                   onPress={() => navigation.navigate('Welcome')}
                 >
                   <Text style={{ fontWeight: "bold", fontSize: 16, color: "white", }}>Volver al inicio</Text>
@@ -208,7 +208,7 @@ const AdvertisementForm = () => {
               flexDirection: 'column',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
-              <h1><span style={{color: '#2bbbad'}}>Publicítate</span> con nosotros</h1>
+              <h1><span style={{color: '#007df3'}}>Publicítate</span> con nosotros</h1>
               <div style={{ margin: 20, fontSize: 16, color: '#64748b', }}>
                 Si quieres aparecer en nuestro mapa, ponte en contacto con nuestro equipo rellenando el siguiente formulario.
               </div>
@@ -434,7 +434,7 @@ const AdvertisementForm = () => {
                     onClick={handleSubmit}
                     style={{
                       width: '100%',
-                      backgroundColor: '#2bbbad',
+                      backgroundColor: '#007df3',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
