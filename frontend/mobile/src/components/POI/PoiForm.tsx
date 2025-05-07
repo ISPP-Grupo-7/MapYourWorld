@@ -332,7 +332,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
         </View>
         <TouchableOpacity
   style={{
-    backgroundColor: '#2bbbad',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     borderRadius: 8,
     width: isWeb ? '100%' : 'auto', // 100% de ancho en web, ajustable en móvil
@@ -350,7 +350,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
 
 <TouchableOpacity
   style={{
-    backgroundColor: '#2bbbad',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     borderRadius: 8,
     width: isWeb ? '100%' : 'auto', // 100% de ancho en web, ajustable en móvil
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   termsLink: {
-    color: '#14b8a6',
+    color: '#00b0dc',
     fontWeight: '500',
   },
   errorText: {
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   loginLink: {
-    color: '#14b8a6',
+    color: '#00b0dc',
     fontWeight: '500',
   },
 

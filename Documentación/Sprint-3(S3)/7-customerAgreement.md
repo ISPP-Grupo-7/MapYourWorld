@@ -65,9 +65,9 @@ Aunque todas las funcionalidades previamente definidas estarán disponibles en l
 | Unirte a un mapa colaborativo                       | Limitado a 1 por usuario  | No limitado                   |
 | Ver tus estadísticas                                | No disponible             | Incluido                      |
 | Interfaz sin anuncios estáticos                     | No incluido               | Incluido                      |
-| PRECIO                                              | Gratis                    | Por  5.50 € / mes             |
+| PRECIO                                              | Gratis                    | Por  2.99 € / mes             |
 
-Para empresas que deseen publicitarse estas podrán ponerse en contacto con nosotros a través del formulario en mapyourworld.netlify.app o www.mapyoutworld.es.
+Para empresas que deseen publicitarse estas podrán ponerse en contacto con nosotros a través del formulario en mapyourworld.netlify.app o www.mapyourworld.es.
 
 ## 2. Uso del servicio
 Debido a la gran importancia de la localización del usuario para utilizar nuestros servicios, el uso de MapYourWorld puede llegar a ser considerado peligroso por diversos factores como son el terreno y el tiempo. La existencia de un distrito o punto de interés no implica la seguridad o legalidad de llegar a este. Todos los riesgos que puedan surgir por usar MapYourWorld deben ser asumidos plenamente por el usuario.

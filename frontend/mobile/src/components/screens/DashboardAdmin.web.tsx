@@ -26,7 +26,7 @@ const Button = ({ title, onPress, fullWidth }: { title: string; onPress: () => v
       onClick={onPress}
       style={{
         padding: '12px 24px',
-        backgroundColor: '#007bff',
+        backgroundColor: '#007df3',
         color: '#fff',
         border: 'none',
         borderRadius: '5px',
@@ -36,8 +36,8 @@ const Button = ({ title, onPress, fullWidth }: { title: string; onPress: () => v
         fontWeight: 'bold',
         transition: 'background-color 0.3s ease',
       }}
-      onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#0056b3')}
-      onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#007bff')}
+      onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#00386d')}
+      onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#007df3')}
     >
       {title}
     </button>

@@ -3,17 +3,41 @@ import { ScrollView, View, Text, Image, Alert, StyleSheet, TouchableOpacity, Mod
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/constants/config';
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { getCurrentUser } from '@/services/auth.service';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/types';
+import { AchievementUtils, TransformedAchievement } from '../../utils/AchievementUtils';
 
 interface Achievement {
+  id?: string;
   name: string;
   description: string;
   points: number;
   iconUrl: string;
 }
+
+type Stats = {
+  achievements: number;
+  friends: number;
+  createdPOI: number;
+  unlockedDistricts: number;
+  collabMaps: number;
+};
+
+const allAchievements: Achievement[] = [
+  { id: "0e6bfcb2-350a-4c98-9195-9ec6b516e390", name: "Explorador Novato", description: "Crea tu primer punto de interés.", points: 10, iconUrl: "https://images.pexels.com/photos/1051077/pexels-photo-1051077.jpeg" },
+  { id: "288930cb-27c2-4340-910b-3f2ffcc914dd", name: "Cartógrafo Aficionado", description: "Crea 10 puntos de interés.", points: 50, iconUrl: "https://images.pexels.com/photos/8869349/pexels-photo-8869349.jpeg" },
+  { id: "8693fa93-723b-45c5-8392-662f73566787", name: "Maestro del Mapa", description: "Crea 50 puntos de interés.", points: 250, iconUrl: "https://images.pexels.com/photos/7634707/pexels-photo-7634707.jpeg" },
+  { id: "c1339ed7-60d5-4027-9220-42df6d30d3f8", name: "Conector Social", description: "Haz tu primer amigo.", points: 15, iconUrl: "https://images.pexels.com/photos/9353433/pexels-photo-9353433.jpeg" },
+  { id: "96bbe1f5-3e3c-4277-8113-9cdf8c8eaf2b", name: "Círculo de Amigos", description: "Haz 10 amigos.", points: 75, iconUrl: "https://images.pexels.com/photos/7968883/pexels-photo-7968883.jpeg" },
+  { id: "295f40ea-bca7-4e35-911c-b217b6dec467", name: "Red Social", description: "Haz 50 amigos.", points: 400, iconUrl: "https://images.pexels.com/photos/10431338/pexels-photo-10431338.jpeg" },
+  { id: "03d762f3-7701-4a87-a4d5-77f37330b506", name: "Primeros pasos", description: "Acumula 10 kilómetros de distancia.", points: 20, iconUrl: "https://images.pexels.com/photos/3601094/pexels-photo-3601094.jpeg" },
+  { id: "b1b2d415-69c8-4b73-8e80-94fe825afcc0", name: "Maratonista Urbano", description: "Acumula 50 kilómetros de distancia.", points: 150, iconUrl: "https://images.pexels.com/photos/1526790/pexels-photo-1526790.jpeg" },
+  { id: "5e99b4ec-c150-4de3-a83c-f1573d77b4de", name: "Explorador Incansable", description: "Acumula 200 kilómetros de distancia.", points: 750, iconUrl: "https://images.pexels.com/photos/421160/pexels-photo-421160.jpeg" },
+  { id: "3cec81ea-6160-4188-9ffc-6610ba90e9a1", name: "Racha Inicial", description: "Inicia sesión 3 días consecutivos.", points: 25, iconUrl: "https://images.pexels.com/photos/4350099/pexels-photo-4350099.jpeg" },
+  { id: "d17553e9-5308-4fa0-9b04-be015186ff9f", name: "Racha Semanal", description: "Inicia sesión 7 días consecutivos.", points: 100, iconUrl: "https://images.pexels.com/photos/2265488/pexels-photo-2265488.jpeg" },
+  { id: "238e196c-bd6e-4413-9329-71e7a9753a70", name: "Racha Mensual", description: "Inicia sesión 30 días consecutivos.", points: 500, iconUrl: "https://images.pexels.com/photos/31525462/pexels-photo-31525462.jpeg" },
+];
 
 const iconPlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQOuXSNhx4c8pKvcysPWidz4NibDU-xLeaJw&s";
 
@@ -51,34 +75,22 @@ const UserAchievementsScreen = () => {
       }
     };
 
-    const fetchAchievements = async () => {
-      if (!user) {
-        setError("No hay usuario autenticado");
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/api/user-achievements/achievements/${user.id}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!response.ok) throw new Error(response.statusText);
-        const data = await response.json();
-        const transformed = data.map((item: any) => ({
-          name: item.achievement ? item.achievement.name : item.name,
-          description: item.achievement ? item.achievement.description : item.description,
-          points: item.achievement ? item.achievement.points : item.points,
-          iconUrl: item.achievement ? item.achievement.iconUrl : item.iconUrl,
-        }));
-        setAchievements(transformed);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al obtener los logros", error);
-        setError("Error al obtener los logros");
-        setLoading(false);
-      }
-    };
+    const fetchAchievements = async (
+          userId: string
+        ) => {
+          if (!userId) return;
+          setLoading(true);
+          try {
+            const unlocked = await AchievementUtils.getUnlockedAchievements(userId);
+            setAchievements(unlocked);
+            setError(null);
+          } catch (err: any) {
+            console.error("Error al obtener estadísticas o logros:", err);
+            setError(err.message || "Error al obtener estadísticas o logros");
+          } finally {
+            setLoading(false);
+          }
+        };
 
     const fetchAllAchievements = async () => {
       try {
@@ -100,8 +112,8 @@ const UserAchievementsScreen = () => {
 
 
     fetchSubscription();
-    if (filter === 'user') {
-      fetchAchievements();
+    if (filter === 'user' && user) {
+      fetchAchievements(user.id);
     } else {
       fetchAllAchievements();
     }
@@ -260,7 +272,7 @@ const UserAchievementsScreen = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#14b8a6",
+        backgroundColor: "#00b0dc",
         paddingHorizontal: 16,
         paddingVertical: 12,
         elevation: 4,
@@ -293,12 +305,12 @@ const UserAchievementsScreen = () => {
       },
       activeFilterButton: {
         borderWidth: 2,
-        borderColor: "#14b8a6",
-        backgroundColor: "#14b8a6",
+        borderColor: "#00b0dc",
+        backgroundColor: "#00b0dc",
       },
       filterText: {
         fontWeight: "bold",
-        color: "#2bbbad",
+        color: "#007df3",
       },
       activeFilterText: {
         color: "white",
@@ -324,15 +336,15 @@ const UserAchievementsScreen = () => {
       achievementName: {
         fontSize: 18,
         fontWeight: "bold",
-        color: "#14b8a6",
+        color: "#00b0dc",
       },
       achievementDescription: {
         fontSize: 14,
-        color: "#555",
+        color: "#00386d",
       },
       achievementInfo: {
         fontSize: 12,
-        color: "#888",
+        color: "#ade8f4",
       },
       modalContainer: {
         flex: 1,
@@ -353,7 +365,7 @@ const UserAchievementsScreen = () => {
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center",
-        color: "#14b8a6",
+        color: "#00b0dc",
       },
       inputLabel: {
         fontSize: 16,
@@ -400,10 +412,10 @@ const UserAchievementsScreen = () => {
       cancelButton: {
         backgroundColor: "white",
         borderWidth: 1,
-        borderColor: "#14b8a6",
+        borderColor: "#00b0dc",
       },
       createButton: {
-        backgroundColor: "#14b8a6",
+        backgroundColor: "#00b0dc",
       },
       buttonText: {
         fontWeight: "bold",
@@ -417,10 +429,10 @@ const UserAchievementsScreen = () => {
       },
       cancelDetailButton: {
         fontWeight: "bold",
-        color: "#14b8a6",
+        color: "#00b0dc",
         backgroundColor: "white",
         borderWidth: 1,
-        borderColor: "#14b8a6",
+        borderColor: "#00b0dc",
         paddingVertical: 10,
         alignItems: "center",
         borderRadius: 8,
@@ -434,7 +446,7 @@ const UserAchievementsScreen = () => {
       },
       emptyStateText: {
         fontSize: 16,
-        color: '#888',
+        color: '#ade8f4',
         textAlign: 'center',
       },
     });

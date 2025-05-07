@@ -60,14 +60,14 @@ export const POICard: React.FC<POICardProps> = ({
     // Estrellas completas
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Icon key={`full-${i}`} name="star" size={16} color="#FFD700" />
+        <Icon key={`full-${i}`} name="star" size={16} color="#007df3" />
       );
     }
     
     // Media estrella si corresponde
     if (hasHalfStar) {
       stars.push(
-        <Icon key="half" name="star-half" size={16} color="#FFD700" />
+        <Icon key="half" name="star-half" size={16} color="#007df3" />
       );
     }
     
@@ -75,7 +75,7 @@ export const POICard: React.FC<POICardProps> = ({
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <Icon key={`empty-${i}`} name="star-outline" size={16} color="#FFD700" />
+        <Icon key={`empty-${i}`} name="star-outline" size={16} color="#007df3" />
       );
     }
     
@@ -99,7 +99,7 @@ export const POICard: React.FC<POICardProps> = ({
             {poi.name}
           </StyledText>
           <StyledView className="flex-row items-center mb-1">
-            <Icon name="place" size={14} color="#3B82F6" />
+            <Icon name="place" size={14} color="#007df3" />
             <StyledText className="text-xs text-gray-600 ml-1">
               {poi.district}
             </StyledText>
@@ -112,7 +112,7 @@ export const POICard: React.FC<POICardProps> = ({
           <TouchableOpacity 
             onPress={() => onNavigatePress(poi.location.latitude, poi.location.longitude)}
           >
-            <Icon name="directions" size={24} color="#3B82F6" />
+            <Icon name="directions" size={24} color="#007df3" />
           </TouchableOpacity>
         </StyledView>
       </Card>
@@ -147,7 +147,7 @@ export const POICard: React.FC<POICardProps> = ({
         </StyledView>
         
         <StyledView className="flex-row items-center mb-3">
-          <Icon name="place" size={16} color="#3B82F6" />
+          <Icon name="place" size={16} color="#007df3" />
           <StyledText className="text-sm text-gray-600 ml-1">
             {poi.district}
           </StyledText>
@@ -158,7 +158,7 @@ export const POICard: React.FC<POICardProps> = ({
         </StyledText>
         
         <StyledView className="flex-row items-center mb-2">
-          <Icon name="category" size={16} color="#3B82F6" />
+          <Icon name="category" size={16} color="#007df3" />
           <StyledText className="text-sm text-gray-600 ml-1">
             {poi.category}
           </StyledText>
@@ -171,7 +171,7 @@ export const POICard: React.FC<POICardProps> = ({
           variant="outline" 
           size="sm" 
           onPress={() => onSavePress(poi.id)}
-          icon={<Icon name="bookmark" size={18} color="#3B82F6" style={{ marginRight: 6 }} />}
+          icon={<Icon name="bookmark" size={18} color="#007df3" style={{ marginRight: 6 }} />}
         />
         <Button 
           title="Cómo llegar" 

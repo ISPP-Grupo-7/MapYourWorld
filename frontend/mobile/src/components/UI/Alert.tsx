@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-const APP_TEAL = '#2bbbad';
+const APP_TEAL = '#0003ff';
 
 interface AlertModalProps {
   visible: boolean;

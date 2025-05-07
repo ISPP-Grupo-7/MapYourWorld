@@ -106,8 +106,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   return (
     <Animated.View style={[styles.logroContainer, { opacity: opacityAnim }]}>
       <Text style={styles.logroEmoji}>🏆</Text>
-      <Text style={styles.logroTitle}>¡Logro Conseguido!</Text>
-      <Text style={styles.logroSubtitle}>Primer distrito desbloqueado</Text>
+      <Text style={styles.logroSubtitle}>¡Distrito desbloqueado!</Text>
       <Text style={styles.logroDistrito}>{distrito}</Text>
     </Animated.View>
   );
@@ -508,7 +507,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 strokeColor={"#808080"}
                 fillColor={
                   distrito.isUnlocked
-                    ? "rgba(0, 255, 0, 0.3)"
+                    ? "rgba(0, 125, 243, 0.3)"
                     : "rgba(128, 128, 128, 0.7)"
                 }
                 strokeWidth={2}
@@ -620,7 +619,7 @@ const styles = StyleSheet.create({
     color: '#4a5568',
   },
   modalButton: {
-    backgroundColor: '#3182ce',
+    backgroundColor: '#007df3',
     borderRadius: 5,
     padding: 10,
     alignItems: 'center',

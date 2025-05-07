@@ -7,7 +7,7 @@ import TextInput from '../UI/TextInput';
 import { styles as globalStyles } from '../../assets/styles/styles';
 import { API_URL } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
+import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import TermsAndConditions from '../UI/TermsAndConditions';
 import StaticAd from '../Ads/StaticAd';
@@ -280,7 +280,7 @@ const RegisterScreen = () => {
               onPress={handleRegister}
               isLoading={isLoading}
               fullWidth
-              className="mt-4 mb-3"
+              className="mt4 mb-3 bg-[#007df3]" 
             />
 
             <View style={styles.loginPromptContainer}>
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   termsLink: {
-    color: '#14b8a6',
+    color: '#007df3',
     fontWeight: '500',
   },
   errorText: {
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   loginLink: {
-    color: '#14b8a6',
+    color: '#007df3',
     fontWeight: '500',
   },
   inputContainer: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   imagePickerButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,

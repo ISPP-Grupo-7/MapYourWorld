@@ -12,6 +12,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { API_URL } from '../../constants/config';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/types';
+import { AchievementUtils, TransformedAchievement } from '../../utils/AchievementUtils';
 
 interface Stats {
   achievements: number;
@@ -86,10 +87,12 @@ const UserStatsScreen = () => {
           if (!response.ok) throw new Error(response.statusText);
           const data = await response.json();
           console.log("Stats:", data);
+
+          const unlocked = await AchievementUtils.getUnlockedAchievements(user.id);
   
           if (isActive) {
             const statsData: Stats = {
-              achievements: data.numeroLogros || 0,
+              achievements: unlocked.length || 0,
               friends: data.numeroAmigos || 0,
               createdPOI: data.numeroPoisCreados || 0,
               unlockedDistricts: data.numeroDistritosDesbloqueados || 0,
@@ -150,7 +153,7 @@ const UserStatsScreen = () => {
     statLabel: {
       fontSize: 18,
       fontWeight: "bold",
-      color: "#0d9488",
+      color: "#00386d",
       marginBottom: 4,
     },
     statValue: {
@@ -205,7 +208,7 @@ const UserStatsScreen = () => {
       fontWeight: "bold",
       marginBottom: 20,
       textAlign: "center",
-      color: "#14b8a6",
+      color: "#007df3",
     },
     inputLabel: {
       fontSize: 16,
@@ -226,10 +229,10 @@ const UserStatsScreen = () => {
     cancelButton: {
       backgroundColor: "white",
       borderWidth: 1,
-      borderColor: "#14b8a6",
+      borderColor: "#007df3",
     },
     createButton: {
-      backgroundColor: "#14b8a6",
+      backgroundColor: "#007df3",
     },
     buttonText: {
       fontWeight: "bold",
@@ -309,26 +312,26 @@ const UserStatsScreen = () => {
     }}
   >
       {/* Logros */}
-      <View style={{ backgroundColor: "#E0F7FA", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <View style={{ backgroundColor: "#ade8f4", borderRadius: 12, padding: 20, marginBottom: 16 }}>
         <View style={{ alignItems: "center" }}>
-          <Text style={{ color: "#14b8a6", fontSize: 30, marginBottom: 10 }}>🏆 Logros</Text>
-          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#0d9488" }}>{stats?.achievements}</Text>
+          <Text style={{ color: "#007df3", fontSize: 30, marginBottom: 10 }}>🏆 Logros</Text>
+          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#00386d" }}>{stats?.achievements}</Text>
         </View>
       </View>
   
       {/* Amigos */}
-      <View style={{ backgroundColor: "#F1F8E9", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <View style={{ backgroundColor: "#ade8f4", borderRadius: 12, padding: 20, marginBottom: 16 }}>
         <View style={{ alignItems: "center" }}>
-          <Text style={{ color: "#14b8a6", fontSize: 30, marginBottom: 10 }}>👥 Amigos</Text>
-          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#0d9488" }}>{stats?.friends}</Text>
+          <Text style={{ color: "#007df3", fontSize: 30, marginBottom: 10 }}>👥 Amigos</Text>
+          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#00386d" }}>{stats?.friends}</Text>
         </View>
       </View>
   
       {/* POIs Creados */}
       <View style={{ backgroundColor: "#FFF9C4", borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: "#e5e7eb" }}>
         <View style={{ alignItems: "center" }}>
-          <Text style={{ color: "#14b8a6", fontSize: 30, marginBottom: 10 }}>🗺️ POIs Creados</Text>
-          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#0d9488" }}>{stats?.createdPOI}</Text>
+          <Text style={{ color: "#007df3", fontSize: 30, marginBottom: 10 }}>🗺️ POIs Creados</Text>
+          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#00386d" }}>{stats?.createdPOI}</Text>
         </View>
       </View>
   
@@ -336,7 +339,7 @@ const UserStatsScreen = () => {
       <View style={{ backgroundColor: "#FFE0B2", borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: "#e5e7eb" }}>
         <View style={{ alignItems: "center" }}>
           <Text style={{ color: "#f59e0b", fontSize: 30, marginBottom: 10 }}>🚪 Distritos Desbloqueados</Text>
-          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#0d9488" }}>{stats?.unlockedDistricts}</Text>
+          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#00386d" }}>{stats?.unlockedDistricts}</Text>
         </View>
       </View>
   
@@ -344,7 +347,7 @@ const UserStatsScreen = () => {
       <View style={{ backgroundColor: "#E1BEE7", borderRadius: 12, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: "#e5e7eb" }}>
         <View style={{ alignItems: "center" }}>
           <Text style={{ color: "#9333ea", fontSize: 30, marginBottom: 10 }}>🗺️ Mapas Colaborativos</Text>
-          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#0d9488" }}>{stats?.collabMaps}</Text>
+          <Text style={{ fontSize: 25, fontWeight: "bold", color: "#00386d" }}>{stats?.collabMaps}</Text>
         </View>
       </View>
       

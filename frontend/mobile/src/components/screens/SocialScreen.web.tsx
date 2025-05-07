@@ -208,7 +208,7 @@ const SocialScreenWeb = () => {
         headers: {
           "Content-Type": "application/json", 
         },
-        body: JSON.stringify({ friendId }),
+        body: JSON.stringify({ friendId, status }),
       });
       const data = await response.json();
       if (data.success) {
@@ -483,15 +483,15 @@ const webStyles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#14b8a6',
+    borderColor: '#007df3',
     backgroundColor: 'white',
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
   },
   tabButtonText: {
-    color: '#14b8a6',
+    color: '#007df3',
     fontWeight: 'bold',
   },
   tabButtonTextActive: {
@@ -522,7 +522,7 @@ const webStyles = StyleSheet.create({
     marginTop: 8,
   },
   acceptButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -552,7 +552,7 @@ const webStyles = StyleSheet.create({
     fontSize: 16,
   },
   primaryButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -611,7 +611,7 @@ const webStyles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 12,
     alignItems: 'center',
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
   },
   modalButtonText: {
     color: 'white',

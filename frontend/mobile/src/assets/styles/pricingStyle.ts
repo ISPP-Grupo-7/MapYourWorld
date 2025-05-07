@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#007df3',
     paddingHorizontal: 26,
     paddingVertical: 15,
     borderRadius: 8,
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   tableContainer: {
     width: '100%',
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#ade8f4',
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#fff',
@@ -46,19 +46,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     paddingVertical: 15,
-    backgroundColor: '#F1F5F9',
-    color: '#2B3A67',
+    backgroundColor: '#ade8f4',
+    color: '#00386d',
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#E5E9F0',
+    backgroundColor: '#007df3',
     borderBottomWidth: 1,
-    borderColor: '#CCC',
+    borderColor: '#ade8f4',
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderColor: '#F2F4F7',
+    borderColor: '#ade8f4',
     paddingVertical: 12,
   },
   cell: {
@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '700',
     fontSize: 14,
-    color: '#4B5563',
+    color: '#ffffff',
   },
   cellText: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#2B3A67',
+    color: '#00386d',
   },
   premiumContainer: {
     alignItems: 'center',
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   premiumTitle: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#3B82F6', 
+    color: '#007df3', 
     marginBottom: 20,
     textAlign: 'center',
   },

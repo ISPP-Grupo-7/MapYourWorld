@@ -7,13 +7,17 @@ import AlertModal from '../UI/Alert';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/types';
 import Button from '../UI/Button';
+import { AchievementUtils, TransformedAchievement } from '../../utils/AchievementUtils';
+
 
 interface Achievement {
+  id?: string;
   name: string;
   description: string;
   points: number;
   iconUrl: string;
 }
+
 
 const iconPlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQOuXSNhx4c8pKvcysPWidz4NibDU-xLeaJw&s";
 
@@ -68,31 +72,19 @@ const UserAchievementsScreen = () => {
       }
     };
 
-    const fetchAchievements = async () => {
-      if (!user) {
-        setError("No hay usuario autenticado");
-        setLoading(false);
-        return;
-      }
+    const fetchAchievements = async (
+      userId: string
+    ) => {
+      if (!userId) return;
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/api/user-achievements/achievements/${user.id}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!response.ok) throw new Error(response.statusText);
-        const data = await response.json();
-        const transformed = data.map((item: any) => ({
-          name: item.achievement ? item.achievement.name : item.name,
-          description: item.achievement ? item.achievement.description : item.description,
-          points: item.achievement ? item.achievement.points : item.points,
-          iconUrl: item.achievement ? item.achievement.iconUrl : item.iconUrl,
-        }));
-        setAchievements(transformed);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al obtener los logros", error);
-        setError("Error al obtener los logros");
+        const unlocked = await AchievementUtils.getUnlockedAchievements(userId);
+        setAchievements(unlocked);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error al obtener estadísticas o logros:", err);
+        setError(err.message || "Error al obtener estadísticas o logros");
+      } finally {
         setLoading(false);
       }
     };
@@ -117,8 +109,8 @@ const UserAchievementsScreen = () => {
 
 
     fetchSubscription();
-    if (filter === 'user') {
-      fetchAchievements();
+    if (filter === 'user' && user) {
+      fetchAchievements(user.id);
     } else {
       fetchAllAchievements();
     }
@@ -179,7 +171,7 @@ const UserAchievementsScreen = () => {
         }}
       >
         <div style={{ marginBottom: 20 }}>
-          <ActivityIndicator size="large" color="#14b8a6" />
+          <ActivityIndicator size="large" color="#00b0dc" />
         </div>
         <div style={{ color: '#4b5563', fontSize: 16 }}>Cargando logros...</div>
       </div>
@@ -199,7 +191,7 @@ const UserAchievementsScreen = () => {
           backgroundColor: '#f9fafb',
         }}
       >
-        <div style={{ color: '#ef4444', fontSize: 18, marginBottom: 8 }}>{error}</div>
+        <div style={{ color: '#00386d', fontSize: 18, marginBottom: 8 }}>{error}</div>
         <div style={{ color: '#4b5563', fontSize: 16 }}>Inicia sesión para ver tus logros</div>
       </div>
     );
@@ -236,9 +228,9 @@ const UserAchievementsScreen = () => {
               flex: 1,
               padding: '10px 20px',
               borderRadius: 8,
-              border: filter === 'user' ? '2px solid #14b8a6' : '1px solid #ddd',
-              backgroundColor: filter === 'user' ? '#2bbbad' : 'white',
-              color: filter === 'user' ? 'white' : '#2bbbad',
+              border: filter === 'user' ? '2px solid #00b0dc' : '1px solid #ddd',
+              backgroundColor: filter === 'user' ? '#007df3' : 'white',
+              color: filter === 'user' ? 'white' : '#007df3',
               cursor: 'pointer',
               fontWeight: 'bold',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -253,9 +245,9 @@ const UserAchievementsScreen = () => {
               flex: 1,
               padding: '10px 20px',
               borderRadius: 8,
-              border: filter === 'all' ? '2px solid #14b8a6' : '1px solid #ddd',
-              backgroundColor: filter === 'all' ? '#2bbbad' : 'white',
-              color: filter === 'all' ? 'white' : '#2bbbad',
+              border: filter === 'all' ? '2px solid #00b0dc' : '1px solid #ddd',
+              backgroundColor: filter === 'all' ? '#007df3' : 'white',
+              color: filter === 'all' ? 'white' : '#007df3',
               cursor: 'pointer',
               fontWeight: 'bold',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -269,7 +261,7 @@ const UserAchievementsScreen = () => {
         {/* Botón de crear logro */}
         <div
           style={{
-            backgroundColor: 'rgb(43, 187, 173)',
+            backgroundColor: '#00b0dc',
             padding: '8px',
             borderRadius: 40,
             display: 'flex',
@@ -307,7 +299,7 @@ const UserAchievementsScreen = () => {
           style={{
             textAlign: 'center',
             padding: '40px 20px',
-            color: '#6b7280',
+            color: '#00386d',
             fontSize: 18,
             fontWeight: 500,
           }}
@@ -358,13 +350,13 @@ const UserAchievementsScreen = () => {
                   gap: '0.75rem',
                 }}
               >
-                <h3 style={{ fontSize: 24, fontWeight: 'bold', color: '#0d9488' }}>
+                <h3 style={{ fontSize: 24, fontWeight: 'bold', color: '#00386d' }}>
                   {achievement.name}
                 </h3>
-                <p style={{ color: '#6b7280', fontSize: 16 }}>
+                <p style={{ color: '#00386d', fontSize: 16 }}>
                   {achievement.description}
                 </p>
-                <p style={{ color: '#6b7280', fontSize: 14 }}>
+                <p style={{ color: '#00386d', fontSize: 14 }}>
                   Puntos: {achievement.points}
                 </p>
               </div>
@@ -580,7 +572,7 @@ const UserAchievementsScreen = () => {
                   flex: 1,
                   padding: '12px 0',
                   borderRadius: 8,
-                  backgroundColor: '#14b8a6',
+                  backgroundColor: '#00b0dc',
                   border: 'none',
                   color: 'white',
                   fontWeight: 'bold',
@@ -601,7 +593,7 @@ const UserAchievementsScreen = () => {
                   backgroundColor: '#ffffff',
                   borderWidth: 1,
                   borderColor: '#e2e8f0',
-                  color: '#2bbbad',
+                  color: '#007df3',
                   fontWeight: 'bold',
                   fontSize: 16,
                   marginRight: 8,

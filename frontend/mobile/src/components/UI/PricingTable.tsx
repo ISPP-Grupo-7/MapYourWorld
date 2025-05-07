@@ -11,6 +11,7 @@ type Plan = {
 };
 
 const PLANES: Plan[] = [
+  { feature: 'Precio', free: 'Gratis', premium: '2,99€/mes' },
   { feature: 'Visualización de mapa personal', free: true, premium: true },
   { feature: 'Exploración de zonas no descubiertas', free: true, premium: true },
   { feature: 'Registro de puntos de interés', free: 'Un solo punto por zona', premium: 'Ilimitado' },

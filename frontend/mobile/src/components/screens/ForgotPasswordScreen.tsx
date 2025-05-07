@@ -13,7 +13,7 @@ const StyledTextInput = styled(TextInput);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
 // Constantes para colores de la aplicación
-const APP_TEAL = '#2bbbad';
+const APP_TEAL = '#007df3';
 
 type ForgotPasswordScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ForgotPassword'>;
 

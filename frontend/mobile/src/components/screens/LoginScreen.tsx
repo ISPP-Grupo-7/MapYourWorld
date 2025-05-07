@@ -152,7 +152,7 @@ const LoginScreen = () => {
             />
             
             <StyledText 
-              className="text-teal-500 text-right mb-4"
+              className="text-[#007df3] text-right mb-4"
               onPress={handleForgotPassword}
             >
               ¿Olvidaste tu contraseña?
@@ -163,7 +163,7 @@ const LoginScreen = () => {
               onPress={handleLogin}
               isLoading={isLoading}
               fullWidth
-              className="mb-3"
+              className="mb-3 bg-[#007df3]" 
             />
             
             <StyledView className="flex-row justify-center mt-4">
@@ -171,7 +171,7 @@ const LoginScreen = () => {
                 ¿No tienes una cuenta?{' '}
               </StyledText>
               <StyledText 
-                className="text-teal-500 font-medium"
+                className="text-[#007df3] font-medium"
                 onPress={goToRegister}
               >
                 Regístrate

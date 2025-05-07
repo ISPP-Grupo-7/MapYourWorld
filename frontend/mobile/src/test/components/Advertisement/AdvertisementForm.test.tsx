@@ -20,7 +20,7 @@ jest.mock('react-native/Libraries/Alert/Alert', () => ({
 }));
 
 // Mock de AdvertisementForm
-jest.mock('@/components/screens/AdvertismentForm', () => {
+jest.mock('@/components/Advertisement/AdvertismentForm', () => {
     const React = require('react');
     const { View, Text, TextInput, TouchableOpacity } = require('react-native');
 
@@ -36,6 +36,7 @@ jest.mock('@/components/screens/AdvertismentForm', () => {
                 <TextInput testID='postalcode-input' error=''></TextInput>
                 <TextInput testID='country-input' error=''></TextInput>
                 <TextInput testID='comments-input' error=''></TextInput>
+                <TouchableOpacity testID='plan-input' error=''></TouchableOpacity>
                 <TouchableOpacity testID="submit-button">
                     <Text>Enviar</Text>
                 </TouchableOpacity>
@@ -51,7 +52,7 @@ jest.mock('@/components/screens/AdvertismentForm', () => {
 
 
 
-import AdvertisementForm from '@/components/screens/AdvertismentForm';
+import AdvertisementForm from '@/components/Advertisement/AdvertismentForm';
 
 describe('AdvertisementForm', () => {
     const mockNavigate = jest.fn();
@@ -74,6 +75,7 @@ describe('AdvertisementForm', () => {
     expect(getByTestId('postalcode-input')).toBeTruthy();
     expect(getByTestId('country-input')).toBeTruthy();
     expect(getByTestId('comments-input')).toBeTruthy();
+    expect(getByTestId('plan-input')).toBeTruthy();
     expect(getByTestId('submit-button')).toBeTruthy();
   });
 
@@ -107,7 +109,7 @@ describe('AdvertisementForm', () => {
 
     await waitFor(() => {
       expect(findByText('Introduce un correo electrónico válido')).toBeTruthy();
-      expect(findByText('Código postal no v´´alido')).toBeTruthy();
+      expect(findByText('Código postal no válido')).toBeTruthy();
     });
   });
 });

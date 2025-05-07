@@ -2,6 +2,7 @@
 import React from 'react';
 
 const PLANES = [
+  { feature: 'Precio', free: 'Gratis', premium: '2,99€/mes' },
   { feature: 'Visualización de mapa personal', free: true, premium: true },
   { feature: 'Exploración de zonas no descubiertas', free: true, premium: true },
   { feature: 'Registro de puntos de interés', free: 'Un solo punto por zona', premium: 'Ilimitados' },
@@ -34,7 +35,7 @@ const styles: { [key: string]: CSSProperties } = {
     textAlign: 'center',
     fontSize: '24px',
     fontWeight: 'bold',
-    color: '#0d9488',
+    color: '#00386d',
     marginBottom: '16px',
   },
   table: {
