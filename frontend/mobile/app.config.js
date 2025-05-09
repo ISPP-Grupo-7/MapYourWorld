@@ -1,18 +1,17 @@
 module.exports = {
-  name: "MapYourWorld-mobile",
+  name: "MapYourWorld",
   slug: "mapyourworld-mobile",
-  version: "1.0.0",
+  version: "3.2.0",
   orientation: "portrait",
 
   entryPoint: "./index.js", // Punto de entrada principal explícito
 
-  // Deshabilitamos temporalmente las referencias a los recursos
-  // icon: "./assets/icon.png",
+  icon: "./assets/icono.png",
   userInterfaceStyle: "automatic",
   owner: "francodellaguila2", // Propietario del proyecto en Expo
 
   splash: {
-    // image: "./assets/splash.png",
+    image: "./assets/icono.png",
     resizeMode: "contain",
     backgroundColor: "#ffffff"
   },

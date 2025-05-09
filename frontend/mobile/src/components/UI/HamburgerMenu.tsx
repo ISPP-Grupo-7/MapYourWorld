@@ -20,6 +20,7 @@ const HamburgerMenu = () => {
     navigation.navigate(screen, params);
   };
 
+  // Función para obtener el perfil del usuario
   const fetchProfile = async (userId: string) => {
     
     setIsLoading(true);
@@ -57,74 +58,80 @@ const HamburgerMenu = () => {
 
   return (
     <View style={{ marginRight: 10 }}>
-      <TouchableOpacity onPress={() => setMenuVisible(true)}>
+      <TouchableOpacity
+        onPress={() => setMenuVisible(true)}
+        style={{ padding: 8 }} // Aumenta el área táctil con padding
+        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} // Expande el área sensible al tacto
+      >
         <Text style={{ fontSize: 30 }}>☰</Text>
       </TouchableOpacity>
-      <Modal
-        visible={menuVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMenuVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          onPress={() => setMenuVisible(false)}
-          activeOpacity={1}
+      {menuVisible && ( // Renderiza el Modal solo cuando es visible
+        <Modal
+          visible={menuVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setMenuVisible(false)}
         >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            onPress={() => setMenuVisible(false)}
+            activeOpacity={1}
+          >
 
-          <View style={styles.menuContainer}>
-
-
-
-            <TouchableOpacity style={styles.menuItem}>
-            <Text style={styles.menuItemText}>
-              {profile?.username || 'Usuario no disponible'}
-            </Text>
-            </TouchableOpacity>
-
-                        
-            <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Cerrar sesión</Text>
-            </TouchableOpacity>
-
-            <View style={styles.separator} />
-
-            
-            <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Social</Text>
-            </TouchableOpacity>
+            <View style={styles.menuContainer}>
 
 
-            <TouchableOpacity onPress={() => handleNavigate('Map')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Mapa Individual</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => handleNavigate('CollaborativeMapListScreen')} 
-              style={styles.menuItem}
-            >
-              <Text style={styles.menuItemText}>Mapas Colaborativos</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => handleNavigate('UserStats')}
-              style={styles.menuItem}
-            >
-              <Text style={styles.menuItemText}>Estadísticas</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => handleNavigate('UserAchievementsScreen')} 
-              style={styles.menuItem}
-            >
-              <Text style={styles.menuItemText}>Logros</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuItemText}>
+                {profile?.username || 'Usuario no disponible'}
+              </Text>
+              </TouchableOpacity>
 
-          </View>
-        </TouchableOpacity>
+                          
+              <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Cerrar sesión</Text>
+              </TouchableOpacity>
 
-        
-      </Modal>
+              <View style={styles.separator} />
+
+              
+              <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Social</Text>
+              </TouchableOpacity>
+
+
+              <TouchableOpacity onPress={() => handleNavigate('Map')} style={styles.menuItem}>
+                <Text style={styles.menuItemText}>Mapa Individual</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={() => handleNavigate('CollaborativeMapListScreen')} 
+                style={styles.menuItem}
+              >
+                <Text style={styles.menuItemText}>Mapas Colaborativos</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleNavigate('UserStats')}
+                style={styles.menuItem}
+              >
+                <Text style={styles.menuItemText}>Estadísticas</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={() => handleNavigate('UserAchievementsScreen')} 
+                style={styles.menuItem}
+              >
+                <Text style={styles.menuItemText}>Logros</Text>
+              </TouchableOpacity>
+
+            </View>
+          </TouchableOpacity>
+
+          
+        </Modal>
+      )}
     </View>
   );
 };

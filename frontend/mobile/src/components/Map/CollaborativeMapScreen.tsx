@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, FlatList, InteractionManager } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, FlatList } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
@@ -7,7 +7,6 @@ import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from "@/contexts/AuthContext";
-import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 
 // Colores disponibles para los usuarios (máximo 6)
 const USER_COLORS = [
@@ -160,7 +159,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const [userColorIndex, setUserColorIndex] = useState<number>(-1);
   // Variables de estado para el seguimiento de ubicación
   const [locationSubscription, setLocationSubscription] = useState<Location.LocationSubscription | null>(null);
-  const mapRef = useRef<MapView>(null); // Ref para el MapView
 
   // Nuevos estados para invitación de amigos
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
@@ -170,9 +168,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
   const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const { user } = useAuth();
-  const isFocused = useIsFocused();
-  const isMountedRef = useRef(true);
-
   useEffect(() => {
     console.log("Usuario actual en Social:", user);
   }, [user]);
@@ -262,7 +257,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Función para obtener los distritos desde el backend
   const fetchDistricts = async () => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       setLoading(true);
       console.log(`Obteniendo distritos para el mapa colaborativo ${mapId}`);
@@ -320,22 +314,17 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         }
       }).filter((d: Distrito | null): d is Distrito => d !== null);
 
-      if (isMountedRef.current && isFocused) {
-        setDistritosBackend(distritosMapeados);
-      }
+      setDistritosBackend(distritosMapeados);
     } catch (error) {
       console.error("Error al obtener los distritos del mapa colaborativo:", error);
       Alert.alert("Error", "No se pudieron cargar los distritos");
     } finally {
-      if (isMountedRef.current && isFocused) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       console.log(`Obteniendo POIs para el mapa colaborativo ${mapId}`);
       const response = await fetch(`${API_URL}/api/poi/map/${mapId}`);
@@ -352,28 +341,21 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.log("Respuesta de POIs:", data);
 
       if (data.success && data.pois) {
-        if (isMountedRef.current && isFocused) {
-          setPointsOfInterest(data.pois);
-        }
+        setPointsOfInterest(data.pois);
       } else {
         console.warn("No se pudieron obtener los puntos de interés del mapa colaborativo");
         // Establecer una lista vacía de puntos de interés
-        if (isMountedRef.current && isFocused) {
-          setPointsOfInterest([]);
-        }
+        setPointsOfInterest([]);
       }
     } catch (error) {
       console.error("Error al obtener los puntos de interés del mapa colaborativo:", error);
       // Establecer una lista vacía de puntos de interés
-      if (isMountedRef.current && isFocused) {
-        setPointsOfInterest([]);
-      }
+      setPointsOfInterest([]);
     }
   };
 
   // Función para obtener los usuarios del mapa colaborativo y asignarles colores
   const fetchMapUsers = async () => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       console.log(`Obteniendo usuarios para el mapa colaborativo ${mapId}`);
       const response = await fetch(`${API_URL}/api/maps/users/${mapId}`);
@@ -398,20 +380,14 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           };
         });
 
-        if (isMountedRef.current && isFocused) {
-          setMapUsers(usersWithColors);
-        }
+        setMapUsers(usersWithColors);
 
         // Encontrar el color del usuario actual
         const currentUser = usersWithColors.find((user: MapUser) => user.id === userId);
         if (currentUser) {
-          if (isMountedRef.current && isFocused) {
-            setUserColorIndex(USER_COLORS.indexOf(currentUser.color) || 0);
-          }
+          setUserColorIndex(USER_COLORS.indexOf(currentUser.color) || 0);
         } else {
-          if (isMountedRef.current && isFocused) {
-            setUserColorIndex(0); // Verde por defecto
-          }
+          setUserColorIndex(0); // Verde por defecto
         }
       } else {
         console.warn("No se pudieron obtener los usuarios del mapa colaborativo");
@@ -423,7 +399,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Función para desbloquear un distrito en el mapa colaborativo
   const desbloquearDistrito = async (districtId: string, regionId: string) => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       console.log(`Desbloqueando distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
       const userColor = USER_COLORS[userColorIndex]; // Obtener color asignado al usuario
@@ -442,20 +417,18 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         console.log(`Color asignado: ${userColor}`);
 
         // Actualizar el distrito en el estado local con el color correcto
-        if (isMountedRef.current && isFocused) {
-          setDistritosBackend((prev) =>
-            prev.map((d) =>
-              d.id === districtId
-                ? {
-                  ...d,
-                  isUnlocked: true,
-                  unlockedByUserId: userId,
-                  color: userColor // Usamos el color asignado
-                }
-                : d
-            )
-          );
-        }
+        setDistritosBackend((prev) =>
+          prev.map((d) =>
+            d.id === districtId
+              ? {
+                ...d,
+                isUnlocked: true,
+                unlockedByUserId: userId,
+                color: userColor // Usamos el color asignado
+              }
+              : d
+          )
+        );
       } else {
         console.warn(`No se pudo desbloquear el distrito ${districtId} en el mapa colaborativo`);
       }
@@ -490,7 +463,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Función para inicializar el mapa colaborativo
   const initializeMap = async () => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       console.log(`Inicializando mapa colaborativo: ${mapId}`);
 
@@ -524,7 +496,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Función para asegurar que el mapa colaborativo existe
   const ensureCollaborativeMapExists = async () => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       setIsCreatingMap(true);
       console.log(`Verificando existencia del mapa colaborativo ${mapId}`);
@@ -587,15 +558,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       // No mostramos alerta para no interrumpir el flujo
       return null;
     } finally {
-      if (isMountedRef.current && isFocused) {
-        setIsCreatingMap(false);
-      }
+      setIsCreatingMap(false);
     }
   };
 
   // Función para invitar a un amigo al mapa colaborativo
   const sendFriendRequest = async (friendId: string) => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
       const response = await fetch(`${API_URL}/api/friends/create`, {
@@ -619,8 +587,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   // Función para iniciar el seguimiento de ubicación
   const startLocationTracking = async () => {
-    if (!isMountedRef.current || !isFocused) return;
-    if (locationSubscription) return; // Evitar duplicados
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -635,20 +601,14 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
           distanceInterval: 5,
         },
         (newLocation) => {
-          if (isMountedRef.current && isFocused) {
-            setLocation({
-              latitude: newLocation.coords.latitude,
-              longitude: newLocation.coords.longitude,
-            });
-          }
+          setLocation({
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+          });
         }
       );
 
-      if (isMountedRef.current && isFocused) {
-        setLocationSubscription(subscription);
-      } else {
-        subscription.remove();
-      }
+      setLocationSubscription(subscription);
       console.log("Seguimiento de ubicación iniciado");
     } catch (locationError) {
       console.error("Error al iniciar el seguimiento de ubicación:", locationError);
@@ -668,39 +628,9 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      isMountedRef.current = true;
-      console.log("CollaborativeMapScreen ganó foco");
-      InteractionManager.runAfterInteractions(() => {
-        if (isMountedRef.current && isFocused) {
-          console.log("[InteractionManager] Iniciando seguimiento de ubicación y mapa.");
-          startLocationTracking();
-          initializeMap();
-        }
-      });
-
-      return () => {
-        console.log("CollaborativeMapScreen perdiendo foco - Limpieza COMPLETA...");
-        isMountedRef.current = false;
-
-        if (locationSubscription) {
-          locationSubscription.remove();
-          setLocationSubscription(null);
-          console.log("Seguimiento de ubicación detenido en cleanup.");
-        }
-
-        setLocation(null);
-        setDistritosBackend([]);
-        setMapUsers([]);
-        setPointsOfInterest([]);
-        setDistritoActual(null);
-        setLoading(true);
-      };
-    }, [])
-  );
-
+  // Al montar el componente se obtienen distritos, POIs, usuarios y se comienza a observar la ubicación
   useEffect(() => {
+    // Si no hay un mapId válido, no continuamos
     if (!mapId) {
       Alert.alert("Error", "No se ha proporcionado un ID de mapa válido");
       return;
@@ -708,10 +638,13 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
     setLoading(true);
 
+    // Usar la función initializeMap ya definida, que ahora asegura que el mapa colaborativo existe
     initializeMap().finally(() => setLoading(false));
 
+    // Comenzar a seguir la ubicación del usuario
     startLocationTracking();
 
+    // Limpiar al desmontar el componente
     return () => {
       stopLocationTracking();
     };
@@ -722,7 +655,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       fetchDistricts();
     }
   }, [mapUsers]);
-
+  // Verificar si el usuario se encuentra dentro de algún distrito y desbloquearlo si es necesario
   useEffect(() => {
     if (location && distritosBackend.length > 0 && userColorIndex >= 0) {
       let dentroDeAlguno = false;
@@ -739,6 +672,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       if (distritoEncontrado) {
         const { id, nombre, isUnlocked, unlockedByUserId, regionId } = distritoEncontrado;
 
+        // Solo intentamos desbloquear si no está ya desbloqueado por otro usuario
         if (!isUnlocked) {
           desbloquearDistrito(id, regionId);
           if (!distritosVisitados.has(nombre)) {
@@ -762,6 +696,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         <Text style={styles.legendTitle}>Usuarios</Text>
         <ScrollView style={{ maxHeight: 150 }}>
           {mapUsers.map((user, index) => {
+            // Usamos (user as any).color para acceder al valor asignado en fetchMapUsers
             const assignedColor = (user as any).color || USER_COLORS[user.colorIndex] || "#000";
             console.log(`Leyenda: Usuario ${user.username} tiene color ${assignedColor}`);
             return (
@@ -783,22 +718,21 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     );
   };
 
+
   const fetchFriends = async (userId: string) => {
-    if (!isMountedRef.current || !isFocused) return;
     try {
       console.log(`Solicitando amigos para el usuario: ${userId}`);
       const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
       const data = await response.json();
 
-      console.log("Respuesta del backend:", data);
+      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
 
       if (Array.isArray(data)) {
-        if (isMountedRef.current && isFocused) {
-          setFriends(data.map((user) => ({
-            id: user.id,
-            name: user.email,
-          })));
-        }
+        // Si la respuesta es directamente un array de usuarios, lo asignamos
+        setFriends(data.map((user) => ({
+          id: user.id,
+          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+        })));
       } else {
         console.warn("Formato inesperado en la respuesta de amigos:", data);
       }
@@ -806,7 +740,6 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.error("Error al obtener amigos:", error);
     }
   };
-
   const getAvailableFriends = () => {
     return friends.filter(
       (friend) =>
@@ -865,6 +798,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     );
   };
 
+
+
+
+  // Botón para recargar los datos
   const renderReloadButton = () => {
     return (
       <TouchableOpacity
@@ -886,6 +823,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
   return (
     <View style={styles.container}>
+
       <AlertModal
         visible={alertModal.visible}
         title={alertModal.title}
@@ -914,28 +852,29 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               message={alertModal.message}
               onClose={closeAlertModal}
             />
-            <View style={styles.modalOverlay}>
-              <PuntoDeInteresForm
-                pointOfInterest={pointOfInterest}
-                setPointOfInterest={setPointOfInterest}
-                setShowForm={setShowForm}
-                onSave={(newPOI: any) => {
-                  const poiConverted = {
-                    ...newPOI,
-                    location: {
-                      type: "Point",
-                      coordinates: [newPOI.longitude, newPOI.latitude],
-                    },
-                  };
-                  setPointsOfInterest((prev) => [...prev, poiConverted]);
-                }}
-                showAlert={showAlert}
-              />
-            </View>
+          <View style={styles.modalOverlay}>
+            
+            <PuntoDeInteresForm
+              pointOfInterest={pointOfInterest}
+              setPointOfInterest={setPointOfInterest}
+              setShowForm={setShowForm}
+              onSave={(newPOI: any) => {
+                // Convertir el POI recién creado al formato esperado
+                const poiConverted = {
+                  ...newPOI,
+                  location: {
+                    type: "Point",
+                    coordinates: [newPOI.longitude, newPOI.latitude],
+                  },
+                };
+                setPointsOfInterest((prev) => [...prev, poiConverted]);
+              }}
+              showAlert={showAlert}
+            />
+          </View>
           </Modal>
 
           <MapView
-            ref={mapRef}
             style={styles.map}
             initialRegion={{
               latitude: 37.3754,
@@ -966,6 +905,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             })}
 
             {pointsOfInterest.map((poi, index) => {
+              // Convertir las coordenadas del POI (se asume que vienen en formato [lng, lat])
               const poiCoordinates = {
                 latitude: poi.location.coordinates[1],
                 longitude: poi.location.coordinates[0],
@@ -1233,4 +1173,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollaborativeMapScreen;
+export default CollaborativeMapScreen; 
