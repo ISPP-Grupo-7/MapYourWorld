@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "jsx": "react-native",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "moduleResolution": "node",
     "noEmit": true,
     "skipLibCheck": true,
@@ -12,27 +16,59 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@screens/*": ["./src/screens/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@services/*": ["./src/services/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@assets/*": ["./src/assets/*"],
-      "@navigation/*": ["./src/navigation/*"],
-      "@constants/*": ["./src/constants/*"],
-      "@contexts/*": ["./src/contexts/*"],
-      "@types/*": ["./src/types/*"],
-      "@store/*": ["./src/store/*"],
-      "@shared/*": ["../../shared/*"],
-      "@frontend/*": ["../../frontend/*"],
-      "@backend/*": ["../../backend/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@screens/*": [
+        "./src/screens/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@assets/*": [
+        "./src/assets/*"
+      ],
+      "@navigation/*": [
+        "./src/navigation/*"
+      ],
+      "@constants/*": [
+        "./src/constants/*"
+      ],
+      "@contexts/*": [
+        "./src/contexts/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
+      "@store/*": [
+        "./src/store/*"
+      ],
+      "@shared/*": [
+        "../../shared/*"
+      ],
+      "@frontend/*": [
+        "../../frontend/*"
+      ],
+      "@backend/*": [
+        "../../backend/*"
+      ]
     },
     "typeRoots": [
       "../../node_modules/@types",
       "./node_modules/@types"
     ],
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*",
@@ -47,5 +83,6 @@
     "**/*.test.ts",
     "dist",
     "build"
-  ]
-} 
+  ],
+  "extends": "expo/tsconfig.base"
+}

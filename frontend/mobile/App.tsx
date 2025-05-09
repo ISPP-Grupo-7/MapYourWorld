@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler'; // DEBE SER LA PRIMERA IMPORTACIÓN
 /**
  * App principal de MapYourWorld Mobile
  */

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, View, Text, Modal, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, Text, Modal, StyleSheet, Pressable, StatusBar } from 'react-native'; // Importar Pressable
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,35 +57,40 @@ const HamburgerMenu = () => {
 
 
   return (
-    <View style={{ marginRight: 10 }}>
+    <View style={{ marginRight: 10, zIndex: 100 }}> {/* Añadir zIndex alto al contenedor del botón */}
       <TouchableOpacity
-        onPress={() => setMenuVisible(true)}
-        style={{ padding: 8 }} // Aumenta el área táctil con padding
-        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} // Expande el área sensible al tacto
+        onPress={() => {
+          console.log("Botón hamburguesa presionado, menuVisible antes:", menuVisible);
+          setMenuVisible(true);
+        }}
+        style={{ padding: 8 }}
+        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
       >
         <Text style={{ fontSize: 30 }}>☰</Text>
       </TouchableOpacity>
-      {menuVisible && ( // Renderiza el Modal solo cuando es visible
+
+      {menuVisible && (
         <Modal
           visible={menuVisible}
           transparent
           animationType="fade"
           onRequestClose={() => setMenuVisible(false)}
+          hardwareAccelerated // Puedes probar a añadir esto
+          statusBarTranslucent // Y esto, si sospechas de la StatusBar
         >
-          <TouchableOpacity
+          {/* Usar Pressable para el overlay */}
+          <Pressable
             style={styles.modalOverlay}
             onPress={() => setMenuVisible(false)}
-            activeOpacity={1}
           >
-
-            <View style={styles.menuContainer}>
-
-
+            {/* Evitar que el toque en el menuContainer cierre el modal */}
+            <Pressable onPress={(e) => e.stopPropagation()} style={[styles.menuContainer, { elevation: 10 }]}> {/* Añadir elevation al menú */}
+              
 
               <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuItemText}>
-                {profile?.username || 'Usuario no disponible'}
-              </Text>
+                <Text style={styles.menuItemText}>
+                  {profile?.username || 'Usuario no disponible'}
+                </Text>
               </TouchableOpacity>
 
                           
@@ -126,10 +131,8 @@ const HamburgerMenu = () => {
                 <Text style={styles.menuItemText}>Logros</Text>
               </TouchableOpacity>
 
-            </View>
-          </TouchableOpacity>
-
-          
+            </Pressable>
+          </Pressable>
         </Modal>
       )}
     </View>
@@ -139,22 +142,23 @@ const HamburgerMenu = () => {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.2)', // Ligeramente más oscuro para depurar
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
   },
   menuContainer: {
-    marginTop: 60,
+    marginTop: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 60, // Ajuste para StatusBar de Android
     marginRight: 10,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
-    width: 220, // Ancho aumentado para un menú más grande
-    elevation: 5,
+    width: 250, // Un poco más ancho
+    // elevation: 5, // Ya lo pusimos inline
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
+    zIndex: 110, // zIndex más alto para el contenido del menú
   },
   menuItem: {
     paddingVertical: 10,
