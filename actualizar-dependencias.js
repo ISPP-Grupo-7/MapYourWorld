@@ -152,7 +152,7 @@ function sincronizarDependencias() {
       // Dependencias principales
       'react': '18.3.1',
       'react-dom': '18.3.1',
-      'react-native': '0.76.7',
+      'react-native': '0.76.9',
       "expo-modules-core": "2.2.3",
       'expo': '52.0.37',
       '@expo/webpack-config': '^0.17.4',
