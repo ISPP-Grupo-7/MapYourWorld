@@ -8,14 +8,14 @@ export const joinMap = async (req: Request, res: Response): Promise<void> => {
   try {
     const mapId = req.params.mapId;
     const userId = req.params.userId;
-    const { friendId } = req.body;
+    const { friendId, status } = req.body;
 
     if (!mapId || !userId || !friendId) {
       res.status(400).json({ success: false, message: 'MapId y UserId son requeridos' });
       return;
     }
 
-    await collabMapService.joinMap(mapId, userId, friendId);
+    await collabMapService.joinMap(mapId, userId, friendId, status);
 
     res.status(200).json({
       success: true,

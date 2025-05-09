@@ -48,7 +48,7 @@ const CollaborativeMapListScreen: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [mapName, setMapName] = useState<string>("");
   const [mapDescription, setMapDescription] = useState<string>("");
-  const [maxUsers, setMaxUsers] = useState<number>(6);
+  const [maxUsers, setMaxUsers] = useState<number>(5);
   const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
 
   // Estado para el modal de invitación
@@ -66,12 +66,12 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Colores para los jugadores
   const playerColors = [
-    "#2196F3", // Azul (propietario)
-    "#4CAF50", // Verde
-    "#FFC107", // Amarillo
-    "#FF9800", // Naranja
-    "#E91E63", // Rosa
-    "#9C27B0"  // Morado
+  "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
+
   ];
 
   // Referencia para verificar si el componente está montado
@@ -275,7 +275,7 @@ const CollaborativeMapListScreen: React.FC = () => {
         // Limpiar los campos del formulario
         setMapName("");
         setMapDescription("");
-        setMaxUsers(6);
+        setMaxUsers(5);
         setShowCreateModal(false);
 
         // Añadir el nuevo mapa a la lista si viene en la respuesta
@@ -427,29 +427,40 @@ const CollaborativeMapListScreen: React.FC = () => {
     const availableFriends = getAvailableFriends();
     return (
       <Modal
-        visible={showInviteModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowInviteModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Invitar Amigos</Text>
-            <Text style={styles.modalSubtitle}>
-              Máximo 5 amigos (6 usuarios en total)
-            </Text>
-
-            {availableFriends.length === 0 ? (
-              <Text style={styles.noFriendsText}>
-                Tus amigos ya se han unido a este mapa.
-              </Text>
-            ) : (
-              <FlatList
-                data={availableFriends}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.invitedItem}>
-                    <Text style={styles.friendName}>{item.name}</Text>
+                visible={showInviteModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowInviteModal(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Invitar Amigos</Text>
+                    <Text style={styles.modalSubtitle}>
+                      Máximo 4 amigos (5 usuarios en total)
+                    </Text>
+          
+                    {availableFriends.length === 0 ? (
+                      <Text style={styles.noFriendsText}>
+                        No te quedan amigos por invitar a este mapa.
+                      </Text>
+                    ) : (
+                      <FlatList
+                        data={availableFriends}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                          <View style={styles.invitedItem}>
+                            <Text style={styles.friendName}>{item.name}</Text>
+                            <TouchableOpacity
+                              style={styles.inviteButton}
+                              onPress={() => sendFriendRequest(item.id)}
+                            >
+                              <Text style={styles.inviteButtonText}>Invitar</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      />
+                    )}
+          
                     <TouchableOpacity
                       style={styles.inviteButton}
                       onPress={() => sendFriendRequest(item.id)}
@@ -488,7 +499,7 @@ const CollaborativeMapListScreen: React.FC = () => {
             {item.description || "Sin descripción"}
           </Text>
           <Text style={styles.mapUsers}>
-            {item.users_joined?.length || 1} / {maxUsers} usuarios
+            {item.users_joined?.length || 1} / 5 usuarios
           </Text>
         </View>
 
@@ -504,21 +515,21 @@ const CollaborativeMapListScreen: React.FC = () => {
               setShowInviteModal(true);
             }}
           >
-            <Icon name="person-add" size={20} color="#2196F3" />
+            <Icon name="person-add" size={20} color="#007df3" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.actionButton, styles.deleteButton]}
-            onPress={(e) => {
-              e.stopPropagation();
-              setShowInviteModal(false);
-              setShowCreateModal(false);
-              setMapToDelete(item.id);
-              setShowDeleteConfirm(true);
-            }}
-          >
-            <Icon name="delete" size={20} color="#f44336" />
-          </TouchableOpacity>
+          
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteButton]}
+              onPress={(e) => {
+                e.stopPropagation();
+                setMapToDelete(item.id);
+                setShowDeleteConfirm(true);
+              }}
+            >
+              <Icon name="delete" size={20} color="#00386d" />
+            </TouchableOpacity>
+          
         </View>
       </TouchableOpacity>
     );
@@ -563,10 +574,10 @@ const CollaborativeMapListScreen: React.FC = () => {
                 multiline={true}
                 maxLength={100}
               />
-
-              <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+  
+              <Text style={styles.inputLabel}>Previsualización de los colores de los usuarios</Text>
               <View style={styles.pickerContainer}>
-                {[2, 3, 4, 5, 6].map((num) => {
+                {[2, 3, 4, 5].map((num) => {
                   const isSelected = maxUsers === num;
                   const buttonStyle = isSelected
                     ? styles.pickerItemSelected
@@ -599,10 +610,8 @@ const CollaborativeMapListScreen: React.FC = () => {
                   />
                 ))}
               </View>
-              <Text style={styles.playerPreviewText}>
-                Vista previa de colores de jugadores
-              </Text>
-
+              
+  
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
@@ -667,7 +676,7 @@ const CollaborativeMapListScreen: React.FC = () => {
     >
       <View style={styles.modalContainer}>
         <View style={[styles.modalContent, styles.confirmModal]}>
-          <Icon name="warning" size={40} color="#f44336" style={styles.warningIcon} />
+          <Icon name="warning" size={40} color="#00386d" style={styles.warningIcon} />
 
           <Text style={styles.confirmTitle}>Eliminar Mapa</Text>
           <Text style={styles.confirmText}>
@@ -708,7 +717,7 @@ const CollaborativeMapListScreen: React.FC = () => {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2196F3" />
+          <ActivityIndicator size="large" color="#007df3" />
           <Text style={styles.loadingText}>Cargando mapas colaborativos...</Text>
         </View>
       ) : (
@@ -757,7 +766,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
     paddingHorizontal: 16,
     paddingVertical: 12,
     elevation: 4,
@@ -799,19 +808,19 @@ const styles = StyleSheet.create({
   },
   mapDescription: {
     fontSize: 14,
-    color: "#666",
+    color: "#00386",
     marginBottom: 6,
   },
   mapUsers: {
     fontSize: 12,
-    color: "#2196F3",
+    color: "#007df3",
   },
   mapActions: {
     flexDirection: "row",
   },
   modalSubtitle: {
     fontSize: 14,
-    color: "#666",
+    color: "#00386",
     marginBottom: 15,
     textAlign: "center",
   },
@@ -835,7 +844,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: "#00386",
   },
   emptyContainer: {
     alignItems: "center",
@@ -845,7 +854,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#666",
+    color: "#00386",
     marginTop: 16,
   },
   emptySubtext: {
@@ -857,12 +866,12 @@ const styles = StyleSheet.create({
   },
   noFriendsText: {
     textAlign: "center",
-    color: "#666",
+    color: "#00386",
     marginVertical: 10,
     fontSize: 16,
   },
   createEmptyButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
@@ -903,7 +912,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inviteButton: {
-    backgroundColor: "#14b8a6",
+    backgroundColor: "#00b0dc", // Tono medio para el botón
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -916,7 +925,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#03045E",
+    backgroundColor: "#00386d", // Tono oscuro para el botón de cerrar
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -965,11 +974,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   pickerItemSelected: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
   },
   pickerText: {
     fontSize: 16,
-    color: "#666",
+    color: "#00386",
   },
   pickerTextSelected: {
     color: "white",
@@ -989,7 +998,7 @@ const styles = StyleSheet.create({
   playerPreviewText: {
     textAlign: "center",
     fontSize: 12,
-    color: "#666",
+    color: "#00386",
     marginBottom: 24,
   },
   modalButtons: {
@@ -1004,13 +1013,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   cancelButton: {
-    backgroundColor: "#f44336",
+    backgroundColor: "#00386d", // Rojo para botones de cancelar
   },
   createButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
   },
   deleteConfirmButton: {
-    backgroundColor: "#f44336",
+    backgroundColor: "#00386d",
   },
   buttonText: {
     fontWeight: "bold",
@@ -1028,11 +1037,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   toggleButtonActive: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
   },
   toggleText: {
     fontSize: 14,
-    color: "#666",
+    color: "#00386",
   },
   toggleTextActive: {
     color: "white",
@@ -1048,7 +1057,7 @@ const styles = StyleSheet.create({
   },
   confirmText: {
     fontSize: 16,
-    color: "#666",
+    color: "#00386",
     textAlign: "center",
     marginBottom: 24,
   },

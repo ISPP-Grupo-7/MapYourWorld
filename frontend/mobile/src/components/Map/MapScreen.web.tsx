@@ -77,7 +77,7 @@ const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, ti
             width: '100%',
             padding: '10px',
             borderRadius: '8px',
-            backgroundColor: '#3182ce',
+            backgroundColor: '#007df3',
             color: 'white',
             fontWeight: 600,
             border: 'none',
@@ -251,7 +251,7 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
           console.log(`Renderizando distritos (total: ${distritos.length})`);
         }
         
-        const color = distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)";
+        const color = distrito.isUnlocked ? "#00b0dc" :"rgb(128, 128, 128)";
         
         L.polygon(distrito.coordenadas, {
           fillColor: color,
@@ -391,8 +391,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
       }}
     >
       <div style={{ fontSize: '50px', marginBottom: '10px' }}>🏆</div>
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '5px' }}>¡Nuevo Logro!</h2>
-      <p style={{ fontSize: '18px', color: 'white', marginBottom: '5px' }}>Has desbloqueado un nuevo distrito</p>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '5px' }}>¡Distrito desbloqueado!</h2>
       <p style={{ fontSize: '16px', color: 'yellow' }}>{distrito}</p>
     </div>
   );
@@ -1153,7 +1152,7 @@ const MapScreen = () => {
                 width: 100%;
                 padding: 12px;
                 border-radius: 8px;
-                background-color: #2563eb;
+                background-color: #007df3;
                 color: white;
                 font-weight: 600;
                 text-align: center;
@@ -1219,7 +1218,7 @@ const MapScreen = () => {
       {/* Loader */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#0003ff" />
     </div>
       )}
       

@@ -9,7 +9,7 @@ import {styles} from '@assets/styles/styles';
 import { API_URL } from '@constants/config';
 require ('@assets/styles/web.css')
 require ('@assets/styles/auth.css')
-import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
+import { useAuth } from '../../contexts/AuthContext';
 import TermsAndConditions from '../UI/TermsAndConditions.web';
 import StaticAd from '../Ads/StaticAd.web';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,7 +19,7 @@ const StyledText = styled(Text);
 const StyledScrollView = styled(ScrollView);
 
 // Constantes para colores de la aplicación
-const APP_TEAL = '#2bbbad';
+const APP_TEAL = '#0003ff';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {

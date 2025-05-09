@@ -7,29 +7,30 @@ import { API_URL } from '../../constants/config';
 import { useAuth } from '@/contexts/AuthContext';
 import PricingTableWeb from '../UI/PricingTableWeb';
 import AlertModal from '../UI/Alert';
-
+ 
 const stripePromise = loadStripe('pk_test_51R4l53COc5nj88VcYd6SLzaAhHazLwG2eu4s7HcQOqYB7H1BolfivjPrFzeedbiZuJftKEZYdozfe6Dmo7wCP5lA00rN9xJSro');
-
+ 
 type SubscriptionPlan = 'PREMIUM' | 'BASIC' | null;
-
+ 
 type RootStackParamList = {
   Map: undefined;
 };
-
+ 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Map'>;
-
+ 
 type CheckoutFormProps = {
   setLoading: (loading: boolean) => void;
   loading: boolean;
   updateSubscription: () => Promise<void>;
 };
-
+ 
 const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> = ({ updateSubscription }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>(null);
+  const [isPricingTableOpen, setIsPricingTableOpen] = useState<boolean>(false);
   const { user } = useAuth();
   const navigation = useNavigation<NavigationProp>();
-
+ 
   useEffect(() => {
     const fetchActualPlan = async () => {
       try {
@@ -43,7 +44,11 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
     };
     if (user) fetchActualPlan();
   }, [user]);
-
+ 
+  const togglePricingTable = () => {
+    setIsPricingTableOpen(prev => !prev);
+  };
+ 
   return (
     <Elements stripe={stripePromise}>
       <div
@@ -56,8 +61,8 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
           boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)',
           borderRadius: '12px',
           gap: '16px',
-          maxHeight: '80vh', // Altura máxima relativa a la ventana
-          overflowY: 'auto', // Habilita el scroll vertical cuando es necesario
+          maxHeight: '80vh',
+          overflowY: 'auto',
         }}
       >
         {subscriptionPlan === 'PREMIUM' ? (
@@ -66,82 +71,138 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: '40px',
+              padding: '20px',
             }}
           >
-            <h2
-              style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#0d9488',
-                marginBottom: '16px',
-              }}
-            >
-              Enhorabuena, ya eres miembro Premium
-            </h2>
-            <p
-              style={{
-                fontSize: '16px',
-                color: '#6b7280',
-                textAlign: 'center',
-                marginBottom: '24px',
-              }}
-            >
-              Ahora puedes disfrutar de todas las características exclusivas, incluyendo acceso ilimitado a mapas y estadísticas avanzadas. ¡Gracias por ser parte de nuestra comunidad Premium!
-            </p>
             <button
               style={{
                 padding: '12px 24px',
+                width: '100%',
                 borderRadius: '8px',
-                backgroundColor: '#14b8a6',
+                backgroundColor: '#007df3',
                 border: 'none',
                 color: 'white',
                 fontWeight: 'bold',
                 fontSize: '16px',
                 cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                marginBottom: '20px',
               }}
-              onClick={() => navigation.navigate('Map')}
+              onClick={togglePricingTable}
             >
-              Ir a mi mapa
+              {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
             </button>
+           
+            {isPricingTableOpen ? (
+              <div style={{ width: '100%', marginBottom: '24px' }}>
+                <PricingTableWeb />
+              </div>
+            ) : (
+              <>
+                <h2
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#00386d',
+                    marginBottom: '16px',
+                  }}
+                >
+                  Enhorabuena, ya eres miembro Premium
+                </h2>
+                <p
+                  style={{
+                    fontSize: '16px',
+                    color: '#6b7280',
+                    textAlign: 'center',
+                    marginBottom: '24px',
+                  }}
+                >
+                  Ahora puedes disfrutar de todas las características exclusivas, incluyendo acceso ilimitado a mapas y estadísticas avanzadas. ¡Gracias por ser parte de nuestra comunidad Premium!
+                </p>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    backgroundColor: '#007df3',
+                    border: 'none',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  }}
+                  onClick={() => navigation.navigate('Map')}
+                >
+                  Ir a mi mapa
+                </button>
+              </>
+            )}
           </div>
         ) : (
-          <>
-            <div style={{ marginBottom: '24px', gap: '16px' }}>
-              <PricingTableWeb />
-            </div>
-            <h2
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '20px',
+            }}
+          >
+            <button
               style={{
-                fontSize: '32px',
+                padding: '12px 24px',
+                width: '100%',
+                borderRadius: '8px',
+                backgroundColor: '#007df3',
+                border: 'none',
+                color: 'white',
                 fontWeight: 'bold',
-                color: '#0d9488',
-                marginBottom: '16px',
-                textAlign: 'center',
+                fontSize: '16px',
+                cursor: 'pointer',
+                marginBottom: '20px',
               }}
+              onClick={togglePricingTable}
             >
-              Suscríbete a Premium (5,50€ al mes)
-            </h2>
-            <CheckoutForm setLoading={setLoading} loading={loading} updateSubscription={updateSubscription} />
-          </>
+              {isPricingTableOpen ? 'Ocultar planes' : 'Ver planes'}
+            </button>
+           
+            {isPricingTableOpen ? (
+              <div style={{ width: '100%', marginBottom: '24px' }}>
+                <PricingTableWeb />
+              </div>
+            ) : (
+              <>
+                <h2
+                  style={{
+                    fontSize: '32px',
+                    fontWeight: 'bold',
+                    color: '#00386d',
+                    marginBottom: '16px',
+                    textAlign: 'center',
+                  }}
+                >
+                  Hazte Premium Ahora (2.99€/mes)
+                </h2>
+                <CheckoutForm setLoading={setLoading} loading={loading} updateSubscription={updateSubscription} />
+              </>
+            )}
+          </div>
         )}
       </div>
     </Elements>
   );
 };
-
+ 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, updateSubscription }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { user } = useAuth();
   const navigation = useNavigation<NavigationProp>();
-
+ 
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertTitle, setAlertTitle] = useState<string>('');
   const [alertMessage, setAlertMessage] = useState<string>('');
   const [alertActionText, setAlertActionText] = useState<string>('');
   const [alertOnAction, setAlertOnAction] = useState<(() => void) | undefined>(undefined);
-
+ 
   const showAlert = (
     title: string,
     message: string,
@@ -154,27 +215,27 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
     setAlertOnAction(() => onAction);
     setAlertVisible(true);
   };
-
+ 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-
+ 
     try {
       const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 550 }),
+        body: JSON.stringify({ amount: 299 }),
       });
-
+ 
       if (!response.ok) throw new Error('Error al crear el PaymentIntent');
       const { paymentIntent } = await response.json();
-
+ 
       if (!stripe || !elements) return;
-
+ 
       const result = await stripe.confirmCardPayment(paymentIntent, {
         payment_method: { card: elements.getElement(CardElement)! },
       });
-
+ 
       if (result.error) {
         console.error(result.error.message);
         alert('Hubo un error al procesar el pago');
@@ -188,10 +249,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
             console.error('Error al actualizar la suscripción');
             return;
           }
-
+ 
           // Llamar a updateSubscription para actualizar el estado en el componente padre
           await updateSubscription();
-
+ 
           showAlert(
             '¡Pago realizado con éxito!',
             'Tu pago se ha procesado correctamente.',
@@ -207,10 +268,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
       console.error('Error al procesar el pago:', error);
       alert('Hubo un error, por favor intenta nuevamente');
     }
-
+ 
     setLoading(false);
   };
-
+ 
   return (
     <>
       <form
@@ -224,6 +285,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           marginTop: '16px',
+          width: '100%',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
@@ -232,13 +294,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
               options={{
                 style: {
                   base: {
-                    color: '#0d9488',
+                    color: '#00386d',
                     fontSize: '16px',
                     fontFamily: 'sans-serif',
                     '::placeholder': {
                       color: '#94a3b8',
                     },
-                    iconColor: '#0d9488',
+                    iconColor: '#00386d',
                   },
                   invalid: {
                     color: '#dc2626',
@@ -255,7 +317,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
           style={{
             padding: '12px 24px',
             borderRadius: '8px',
-            backgroundColor: '#14b8a6',
+            backgroundColor: '#007df3',
             border: 'none',
             color: 'white',
             fontWeight: 'bold',
@@ -271,7 +333,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
           {loading ? 'Cargando...' : 'Pagar con Stripe'}
         </button>
       </form>
-
+ 
       <AlertModal
         visible={alertVisible}
         title={alertTitle}
@@ -284,5 +346,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
     </>
   );
 };
-
+ 
 export default SubscriptionScreen;
+ 

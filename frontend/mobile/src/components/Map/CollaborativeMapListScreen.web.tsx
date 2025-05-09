@@ -46,7 +46,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
     const [mapName, setMapName] = useState<string>("");
     const [mapDescription, setMapDescription] = useState<string>("");
-    const [maxUsers, setMaxUsers] = useState<number>(6);
+    const [maxUsers, setMaxUsers] = useState<number>(5);
     const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
 
 
@@ -67,12 +67,12 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
 
     // Colores para los jugadores (se mantiene el mismo orden que en la versión móvil)
     const playerColors = [
-        "#2196F3", // Azul (propietario)
-        "#4CAF50", // Verde
-        "#FFC107", // Amarillo
-        "#FF9800", // Naranja
-        "#E91E63", // Rosa
-        "#9C27B0"  // Morado
+        "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
+        
     ];
 
     // Obtener el ID del usuario al cargar el componente
@@ -357,7 +357,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                         {item.description || "Sin descripción"}
                     </Text>
                     <Text style={webStyles.mapUsers}>
-                        {item.users_joined?.length || 1} / {maxUsers} usuarios
+                        {item.users_joined?.length || 1} / 5 usuarios
                     </Text>
                 </View>
                 <View style={webStyles.mapActions}>
@@ -370,7 +370,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                             setShowInviteModal(true);
                         }}
                     >
-                        <Icon name="person-add" size={20} color="#2196F3" />
+                        <Icon name="person-add" size={20} color="#007df3" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -381,7 +381,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                             setShowDeleteConfirm(true);
                         }}
                     >
-                        <Icon name="delete" size={20} color="#f44336" />
+                        <Icon name="delete" size={20} color="#00386d" />
                     </TouchableOpacity>
 
                 </View>
@@ -430,9 +430,9 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                             maxLength={100}
                         />
 
-                        <Text style={webStyles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+                        <Text style={webStyles.inputLabel}>Previsualización de los colores de los usuarios</Text>
                         <View style={webStyles.pickerContainer}>
-                            {[2, 3, 4, 5, 6].map((num) => {
+                            {[2, 3, 4, 5].map((num) => {
                                 const isSelected = maxUsers === num;
                                 return (
                                     <TouchableOpacity
@@ -467,9 +467,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                                 />
                             ))}
                         </View>
-                        <Text style={webStyles.playerPreviewText}>
-                            Vista previa de colores de jugadores
-                        </Text>
+                        
 
                         <View style={webStyles.modalButtons}>
                             <TouchableOpacity
@@ -565,11 +563,11 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
           >
             <div style={webStyles.modalContent}>
               <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
-              <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
+              <p style={webStyles.modalSubtitle}>Máximo 4 amigos (5 usuarios en total)</p>
               <div style={{ maxHeight: 150, overflowY: "auto" }}>
               {availableFriends.length === 0 ? (
                 <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
-                  Tus amigos ya se han unido a este mapa.
+                  No te quedan amigos por invitar a este mapa.
                 </p>
               ) : (
                 availableFriends.map((friend) => (
@@ -598,7 +596,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
         >
             <View style={webStyles.modalContainer}>
                 <View style={[webStyles.modalContent, webStyles.confirmModal]}>
-                    <Icon name="warning" size={40} color="#f44336" style={webStyles.warningIcon} />
+                    <Icon name="warning" size={40} color="#00386d" style={webStyles.warningIcon} />
                     <Text style={webStyles.confirmTitle}>Eliminar Mapa</Text>
                     <Text style={webStyles.confirmText}>
                         ¿Estás seguro de que deseas eliminar este mapa colaborativo? Esta acción no se puede deshacer.
@@ -637,7 +635,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
             {/* Lista de mapas */}
             {loading ? (
                 <View style={webStyles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#2196F3" />
+                    <ActivityIndicator size="large" color="#007df3" />
                     <Text style={webStyles.loadingText}>Cargando mapas colaborativos...</Text>
                 </View>
             ) : (
@@ -685,7 +683,7 @@ const webStyles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#2196F3",
+        backgroundColor: "#007df3",
         paddingHorizontal: 16,
         paddingVertical: 12,
         // Para web se puede usar boxShadow en lugar de elevation
@@ -739,7 +737,7 @@ const webStyles = StyleSheet.create({
     },
     mapUsers: {
         fontSize: 12,
-        color: "#2196F3"
+        color: "#007df3"
     },
     mapActions: {
         flexDirection: "row"
@@ -758,7 +756,7 @@ const webStyles = StyleSheet.create({
     },
     friendName: {
         fontSize: 16,
-        color: "#023E8A",
+        color: "#00386d",
         flex: 1,
     },
     loadingContainer: {
@@ -790,7 +788,7 @@ const webStyles = StyleSheet.create({
         textAlign: "center"
     },
     createEmptyButton: {
-        backgroundColor: "#2196F3",
+        backgroundColor: "#007df3",
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 25
@@ -804,7 +802,7 @@ const webStyles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)"
+        backgroundColor: "rgba(0, 56, 109, 0.5)"
     },
     modalContent: {
         backgroundColor: "white",
@@ -866,7 +864,7 @@ const webStyles = StyleSheet.create({
         paddingBottom: 8,
     },
     inviteButton: {
-        backgroundColor: "#14b8a6",
+        backgroundColor: "#00b0dc",
         borderRadius: 8,
         paddingTop: 16,      // Aumenta el espacio superior
         paddingBottom: 16,   // Aumenta el espacio inferior
@@ -878,7 +876,7 @@ const webStyles = StyleSheet.create({
         fontSize: 16,        // Aumenta el tamaño del texto
       },
       closeButton: {
-        backgroundColor: "#03045E",
+        backgroundColor: "#00386d",
         borderRadius: 8,
         paddingTop: 16,
         paddingBottom: 16,
@@ -944,13 +942,13 @@ const webStyles = StyleSheet.create({
         marginHorizontal: 8
     },
     cancelButton: {
-        backgroundColor: "#f44336"
+        backgroundColor: "#00386d"
     },
     createButton: {
-        backgroundColor: "#2196F3"
+        backgroundColor: "#007df3"
     },
     deleteConfirmButton: {
-        backgroundColor: "#f44336"
+        backgroundColor: "#00386d"
     },
     buttonText: {
         fontWeight: "bold",
@@ -968,7 +966,7 @@ const webStyles = StyleSheet.create({
         backgroundColor: "#f0f0f0"
     },
     toggleButtonActive: {
-        backgroundColor: "#2196F3"
+        backgroundColor: "#007df3"
     },
     toggleText: {
         fontSize: 14,

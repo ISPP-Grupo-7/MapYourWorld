@@ -94,16 +94,7 @@ export default class DistrictRepository {
         return district;
 }
 
-    async findDistrictContainingLocation(latitude: number, longitude: number): Promise<District | null> {
-        const result = await this.districtRepo.query(`
-            SELECT * 
-            FROM district 
-            WHERE ST_Within(ST_SetSRID(ST_MakePoint($1, $2), 4326), boundaries)
-            LIMIT 1
-        `, [longitude, latitude]);
-
-        return result;
-    }
+ 
 
     async getDistrictsByMapId(mapId: string): Promise<District[]> {
         console.log(`Buscando distritos para el mapa con ID ${mapId}`);

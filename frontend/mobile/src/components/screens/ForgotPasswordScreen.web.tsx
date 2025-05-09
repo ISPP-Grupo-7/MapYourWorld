@@ -19,7 +19,7 @@ const StyledText = styled(Text);
 const StyledScrollView = styled(ScrollView);
 
 // Constantes para colores de la aplicación
-const APP_TEAL = '#2bbbad';
+const APP_TEAL = '#007df3';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {

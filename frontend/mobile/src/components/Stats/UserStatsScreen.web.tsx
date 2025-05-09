@@ -5,6 +5,7 @@
   import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
   import { RootStackParamList } from '@/navigation/types';
   import AlertModal from '../UI/Alert';
+import { AchievementUtils } from '../../utils/AchievementUtils';
 
   interface Stats {
     achievements: number;
@@ -77,9 +78,11 @@
         });
         if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
+
+        const unlocked = await AchievementUtils.getUnlockedAchievements(user.id);
   
         const statsData: Stats = {
-          achievements: data.numeroLogros || 0,
+          achievements: unlocked.length || 0,
           friends: data.numeroAmigos || 0,
           createdPOI: data.numeroPoisCreados || 0,
           unlockedDistricts: data.numeroDistritosDesbloqueados || 0,
@@ -115,7 +118,7 @@
             }}
           >
             <div style={{ marginBottom: 20 }}>
-              <ActivityIndicator size="large" color="#2bbbad" />
+              <ActivityIndicator size="large" color="#007df3" />
             </div>
             <div style={{ color: '#4b5563', fontSize: 16 }}>Cargando logros...</div>
           </div>
@@ -156,7 +159,7 @@
       >
       <div
         style={{
-          backgroundColor: '#E0F7FA',
+          backgroundColor: '#ade8f4',
           borderRadius: 12,
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
           padding: 20,
@@ -165,8 +168,8 @@
       >
         <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: 12 }}>
           <div style={{ width: '100%', marginBottom: 16, textAlign: 'center' }}>
-            <h2 style={{ color: '#14b8a6', fontSize: 30, marginBottom: 10 }}>🏆 Logros</h2>
-            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#0d9488' }}>
+            <h2 style={{ color: '#007df3', fontSize: 30, marginBottom: 10 }}>🏆 Logros</h2>
+            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#00386d' }}>
               {stats?.achievements}
             </div>
           </div>
@@ -176,7 +179,7 @@
       {/* Sección de Amigos */}
       <div
         style={{
-          backgroundColor: '#F1F8E9',
+          backgroundColor: '#ade8f4',
           borderRadius: 12,
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
           padding: 20,
@@ -185,8 +188,8 @@
       >
         <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: 12 }}>
           <div style={{ width: '100%', marginBottom: 16, textAlign: 'center' }}>
-            <h2 style={{ color: '#14b8a6', fontSize: 30, marginBottom: 10 }}>👥 Amigos</h2>
-            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#0d9488' }}>
+            <h2 style={{ color: '#007df3', fontSize: 30, marginBottom: 10 }}>👥 Amigos</h2>
+            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#00386d' }}>
               {stats?.friends}
             </div>
           </div>
@@ -221,8 +224,8 @@
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
             }}
           >
-            <h2 style={{ color: '#14b8a6', fontSize: 25, marginBottom: 10, marginTop: 10 }}>🗺️ POIs Creados</h2>
-            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#0d9488' }}>
+            <h2 style={{ color: '#007df3', fontSize: 25, marginBottom: 10, marginTop: 10 }}>🗺️ POIs Creados</h2>
+            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#00386d' }}>
               {stats?.createdPOI}
             </div>
           </div>
@@ -239,7 +242,7 @@
             }}
           >
             <h2 style={{ color: '#f59e0b', fontSize: 25, marginBottom: 10 }}>🚪 Distritos Desbloqueados</h2>
-            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#0d9488' }}>
+            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#00386d' }}>
               {stats?.unlockedDistricts}
             </div>
           </div>
@@ -256,7 +259,7 @@
             }}
           >
             <h2 style={{ color: '#9333ea', fontSize: 25, marginBottom: 10 }}>🗺️ Mapas Colaborativos</h2>
-            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#0d9488' }}>
+            <div style={{ fontSize: 25, fontWeight: 'bold', color: '#00386d' }}>
               {stats?.collabMaps}
             </div>
           </div>

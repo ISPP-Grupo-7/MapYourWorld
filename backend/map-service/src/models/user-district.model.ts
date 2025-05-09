@@ -1,6 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, RelationId, JoinColumn } from 'typeorm';
-import { Geometry } from 'geojson';
-import { Map } from './map.model';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../../auth-service/src/models/user.model';
 import { District } from './district.model';
 

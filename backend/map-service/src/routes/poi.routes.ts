@@ -1,22 +1,22 @@
 import { Router } from 'express';
-import * as POIController from '../controllers/poi.controller';
+import { createPOI, createPOIInAllMaps, getPOIById, updatePOI, deletePOI, getAllPOIs, getPOIsByMapId, getUniquePointsOfInterestBusiness } from '../controllers/poi.controller';
 
 const router: Router = Router();
 
 // Crear un nuevo POI
-router.post('/', POIController.createPOI);
-router.post('/admin/create/ads', POIController.createPOIInAllMaps);
+router.post('/', createPOI);
+router.post('/admin/create/ads', createPOIInAllMaps);
 // Crear POI sin token
 
 // Rutas específicas primero
-router.get('/all', POIController.getAllPOIs);
-router.get('/map/:mapId', POIController.getPOIsByMapId);
-router.get('/business/points', POIController.getUniquePointsOfInterestBusiness);
+router.get('/all', getAllPOIs);
+router.get('/map/:mapId', getPOIsByMapId);
+router.get('/business/points', getUniquePointsOfInterestBusiness);
 
 
 // Rutas con parámetros de ID al final
-router.get('/:id', POIController.getPOIById);
-router.put('/:id', POIController.updatePOI);
-router.delete('/:id', POIController.deletePOI);
+router.get('/:id', getPOIById);
+router.put('/:id', updatePOI);
+router.delete('/:id', deletePOI);
 
 export default router;

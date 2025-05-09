@@ -17,7 +17,7 @@ const StyledText = styled(Text);
 const StyledScrollView = styled(ScrollView);
 
 // Constantes para colores de la aplicación
-const APP_TEAL = '#2bbbad';
+const APP_TEAL = '#0003ff';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -292,7 +292,7 @@ const LoginScreen = () => {
                 onClick={handleLogin}
                 disabled={isLoading}
                 style={{
-                  backgroundColor: '#2bbbad',
+                  backgroundColor: APP_TEAL,
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',

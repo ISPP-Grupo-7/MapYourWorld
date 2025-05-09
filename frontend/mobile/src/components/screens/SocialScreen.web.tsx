@@ -208,7 +208,7 @@ const SocialScreenWeb = () => {
         headers: {
           "Content-Type": "application/json", 
         },
-        body: JSON.stringify({ friendId }),
+        body: JSON.stringify({ friendId, status }),
       });
       const data = await response.json();
       if (data.success) {
@@ -219,9 +219,15 @@ const SocialScreenWeb = () => {
         }
         // Quitamos la solicitud de la lista
         setFriendRequests((prev) => prev.filter((r) => r.id !== friendId));
+      }else if (data.error) {
+        window.alert(data.error);
       }
+
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al unirse al mapa';
+      window.alert(errorMessage);
       console.error(`Error al actualizar invitación (${status}):`, error);
+      
     }
   };
 
@@ -373,9 +379,16 @@ const SocialScreenWeb = () => {
                     style={[webStyles.tabButton, active && webStyles.tabButtonActive]}
                     onPress={() => setActiveTab(tab as any)}
                   >
+                    
                     <Text style={[webStyles.tabButtonText, active && webStyles.tabButtonTextActive]}>
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {tab === 'solicitudes' && friendRequests.length > 0 && (
+                        <View style={webStyles.badgeContainer}>
+                          <Text style={webStyles.badgeText}>{friendRequests.length}</Text>
+                        </View>
+                      )}
                     </Text>
+
                   </TouchableOpacity>
                 );
               })}
@@ -470,15 +483,15 @@ const webStyles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#14b8a6',
+    borderColor: '#007df3',
     backgroundColor: 'white',
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
   },
   tabButtonText: {
-    color: '#14b8a6',
+    color: '#007df3',
     fontWeight: 'bold',
   },
   tabButtonTextActive: {
@@ -509,7 +522,7 @@ const webStyles = StyleSheet.create({
     marginTop: 8,
   },
   acceptButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -539,7 +552,7 @@ const webStyles = StyleSheet.create({
     fontSize: 16,
   },
   primaryButton: {
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -598,7 +611,7 @@ const webStyles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 12,
     alignItems: 'center',
-    backgroundColor: '#14b8a6',
+    backgroundColor: '#007df3',
   },
   modalButtonText: {
     color: 'white',
@@ -619,5 +632,21 @@ const webStyles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    right: -24,
+    top: -8,
+    backgroundColor: '#e11d48',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
