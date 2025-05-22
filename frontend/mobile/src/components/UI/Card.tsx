@@ -55,7 +55,7 @@ export const Card: React.FC<CardProps> = ({
   };
 
   // Clase para borde
-  const borderClass = border ? 'border border-gray-200' : '';
+  const borderClass = border ? 'border border-[#ade8f4]' : '';
 
   // Combinación de todas las clases
   const cardClasses = `

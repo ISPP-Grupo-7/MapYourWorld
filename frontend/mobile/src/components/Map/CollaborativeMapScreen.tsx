@@ -128,8 +128,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   return (
     <Animated.View style={[styles.logroContainer, { opacity: opacityAnim }]}>
       <Text style={styles.logroEmoji}>🏆</Text>
-      <Text style={styles.logroTitle}>¡Logro Conseguido!</Text>
-      <Text style={styles.logroSubtitle}>Distrito desbloqueado en mapa colaborativo</Text>
+      <Text style={styles.logroTitle}>¡Distrito desbloqueado!</Text>
       <Text style={styles.logroDistrito}>{distrito}</Text>
     </Animated.View>
   );
@@ -1084,7 +1083,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#14b8a6", // Tono medio para el botón
+    backgroundColor: "#00b0dc", // Tono medio para el botón
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -1097,7 +1096,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    backgroundColor: "#00386d", // Tono oscuro para el botón de cerrar
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -1124,14 +1123,14 @@ const styles = StyleSheet.create({
   },
   friendName: {
     fontSize: 16,
-    color: "#023E8A",
+    color: "#00386d",
     flex: 1,
   },
   reloadButton: {
     position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: "#FF9800",
+    backgroundColor: "#007df3",
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
@@ -1145,7 +1144,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   modalButton: {
-    backgroundColor: '#3182ce',
+    backgroundColor: '#007df3',
     borderRadius: 5,
     padding: 10,
     alignItems: 'center',
@@ -1168,7 +1167,7 @@ const styles = StyleSheet.create({
     left: 0, 
     right: 0, 
     bottom: 0, 
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro
+    backgroundColor: 'rgba(0, 56, 109, 0.5)', // Fondo oscuro
     justifyContent: 'center', // Centrado verticalmente
     alignItems: 'center', // Centrado horizontalmente
   },

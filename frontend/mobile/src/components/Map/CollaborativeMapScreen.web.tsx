@@ -6,12 +6,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Definición de colores disponibles para los usuarios
 const USER_COLORS = [
-  "#2196f3", 
-  "#4cb050", 
-  "#fec107", 
-  "#ff9700", 
-  "#ea1e63", 
-  "#9c27b3",
+  "#2196f399",
+  "#4cb05099",
+  "#fec10799",
+  "#ff970099",
+  "#ea1e6399",
+  "#9c27b399",
 ];
 
 // Tipos para distritos, usuarios y POIs
@@ -76,8 +76,7 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   return (
     <div style={styles.logroContainer}>
       <span style={styles.logroEmoji}>🏆</span>
-      <h2 style={styles.logroTitle}>¡Logro Conseguido!</h2>
-      <p style={styles.logroSubtitle}>Distrito desbloqueado en mapa colaborativo</p>
+      <h2 style={styles.logroTitle}>¡Distrito desbloqueado!</h2>
       <p style={styles.logroDistrito}>{distrito}</p>
     </div>
   );
@@ -136,7 +135,7 @@ const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, ti
             width: '100%',
             padding: '10px',
             borderRadius: '8px',
-            backgroundColor: '#3182ce',
+            backgroundColor: '#007df3',
             color: 'white',
             fontWeight: 600,
             border: 'none',
@@ -1119,7 +1118,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "absolute",
     bottom: 20,
     left: 20,
-    backgroundColor: "#2196F3",
+    backgroundColor: "#007df3",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
@@ -1135,7 +1134,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: "#FF9800",
+    backgroundColor: "#007df3",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
@@ -1148,7 +1147,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 1001,
   },
   inviteButton: {
-    backgroundColor: "#14b8a6",
+    backgroundColor: "#007df3",
     borderRadius: 8,
     padding: "10px 20px",
     border: "none",

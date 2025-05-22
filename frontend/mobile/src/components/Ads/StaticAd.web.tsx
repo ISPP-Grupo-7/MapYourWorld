@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#2bbbad',
+    backgroundColor: '#00b0dc',
     position: 'absolute',
     left: 0,
   },
