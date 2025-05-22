@@ -79,7 +79,7 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
                 padding: '12px 24px',
                 width: '100%',
                 borderRadius: '8px',
-                backgroundColor: '#14b8a6',
+                backgroundColor: '#007df3',
                 border: 'none',
                 color: 'white',
                 fontWeight: 'bold',
@@ -102,7 +102,7 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
                   style={{
                     fontSize: '24px',
                     fontWeight: 'bold',
-                    color: '#0d9488',
+                    color: '#00386d',
                     marginBottom: '16px',
                   }}
                 >
@@ -122,7 +122,7 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
                   style={{
                     padding: '12px 24px',
                     borderRadius: '8px',
-                    backgroundColor: '#14b8a6',
+                    backgroundColor: '#007df3',
                     border: 'none',
                     color: 'white',
                     fontWeight: 'bold',
@@ -151,7 +151,7 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
                 padding: '12px 24px',
                 width: '100%',
                 borderRadius: '8px',
-                backgroundColor: '#14b8a6',
+                backgroundColor: '#007df3',
                 border: 'none',
                 color: 'white',
                 fontWeight: 'bold',
@@ -174,12 +174,12 @@ const SubscriptionScreen: React.FC<{ updateSubscription: () => Promise<void> }> 
                   style={{
                     fontSize: '32px',
                     fontWeight: 'bold',
-                    color: '#0d9488',
+                    color: '#00386d',
                     marginBottom: '16px',
                     textAlign: 'center',
                   }}
                 >
-                  Hazte Premium Ahora
+                  Hazte Premium Ahora (2.99€/mes)
                 </h2>
                 <CheckoutForm setLoading={setLoading} loading={loading} updateSubscription={updateSubscription} />
               </>
@@ -224,7 +224,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
       const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 550 }),
+        body: JSON.stringify({ amount: 299 }),
       });
  
       if (!response.ok) throw new Error('Error al crear el PaymentIntent');
@@ -294,13 +294,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
               options={{
                 style: {
                   base: {
-                    color: '#0d9488',
+                    color: '#00386d',
                     fontSize: '16px',
                     fontFamily: 'sans-serif',
                     '::placeholder': {
                       color: '#94a3b8',
                     },
-                    iconColor: '#0d9488',
+                    iconColor: '#00386d',
                   },
                   invalid: {
                     color: '#dc2626',
@@ -317,7 +317,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ setLoading, loading, update
           style={{
             padding: '12px 24px',
             borderRadius: '8px',
-            backgroundColor: '#14b8a6',
+            backgroundColor: '#007df3',
             border: 'none',
             color: 'white',
             fontWeight: 'bold',

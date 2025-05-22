@@ -5,6 +5,7 @@ import { ImageBackground, View, TouchableOpacity, StyleSheet, Text, Platform, Te
 import { styles } from '../../assets/styles/styles';
 import React, { useState } from "react";
 import { API_URL } from "@/constants/config";
+import AdvertisementPlans from "./AdvertisementPlans";
 
 type AdvertisementFormNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdvertisementForm'>;
 
@@ -16,10 +17,12 @@ interface AdvertisementPoint {
   city: string,
   postalcode: string,
   country: string,
-  comments: string
+  comments: string,
+  plan: string
 }
 
 const MAIL_ADDRESS = 'mapyourworld.group7@gmail.com'
+const planes = ['Explorador local', 'Ruta destacada', 'Destino imperdible']
 
 const AdvertisementForm = () => {
   const [ point, setPoint ] = useState<AdvertisementPoint>({
@@ -30,7 +33,8 @@ const AdvertisementForm = () => {
     city: '',
     postalcode: '',
     country: '',
-    comments: ''
+    comments: '',
+    plan: ''
   })
   const [errors, setErrors] = useState({
     email: '',
@@ -40,10 +44,12 @@ const AdvertisementForm = () => {
     city: '',
     postalcode: '',
     country: '',
-    comments: ''
+    comments: '',
+    plan: ''
   });
   const [loading, setLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [plansVisible, setPlansVisible] = useState(false);
     
   const navigation = useNavigation<AdvertisementFormNavigationProp>();
 
@@ -87,6 +93,12 @@ const AdvertisementForm = () => {
         isValid = false;
     }
 
+    // validación del plan
+    if (!point.plan.trim()) {
+      newErrors.plan = 'Se debe seleccionar un plan';
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
 }
@@ -110,7 +122,8 @@ const AdvertisementForm = () => {
         + `<br>Dirección: ${point.address}, ${point.city} ${point.postalcode}, ${point.country}</p>`
         + `<h3>Datos de contacto</h3><p>Correo electrónico: ${point.email}`
         + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}`
-        + `${point.comments ? `<br>Comentarios del solicitante: ${point.comments}</p>` : `</p>`}`;
+        + `${point.comments ? `<br>Comentarios del solicitante: ${point.comments}</p>` : `</p>`}`
+        + `<h3>Plan escogido</h3><p>${point.plan}`;
 
     const response = await fetch(`${API_URL}/api/email/send`, {
         method: 'POST',
@@ -137,7 +150,7 @@ const AdvertisementForm = () => {
   };
   
   const customInputStyles = `
-    .input-container input {
+    .input-container input, .input-container select {
       border: 2px solid #e2e8f0;
       border-radius: 8px;
       padding: 10px 15px;
@@ -148,7 +161,7 @@ const AdvertisementForm = () => {
     }
     
     .input-container input:focus {
-      border-color: #2bbbad;
+      border-color: #007df3;
       outline: none;
     }
     
@@ -160,10 +173,6 @@ const AdvertisementForm = () => {
       box-sizing: border-box;
       height: 44px;
     }
-
-    .ad-container {
-      margin: 50px;
-    }
   `;
 
   const renderSentModal = () => (
@@ -174,7 +183,7 @@ const AdvertisementForm = () => {
         <Text style={{ fontSize: 16, textAlign: 'center', }}>En breves nos pondremos en contacto con vosotros.</Text>
               <View>
                 <TouchableOpacity 
-                  style={{ flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#2bbbad", marginTop: 20, }} 
+                  style={{ flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#007df3", marginTop: 20, }} 
                   onPress={() => navigation.navigate('Welcome')}
                 >
                   <Text style={{ fontWeight: "bold", fontSize: 16, color: "white", }}>Volver al inicio</Text>
@@ -184,6 +193,10 @@ const AdvertisementForm = () => {
       </View>
     </Modal>
   );
+
+  const toggleTable = () => {
+    setPlansVisible(prev => !prev);
+  };
 
   return (
     <ImageBackground
@@ -208,10 +221,36 @@ const AdvertisementForm = () => {
               flexDirection: 'column',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
-              <h1><span style={{color: '#2bbbad'}}>Publicítate</span> con nosotros</h1>
+              <h1><span style={{color: '#007df3'}}>Publicítate</span> con nosotros</h1>
               <div style={{ margin: 20, fontSize: 16, color: '#64748b', }}>
                 Si quieres aparecer en nuestro mapa, ponte en contacto con nuestro equipo rellenando el siguiente formulario.
               </div>
+
+              {/* Pricing */}
+              <div>
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    width: '100%',
+                    borderRadius: '8px',
+                    backgroundColor: '#007df3',
+                    border: 'none',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    marginBottom: '20px',
+                  }}
+                  onClick={toggleTable}
+                >
+                  {plansVisible ? 'Ocultar' : 'Ver opciones de inversión'}
+                </button>
+                {plansVisible ? (
+                    <div style={{ width: '100%', marginBottom: '24px' }}>
+                      <AdvertisementPlans />
+                    </div>
+                    ) : <></>}
+                </div>
               
               <div style={{ width: '100%', marginBottom: 20 }}>
                 {/* Correo electrónico */}
@@ -428,13 +467,41 @@ const AdvertisementForm = () => {
                   )}
                 </div>
 
+                {/* Plan */}
+                <div className="input-container" style={{ marginBottom: 20 }}>
+                  <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                    Plan
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      value={point.plan}
+                      onChange={(e) => handleChange('plan', e.target.value)}
+                      style={{ 
+                        width: '100%',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                        height: '44px',
+                        borderColor: errors.comments ? '#e53e3e' : undefined
+                      }}
+                    >
+                      <option value="">Escoge un plan</option>
+                      {planes.map(p => (<option value={p}>{p}</option>))}
+                    </select>
+                  </div>
+                  {errors.plan && (
+                    <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                      {errors.plan}
+                    </div>
+                  )}
+                </div>
+
                 {/* Botón */}
                 <div style={{ width: '100%' }}>
                   <button 
                     onClick={handleSubmit}
                     style={{
                       width: '100%',
-                      backgroundColor: '#2bbbad',
+                      backgroundColor: '#007df3',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
