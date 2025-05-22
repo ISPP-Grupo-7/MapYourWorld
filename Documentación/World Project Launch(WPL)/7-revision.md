@@ -27,31 +27,28 @@
 
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
-| V1      | 21/05/2025| Primera versión          | Ángel Neria Acal
-
+| V1      | 21/05/2025| Primera versión          | Ángel Neria Acal   |
 
 ---
+
 ## 1. Mapeo Explícito de Casos de Uso (UC) a Interacciones
 
-
 ### 1.1. No Matchmaking
-
 
 - **Bienvenida**:  
   El usuario tiene la opción de iniciar sesión con una cuenta existente o registrarse en el sistema con una nueva cuenta. También se peude realizar una gestión del usu de cookies.
   ![Registro](./Images/bienvenidaWeb.png)
   *(Caso de uso implementado en #S2)*
 
-
 - **Registro**:  
-  El usuario se registra en el sistema proporcionando su nombre, correo electrónico y contraseña a través de un formulario. Para completar el registro es necesario que el nuevo usuario lea y acepte los términos y condiciones de uso. 
+  El usuario se registra en el sistema proporcionando su nombre, correo electrónico y contraseña a través de un formulario. Para completar el registro es necesario que el nuevo usuario lea y acepte los términos y condiciones de uso.
   ![Registro](./Images/registroWeb.png)
  *(Caso de uso implementado en #S2)*
   ![Registro](./Images/terminosCondiciones.png)
   *(Caso de uso implementado en #S2)*
 
 - **Login**:  
-  El usuario inicia sesión en el sistema introduciendo el correo y contraseña con el que previamente se ha debido registrar en el sistema. 
+  El usuario inicia sesión en el sistema introduciendo el correo y contraseña con el que previamente se ha debido registrar en el sistema.
   ![Login](./Images/LoginWeb.png)
   *(Caso de uso implementado en #S2)*
 
@@ -67,24 +64,22 @@
   ![POIFormulario](./Images/POIFormularioWeb.png)
   *(Caso de uso implementado en #S1)*
 
-  
   ![VerPOI](./Images/verPOIWeb.png)
   *(Caso de uso implementado en #S1)*
 
 - **Suscripción**:
-  El usuario puede acceder a la pantalla de suscripción a Premium desde la opción "Hazte Premium" situado en la esquina superior derecha. 
+  El usuario puede acceder a la pantalla de suscripción a Premium desde la opción "Hazte Premium" situado en la esquina superior derecha.
    ![suscripcion](./Images/botonPremiumWeb.png)
-  *(Caso de uso implementado en #S2)* 
-   
+  *(Caso de uso implementado en #S2)*
+  
    Al entrar, visualizará información sobre los beneficios de ser Premium y un botón "Pagar con Stripe", que le permitirá iniciar el proceso de pago. Al pulsarlo, aparecerá la pasarela de pago de Stripe, donde deberá ingresar sus datos y confirmar la transacción.
    ![suscripcion](./Images/suscripcionNormal2Web.png)
-  *(Caso de uso implementado en #S2)* 
+  *(Caso de uso implementado en #S2)*
 
   Una vez completado el pago con éxito, el sistema actualizará su estado a Premium y lo llevará a su mapa.
   ![suscripcion](./Images/mapaPremium.png)
   *(Caso de uso implementado en #S2)*
 
-  
   Si el usuario selecciona esta opción de "Premium" se le indica que ya es miembro Premium y se muestra un botón "Ir a mi mapa", que le permitirá acceder a sus mapas y disfrutar de las ventajas exclusivas de los miembros Premium.
    ![suscripcion](./Images/suscripcionPremiumWeb.png)
   *(Caso de uso implementado en #S2)*
@@ -111,8 +106,6 @@
   ![logros](./Images/crearLogrosWeb.png)
   *(Caso de uso implementado en #S3)*
 
-
-
 ### 1.2. Matchmaking
 
 - **Administrador**:
@@ -121,30 +114,27 @@
  ![Registro](./Images/adminWeb.png)
   *(Caso de uso implementado en #S2)*
 
-
-
 - **Publicidad de empresas**:  
-  Las empresas que quieran aparecer en los mapas como puntos de interés tienen disponible la opción de "Publicítate con nosotros". Para ello solo deben rellenar un formulario con nombre, correo de contacto, descripción del local o empresa a publicitar y las coordenadas donde se ubica el mismo. Este formulario se envía por correo a la cuenta corporativa de MapYourworld para que los adminitradores del sistema puedan añadirlo. 
+  Las empresas que quieran aparecer en los mapas como puntos de interés tienen disponible la opción de "Publicítate con nosotros". Para ello solo deben rellenar un formulario con nombre, correo de contacto, descripción del local o empresa a publicitar y las coordenadas donde se ubica el mismo. Este formulario se envía por correo a la cuenta corporativa de MapYourworld para que los adminitradores del sistema puedan añadirlo.
   ![Registro](./Images/publicidadWeb.png)
   *(Caso de uso implementado en #S2)*
 
 - **Social:**
   El usuario puede acceder al apartado de Social desde el menú desplegable en la esquina superior derecha. 
  ![suscripcion](./Images/menuWeb.png)
-  *(Caso de uso implementado en #S2)* 
+  *(Caso de uso implementado en #S2)*
 
   En la sección Amigos, se muestra un listado con los amigos agregados.
  ![social](./Images/socialAmigosWeb.png)
-  *(Caso de uso implementado en #S2)* 
+  *(Caso de uso implementado en #S2)*
 
-  En Solicitudes, el usuario puede ver tanto las peticiones de amistad recibidas como las invitaciones a mapas enviadas por sus amigos, pudiendo aceptarlas o rechazarlas. 
+  En Solicitudes, el usuario puede ver tanto las peticiones de amistad recibidas como las invitaciones a mapas enviadas por sus amigos, pudiendo aceptarlas o rechazarlas.
   ![social](./Images/socialSolicitudesWeb.png)
-  *(Caso de uso implementado en #S2)* 
+  *(Caso de uso implementado en #S2)*
 
   En Buscar, el usuario puede encontrar a otros miembros de la plataforma escribiendo su nombre de usuario en la barra de búsqueda y pulsando el botón Buscar. Si el usuario existe, se mostrará su correo junto a un botón Agregar, que enviará una solicitud de amistad a dicho usuario.
    ![social](./Images/socialBuscarWeb.png)
-  *(Caso de uso implementado en #S2)* 
-
+  *(Caso de uso implementado en #S2)*
 
 - **Participación en mapas colaborativos:**
   El usuario registrado puede acceder a la sección de mapas colaborativos desde el menú desplegable de la esquina superior derecha de su pantalla.
@@ -155,7 +145,7 @@
   ![collab](./Images/listaMapaColab.png)
   *(Caso de uso implementado en #S2)*
 
-  Si el usuario crea un nuevo mapa colaborativo pulsando sobre el boton "+" en la parte superior derecha, se muestra un formulario donde debe indicar el nombre del mapa, una descripción e indicar el número de usuarios máximos  que pueden formar parte de dicho mapa. 
+  Si el usuario crea un nuevo mapa colaborativo pulsando sobre el boton "+" en la parte superior derecha, se muestra un formulario donde debe indicar el nombre del mapa, una descripción e indicar el número de usuarios máximos  que pueden formar parte de dicho mapa.
   ![collab](./Images/crearMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
 
@@ -165,7 +155,7 @@
 
   Si desde dentro de un mapa colaborativo el usuario pulsa el boton de "Invitar Amigos" situado en la parte inferior de la pantalla, se muestra un listado de los amigos del usuario y junto a cada uno de los amigos la opción "Invitar" que le enviará una invitación a ese amigo al mapa actual desde el que se envía. Se ha mejorado el formulario para invitar amigos, ahora se listan solo los amigos que no forman parte de ese mapa.
   ![collab](./Images/invitarMapaColabWeb.png)
-  *(Caso de uso implementado en #S2)* 
+  *(Caso de uso implementado en #S2)*
 
   Esta solicitud le aparecerá al usuario amigo en la sección de social en el apartado de Solicitudes.
   ![collab](./Images/invitacionMapaColabWeb.png)
@@ -175,16 +165,12 @@
   ![collab](./Images/ProgresoMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
 
-
 ---
 
 ## 2. Datos Necesarios para Realizar la Revisión
 
-- **URL de la página de inicio (Landing Page):** [Landing Page de MapYourWorld](https://mapyourworld.netlify.app/)  
+- **URL de la página de inicio (Landing Page):** [Landing Page de MapYourWorld](https://mapyourworld.netlify.app/)
   
-
-
-
 - **Plataforma de Despliegue:**
   - **URL Primer despliegue:** [Despliegue de MapYourWorld](https://app1g.mapyourworld.es)
   - **URL Segundo despliegue:** [Despliegue de MapYourWorld](https://app2g.mapyourworld.es)
@@ -227,7 +213,7 @@
 
 ## 4. Demo de la Evaluación
 
-- **URL:** [Demo de MapYourWorld](https://www.youtube.com/shorts/LzOtpgP5Hh8)
+- **URL:** [Demo de MapYourWorld](https://www.youtube.com/shorts/ULtdjq_lQXY)
 
 ## 5. Acceso al despliegue
 
@@ -238,6 +224,5 @@
 Concretamente, el proceso de node (llamado mapyourworld) está gestionado por la herramienta **PM2**. Para comprobar el estado del proceso, se puede ejecutar el siguiente comando:
 
 `pm2 list`
-
 
 ---
