@@ -19,6 +19,7 @@
     "jsonwebtoken": "9.0.2",
     "lightningcss": "1.29.1",
     "pg": "8.13.3",
+    "selenium-webdriver": "4.31.0",
     "stripe": "17.7.0",
     "typeorm": "0.3.21",
     "ws": "8.18.1"
